@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import PinButton from "../PinButton";
 import Fuse from "fuse.js";
 import { type StoredSubjects, type ICourseWithCount, type IUpcomingPaper } from "@/interface";
+import { rankCourses } from "@/lib/utils/search-ranking";
 
 function PinnedSearchBar({
   initialSubjects,
@@ -38,10 +39,8 @@ function PinnedSearchBar({
     setSearchText(text);
 
     if (text.length > 1 && initialSubjects.length > 0) {
-      const filteredSuggestions = fuzzy
-        .search(text)
-        .sort((a, b) => (a.score ?? Infinity) - (b.score ?? Infinity))
-        .map((res) => res.item.name)
+      const filteredSuggestions = rankCourses(initialSubjects, text, fuzzy)
+        .map((item) => item.name)
         .slice(0, 10);
 
       setSuggestions(filteredSuggestions);

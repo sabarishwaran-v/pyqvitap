@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import Fuse from "fuse.js";
 import { type ICourseWithCount } from "@/interface";
+import { rankCourses } from "@/lib/utils/search-ranking";
 
 function SearchBarChild({
   initialSubjects,
@@ -46,12 +47,7 @@ function SearchBarChild({
     setSearchText(text);
 
     if (text.length > 1 && initialSubjects.length > 0) {
-      const filteredSuggestions = fuzzy
-        .search(text)
-        .sort((a, b) => (a.score ?? Infinity) - (b.score ?? Infinity))
-        .map((res) => res.item)
-        .slice(0, 10);
-
+      const filteredSuggestions = rankCourses(initialSubjects, text, fuzzy).slice(0, 10);
       setSuggestions(filteredSuggestions);
     } else {
       setSuggestions([]);
