@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, ExternalLink } from "lucide-react";
+import { Mail, ExternalLink, Github } from "lucide-react";
 import toast from "react-hot-toast";
 import type { ApiResponse } from '@/interface'
 
@@ -122,6 +122,22 @@ export default function Footer() {
             className="text-[#562EE7] underline underline-offset-4 transition-colors hover:text-[#4531b3] dark:text-[#A47DE5] dark:hover:text-[#FFC6E8]"
           >
             Sabarish V
+          </a>
+        </p>
+
+        {/* Open Source on GitHub */}
+        <p className="mt-2.5 flex items-center justify-center gap-1.5 text-center font-play text-sm text-gray-800 dark:text-gray-200">
+          <span>This project is Open Source on</span>
+          <a
+            href="https://github.com/sabarishwaran-v/pyqvitap"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 font-semibold text-[#562EE7] underline underline-offset-4 transition-colors hover:text-[#4531b3] dark:text-[#A47DE5] dark:hover:text-[#FFC6E8]"
+            title="View PyqVitAp on GitHub"
+            aria-label="View PyqVitAp on GitHub"
+          >
+            <Github className="h-4 w-4" />
+            <span>GitHub</span>
           </a>
         </p>
 
