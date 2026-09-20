@@ -17,6 +17,7 @@ export interface PaperResponse {
   year: string;
   slot: string;
   exam: string;
+  semester?: string;
   school?: string;
   pdf_sha256?: string;
 }

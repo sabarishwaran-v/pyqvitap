@@ -18,6 +18,7 @@ import axios from "axios";
 import toast from "react-hot-toast";  
 import { type ApiResponse } from '@/interface'
 import { formatSlotDisplay } from "@/lib/utils/string";
+import { semesters } from "@/components/select_options";
 
 type ReportResponse = ApiResponse<{ error?: string; message?: string }>;
 
@@ -27,6 +28,7 @@ interface ReportTagModalProps {
   exam?: string;
   slot?: string;
   year?: string;
+  semester?: string;
   toolbarStyle?: boolean;
   open?: boolean;
   setOpen?: (v: boolean) => void;
@@ -38,6 +40,7 @@ const ReportTagModal = ({
   exam,
   slot,
   year,
+  semester,
   open,
   setOpen,
 }: ReportTagModalProps) => {
@@ -97,12 +100,14 @@ const ReportTagModal = ({
         }
       } else if (c === "exam" && exam)
         setCategoryValues((s) => ({ ...s, [c]: exam }));
+      else if (c === "semester" && semester)
+        setCategoryValues((s) => ({ ...s, [c]: semester }));
       else if (c === "slot" && slot)
         setCategoryValues((s) => ({ ...s, [c]: slot }));
       else if (c === "year" && year)
         setCategoryValues((s) => ({ ...s, [c]: year }));
     }
-  }, [selectedCategories, subject, exam, slot, year, categoryValues]);
+  }, [selectedCategories, subject, exam, semester, slot, year, categoryValues]);
 
   useEffect(() => {
     if (open) {
@@ -118,6 +123,7 @@ const ReportTagModal = ({
         }
       }
       if (exam) base.exam = exam;
+      if (semester) base.semester = semester;
       if (slot) base.slot = formatSlotDisplay(slot);
       if (year) base.year = year;
       setOriginalCategoryValues(base);
@@ -128,7 +134,7 @@ const ReportTagModal = ({
       setEmail("");
       setOriginalCategoryValues({});
     }
-  }, [open, subject, exam, slot, year]);
+  }, [open, subject, exam, semester, slot, year]);
 
   const handleSubmit = async () => {
   if (!paperId) {
@@ -143,6 +149,14 @@ const ReportTagModal = ({
     return;
   }
 }
+
+  if (selectedCategories.includes("semester")) {
+    const s = (categoryValues.semester ?? "").trim();
+    if (!s) {
+      toast.error("Please select a semester.");
+      return;
+    }
+  }
 
   if (selectedCategories.includes("slot")) {
     const v = (categoryValues.slot ?? "").trim();
@@ -279,6 +293,7 @@ if (reportedFields.length === 0 && comment.trim().length === 0) {
               options={[
                 { label: "Subject", value: "subject" },
                 { label: "Exam", value: "exam" },
+                { label: "Semester", value: "semester" },
                 { label: "Slot", value: "slot" },
                 { label: "Year", value: "year" },
               ]}
@@ -322,6 +337,19 @@ if (reportedFields.length === 0 && comment.trim().length === 0) {
                     onChange={(v) => setCategoryValues((s) => ({ ...s, exam: v }))}
                     options={["CAT-1", "CAT-2", "FAT"]}
                     placeholder="Select exam"
+                  />
+                );
+              }
+
+              if (c === "semester") {
+                return (
+                  <LabeledSelect
+                    key={c}
+                    label="Semester"
+                    value={categoryValues.semester ?? ""}
+                    onChange={(v) => setCategoryValues((s) => ({ ...s, semester: v }))}
+                    options={semesters}
+                    placeholder="Select semester"
                   />
                 );
               }

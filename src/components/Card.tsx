@@ -36,8 +36,9 @@ const Card = ({ paper, onSelect, isSelected, isShow=true }: CardProps) => {
       exam: paper.exam,
       slot: paper.slot,
       year: paper.year,
+      semester: paper.semester,
     }),
-    [paper._id, paper.subject, paper.exam, paper.slot, paper.year],
+    [paper._id, paper.subject, paper.exam, paper.slot, paper.year, paper.semester],
   );
 
   React.useEffect(() => {

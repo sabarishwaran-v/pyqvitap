@@ -2,8 +2,10 @@ import { connectToDatabase } from "@/lib/database/mongoose";
 import TagReport from "@/db/tagReport";
 import { CustomError } from "@/lib/utils/error";
 
+import { semesters } from "@/components/select_options";
+
 const exams: string[] = ["CAT-1", "CAT-2", "FAT", "Model CAT-1", "Model CAT-2", "Model FAT"]
-const ALLOWED_FIELDS = ["subject", "courseCode", "exam", "slot", "year"];
+const ALLOWED_FIELDS = ["subject", "courseCode", "exam", "semester", "slot", "year"];
 const MAX_REPORTS_PER_PAPER = 5; 
 
 export interface ReportTagBody {
@@ -45,6 +47,12 @@ export async function reportTag(paperId: string, body: ReportTagBody) {
     if (rf.field === "exam" && rf.value) {
       if (!exams.some(e => e.toLowerCase() === rf.value?.toLowerCase())) {
         throw new CustomError(`Invalid exam value: ${rf.value}`, 400);
+      }
+    }
+
+    if (rf.field === "semester" && rf.value) {
+      if (!semesters.some(s => s.toLowerCase() === rf.value?.toLowerCase())) {
+        throw new CustomError(`Invalid semester value: ${rf.value}`, 400);
       }
     }
   }

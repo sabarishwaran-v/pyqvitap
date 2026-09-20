@@ -8,6 +8,7 @@ interface PaperContextType {
   exam?: string;
   slot?: string;
   year?: string;
+  semester?: string;
 }
 
 const PaperContext = createContext<PaperContextType | undefined>(undefined);

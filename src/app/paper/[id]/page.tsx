@@ -178,6 +178,7 @@ const PaperPage = async ({ params }: { params: { id: string } }) => {
             exam: paper.exam,
             slot: paper.slot,
             year: paper.year,
+            semester: paper.semester,
           }}
         >
           <PDFViewer

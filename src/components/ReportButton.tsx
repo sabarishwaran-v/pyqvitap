@@ -7,7 +7,7 @@ import ReportTagModal from "./ReportTagModal";
 import { usePaper } from "@/context/PaperContext";
 
 export default function ReportButton(){ 
-  const { paperId, subject, exam, slot, year } = usePaper();
+  const { paperId, subject, exam, slot, year, semester } = usePaper();
   const [open, setOpen] = useState(false);
   return (
     <> 
@@ -26,6 +26,7 @@ export default function ReportButton(){
         exam={exam}
         slot={slot}
         year={year}
+        semester={semester}
         open={open}
         setOpen={setOpen}
       />
