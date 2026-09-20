@@ -8,6 +8,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChildrenWrapper from "@/components/ChildrenWrapper";
 import { CoursesProvider } from "@/context/courseContext";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://pyqvitap.vercel.app/"),
@@ -158,6 +159,7 @@ export default function RootLayout({
             </CoursesProvider>
           </div>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
