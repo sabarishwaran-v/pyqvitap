@@ -9,11 +9,13 @@ interface ExtendedScreenshot {
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
+    id: "pyqvitap-pwa",
     name: "PyqVitAp",
     short_name: "PyqVitAp",
     description:
       "Prepare and ace your CAT and FAT exams with PyqVitAp. Search 5k+ question papers across all branches, slots, and years in seconds.",
     start_url: "/",
+    scope: "/",
     display: "standalone",
     background_color: "#10011a",
     theme_color: "#10011a",
@@ -39,16 +41,16 @@ export default function manifest(): MetadataRoute.Manifest {
       },
     ],
     icons: [
-      { src: "/assets/icons/icon-192x192.png?v=3", sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: "/assets/icons/icon-192x192.png?v=3", sizes: "192x192", type: "image/png", purpose: "maskable" },
-      { src: "/assets/icons/icon-512x512.png?v=3", sizes: "512x512", type: "image/png", purpose: "any" },
-      { src: "/assets/icons/icon-512x512.png?v=3", sizes: "512x512", type: "image/png", purpose: "maskable" },
-      { src: "/assets/icons/icon-192x192.webp?v=3", sizes: "192x192", type: "image/webp", purpose: "any" },
-      { src: "/assets/icons/icon-196x196.webp?v=3", sizes: "196x196", type: "image/webp" },
-      { src: "/assets/icons/icon-228x228.webp?v=3", sizes: "228x228", type: "image/webp" },
-      { src: "/assets/icons/icon-256x256.webp?v=3", sizes: "256x256", type: "image/webp" },
-      { src: "/assets/icons/icon-384x384.webp?v=3", sizes: "384x384", type: "image/webp" },
-      { src: "/assets/icons/icon-512x512.webp?v=3", sizes: "512x512", type: "image/webp", purpose: "any" },
+      { src: "/assets/icons/icon-192x192.png?v=4", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/assets/icons/icon-192x192.png?v=4", sizes: "192x192", type: "image/png", purpose: "maskable" },
+      { src: "/assets/icons/icon-512x512.png?v=4", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "/assets/icons/icon-512x512.png?v=4", sizes: "512x512", type: "image/png", purpose: "maskable" },
+      { src: "/assets/icons/icon-192x192.webp?v=4", sizes: "192x192", type: "image/webp", purpose: "any" },
+      { src: "/assets/icons/icon-196x196.webp?v=4", sizes: "196x196", type: "image/webp" },
+      { src: "/assets/icons/icon-228x228.webp?v=4", sizes: "228x228", type: "image/webp" },
+      { src: "/assets/icons/icon-256x256.webp?v=4", sizes: "256x256", type: "image/webp" },
+      { src: "/assets/icons/icon-384x384.webp?v=4", sizes: "384x384", type: "image/webp" },
+      { src: "/assets/icons/icon-512x512.webp?v=4", sizes: "512x512", type: "image/webp", purpose: "any" },
     ],
     screenshots: [
       {

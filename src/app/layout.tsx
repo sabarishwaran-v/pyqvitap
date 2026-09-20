@@ -16,8 +16,8 @@ export const metadata: Metadata = {
   description:
     "Prepare and ace your CAT and FAT exams with PyqVitAp. Search 5k+ question papers across all branches, slots, and years in seconds.",
   icons: [
-    { rel: "icon", url: "/assets/images/favicon.svg?v=3" },
-    { rel: "apple-touch-icon", url: "/assets/images/apple-touch-icon.png?v=3" },
+    { rel: "icon", url: "/assets/images/favicon.svg?v=4" },
+    { rel: "apple-touch-icon", url: "/assets/images/apple-touch-icon.png?v=4" },
   ],
   openGraph: {
     title: "PyqVitAp | Exam Resources",
@@ -50,6 +50,11 @@ export const metadata: Metadata = {
     ],
   },
   applicationName: "PyqVitAp",
+  appleWebApp: {
+    capable: true,
+    title: "PyqVitAp",
+    statusBarStyle: "default",
+  },
   keywords: [
     "pyqvitap",
     "PyqVitAp",

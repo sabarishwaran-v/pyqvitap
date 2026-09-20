@@ -30,7 +30,7 @@ export async function generateMetadata({
         metadataBase: new URL("https://pyqvitap.vercel.app/"),
         title: `PyqVitAp | ${paper.subject} | ${paper.exam} | ${displaySlot}`,
         description: `Discover ${paper.subject}'s question paper on PyqVitAp at VIT-AP. Made to help students excel.`,
-        icons: [{ rel: "icon", url: "/assets/images/favicon.svg?v=3" }],
+        icons: [{ rel: "icon", url: "/assets/images/favicon.svg?v=4" }],
         openGraph: {
           title: `PyqVitAp | ${paper.subject} | ${paper.exam} | ${displaySlot}`,
           images: [
