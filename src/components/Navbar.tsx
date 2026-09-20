@@ -107,7 +107,7 @@ function Navbar() {
         <div className="relative flex items-center gap-3 md:gap-4">
           <Link href="/" className="flex items-center gap-3">
             <Image
-              src="/assets/icons/icon-192x192.png?v=2"
+              src="/assets/icons/icon-192x192.png?v=3"
               alt="PyqVitAp Logo"
               height={48}
               width={48}
