@@ -1,0 +1,35 @@
+name: CI Checks
+
+on:
+  pull_request:
+    branches: [ "staging", "prod", "main" ]
+  push:
+    branches: [ "staging", "prod", "main" ]
+
+jobs:
+  build-and-typecheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: pnpm run build
+        env:
+          SKIP_ENV_VALIDATION: "1"
+          NODE_ENV: "production"

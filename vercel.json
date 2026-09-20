@@ -1,0 +1,41 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "headers": [
+    {
+      "source": "/api/upcoming-papers",
+      "headers": [
+        { "key": "Cache-Control", "value": "s-maxage=60, stale-while-revalidate=120" }
+      ]
+    },
+    {
+      "source": "/api/papers",
+      "headers": [
+        { "key": "Cache-Control", "value": "s-maxage=60, stale-while-revalidate=120" }
+      ]
+    },
+    {
+      "source": "/api/selected-papers",
+      "headers": [
+        { "key": "Cache-Control", "value": "s-maxage=60, stale-while-revalidate=120" }
+      ]
+    },
+    {
+      "source": "/api/related-subject",
+      "headers": [
+        { "key": "Cache-Control", "value": "s-maxage=60, stale-while-revalidate=120" }
+      ]
+    },
+    {
+      "source": "/api/course-list",
+      "headers": [
+        { "key": "Cache-Control", "value": "s-maxage=60, stale-while-revalidate=120" }
+      ]
+    },
+    {
+      "source": "/api/papers/count",
+      "headers": [
+        { "key": "Cache-Control", "value": "s-maxage=60, stale-while-revalidate=120" }
+      ]
+    }
+  ]
+}

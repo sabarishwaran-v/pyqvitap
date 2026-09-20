@@ -1,0 +1,188 @@
+import { type mongo } from "mongoose";
+
+export interface IUpcomingSlot {
+  slot: string;
+  lastSyncedDate?: string;
+  syncMode?: "CAT" | "FAT";
+}
+
+export interface IUpcomingSubject {
+  subject: string;
+  slots: string[];
+}
+
+export interface PaperResponse {
+  file_url: string;
+  subject: string;
+  year: string;
+  slot: string;
+  exam: string;
+  school?: string;
+  pdf_sha256?: string;
+}
+
+export interface IAdminPaper {
+  file_url: string;
+  thumbnail_url: string;
+  subject: string | null;
+  slot: string | null;
+  year: string | null;
+  exam: "CAT" | "CAT-1" | "CAT-2" | "FAT" | "Model" | "Model CAT-1" | "Model CAT-2" | "Model FAT" | null;
+  semester:
+    | "FALL"
+    | "WINTER"
+    | "FALL FRESHERS"
+    | "LONG SUMMER"
+    | "SUMMER - 1"
+    | "SUMMER - 2"
+    | "FAST TRACK FALL"
+    | "SUMMER"
+    | "WINTER FRESHERS"
+    | "INTRA SEM"
+    | "Fall Semester"
+    | "Fall Sem Freshers"
+    | "Winter Semester"
+    | "Summer Semester"
+    | "Weekend Semester"
+    | null;
+  campus:
+    | "Vellore"
+    | "Chennai"
+    | "Andhra Pradesh"
+    | "Bhopal"
+    | "Bangalore"
+    | "Mauritius"
+    | null;
+  school?:
+    | "SCOPE"
+    | "SITE"
+    | "SENSE"
+    | "SMEC"
+    | "SCE"
+    | "SELECT"
+    | "SAS"
+    | "SSL"
+    | "VITBS"
+    | "SBST"
+    | null;
+  pdf_sha256?: string | null;
+  answer_key_included?: boolean | null;
+  is_selected?: boolean;
+  ambiguous_tags: string[];
+}
+
+export interface ICourses {
+  name: string;
+}
+
+export interface APIResponse {
+  message: string;
+  status: number;
+}
+
+export interface ApiResponse<T> {
+  status: "success" | "error";
+  data: T | null;
+  message: string;
+}
+
+export interface ConverttoPDFResponse {
+  url: string;
+  secure_url: string;
+  asset_id: string;
+  public_id: string;
+  version: number;
+}
+
+export interface ErrorResponse {
+  message: string;
+}
+
+export interface IUpcomingPaper extends mongo.Document {
+  subject: string;
+  slots: string[];
+}
+
+export interface IPaper {
+  _id: string;
+  exam: "CAT" | "CAT-1" | "CAT-2" | "FAT" | "Model CAT-1" | "Model CAT-2" | "Model FAT";
+  file_url: string;
+  thumbnail_url: string;
+  semester:
+    | "FALL"
+    | "WINTER"
+    | "FALL FRESHERS"
+    | "LONG SUMMER"
+    | "SUMMER - 1"
+    | "SUMMER - 2"
+    | "FAST TRACK FALL"
+    | "SUMMER"
+    | "WINTER FRESHERS"
+    | "INTRA SEM"
+    | "Fall Semester"
+    | "Fall Sem Freshers"
+    | "Winter Semester"
+    | "Summer Semester"
+    | "Weekend Semester";
+  campus:
+    | "Vellore"
+    | "Chennai"
+    | "Andhra Pradesh"
+    | "Bhopal"
+    | "Bangalore"
+    | "Mauritius";
+  school?:
+    | "SCOPE"
+    | "SITE"
+    | "SENSE"
+    | "SMEC"
+    | "SCE"
+    | "SELECT"
+    | "SAS"
+    | "SSL"
+    | "VITBS"
+    | "SBST";
+  slot: string;
+  subject: string;
+  course_name?: string;
+  year: string;
+  pdf_sha256?: string;
+  answer_key_included?: boolean;
+}
+
+export interface Filters {
+  papers: IPaper[];
+  unique_exams: string[];
+  unique_slots: string[];
+  unique_years: string[];
+  unique_campuses: string[];
+  unique_semesters: string[];
+}
+
+export type StoredSubjects = string[];
+
+export interface TransformedPaper {
+  subject: string;
+  slots: string[];
+}
+
+export interface IRelatedSubject {
+  subject: string;
+  related_subjects: string[];
+}
+
+export interface ICourseCount {
+  name: string;
+  count: number;
+}
+
+export interface ICourse {
+  _id: string;
+  name: string;
+}
+
+export interface ICourseWithCount {
+  _id: string;
+  name: string;
+  count: number;
+}
