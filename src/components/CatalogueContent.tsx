@@ -9,9 +9,8 @@ import Card from "./Card";
 import Loader from "./ui/loader";
 import SideBar from "../components/SideBar";
 import Error from "./Error";
-import { Filter } from "lucide-react";
+import { Filter, Pin, Search } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
-import { Pin } from "lucide-react";
 import SearchBarChild from "./Searchbar/searchbar-child";
 import Link from "next/link";
 import { useCourses } from "@/context/courseContext";
@@ -25,7 +24,7 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
   const [isMounted, setIsMounted] = useState(false);
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(Boolean(subject));
   const [pinned, setPinned] = useState<boolean>(false);
   const [relatedSubjects, setRelatedSubjects] = useState<string[]>([]);
   const { courses } = useCourses();
@@ -148,7 +147,13 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
 
   // Fetch papers ONLY when subject changes (not when filters change!)
   useEffect(() => {
-    if (!subject || !isMounted) return;
+    if (!isMounted) return;
+
+    if (!subject) {
+      setLoading(false);
+      setPapers([]);
+      return;
+    }
 
     const fetchPapers = async () => {
       setLoading(true);
@@ -298,60 +303,76 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
           <div className="mb-8 flex w-full flex-col items-start md:hidden">
             <SearchBarChild initialSubjects={courses} />
           </div>
-          <div className="flex items-center gap-2">
-            <div>
-              <p className="text-s font-semibold text-gray-700 dark:text-white/80">
-                {subject?.split("[")[1]?.replace("]", "")}
-              </p>
-              <h2 className="text-2xl font-extrabold text-gray-700 dark:text-white md:text-3xl">
-                {subject?.split(" [")[0]}
-              </h2>
-            </div>
-            <div className="mt-7">
-              <button onClick={handlePinToggle}>
-                <Pin
-                  className={`h-7 w-7 ${pinned ? "fill-[#A78BFA]" : ""} stroke-gray-700 dark:stroke-white`}
+          {subject && (
+            <>
+              <div className="flex items-center gap-2">
+                <div>
+                  <p className="text-s font-semibold text-gray-700 dark:text-white/80">
+                    {subject.split("[")[1]?.replace("]", "")}
+                  </p>
+                  <h2 className="text-2xl font-extrabold text-gray-700 dark:text-white md:text-3xl">
+                    {subject.split(" [")[0]}
+                  </h2>
+                </div>
+                <div className="mt-7">
+                  <button onClick={handlePinToggle}>
+                    <Pin
+                      className={`h-7 w-7 ${pinned ? "fill-[#A78BFA]" : ""} stroke-gray-700 dark:stroke-white`}
+                    />
+                  </button>
+                </div>
+              </div>
+
+              {/* Select/Deselect/Download All Buttons */}
+              <div className="mb-6 mt-5 flex w-full flex-wrap items-center justify-start gap-3 sm:gap-4 md:mt-4 md:justify-end">
+                <SortComponent
+                  onSortChange={setSortOption}
+                  currentSort={sortOption}
                 />
-              </button>
-            </div>
-          </div>
 
-          {/* Select/Deselect/Download All Buttons */}
-          <div className="mb-6 mt-5 flex w-full flex-wrap items-center justify-start gap-3 sm:gap-4 md:mt-4 md:justify-end">
-            <SortComponent
-              onSortChange={setSortOption}
-              currentSort={sortOption}
-            />
+                <SelectionToolbar
+                  selectedCount={selectedPapers.length}
+                  totalCount={(appliedFilters ? filteredPapers : papers).length}
+                  onSelectAll={handleSelectAll}
+                  onDeselectAll={handleDeselectAll}
+                  onDownload={() => void handleDownloadSelected()}
+                  isDownloading={isDownloading}
+                />
+              </div>
 
-            <SelectionToolbar
-              selectedCount={selectedPapers.length}
-              totalCount={(appliedFilters ? filteredPapers : papers).length}
-              onSelectAll={handleSelectAll}
-              onDeselectAll={handleDeselectAll}
-              onDownload={() => void handleDownloadSelected()}
-              isDownloading={isDownloading}
-            />
-          </div>
-
-          {relatedSubjects.length > 0 && (
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="mr-2 text-sm font-medium text-gray-500 dark:text-gray-300">
-                Related subjects:
-              </span>
-              {relatedSubjects.map((sub) => (
-                <Link
-                  key={sub}
-                  href={`/catalogue?subject=${encodeURIComponent(sub)}`}
-                  className="rounded-full bg-violet-100 px-3 py-1 text-sm font-semibold text-violet-700 transition-colors hover:bg-violet-200 dark:bg-violet-900 dark:text-violet-200 dark:hover:bg-violet-800"
-                >
-                  {sub}
-                </Link>
-              ))}
-            </div>
+              {relatedSubjects.length > 0 && (
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <span className="mr-2 text-sm font-medium text-gray-500 dark:text-gray-300">
+                    Related subjects:
+                  </span>
+                  {relatedSubjects.map((sub) => (
+                    <Link
+                      key={sub}
+                      href={`/catalogue?subject=${encodeURIComponent(sub)}`}
+                      className="rounded-full bg-violet-100 px-3 py-1 text-sm font-semibold text-violet-700 transition-colors hover:bg-violet-200 dark:bg-violet-900 dark:text-violet-200 dark:hover:bg-violet-800"
+                    >
+                      {sub}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
 
-        {loading ? (
+        {!subject ? (
+          <div className="flex flex-col items-center justify-center px-4 py-20 text-center font-play">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#EFEAFF] text-[#7480FF] dark:bg-[#1A1823] dark:text-[#7480FF]">
+              <Search className="h-8 w-8" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white md:text-3xl">
+              Search for Question Papers
+            </h2>
+            <p className="mt-2 max-w-md text-sm text-gray-600 dark:text-gray-400 md:text-base">
+              Search for a subject or course code above to explore and download previous year question papers.
+            </p>
+          </div>
+        ) : loading ? (
           <Loader />
         ) : papers.length > 0 ? (
           <div className="flex flex-col items-center">
@@ -407,7 +428,9 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
 
 const CatalogueContent = () => {
   const searchParams = useSearchParams();
-  const [subject, setSubject] = useState<string | null>(null);
+  const [subject, setSubject] = useState<string | null>(() =>
+    searchParams ? searchParams.get("subject") : null,
+  );
 
   useEffect(() => {
     if (searchParams) {
