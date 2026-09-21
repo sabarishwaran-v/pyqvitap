@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import ChildrenWrapper from "@/components/ChildrenWrapper";
 import { CoursesProvider } from "@/context/courseContext";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://pyqvitap.vercel.app/"),
@@ -165,6 +166,7 @@ export default function RootLayout({
           </div>
         </ThemeProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

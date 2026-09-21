@@ -40,6 +40,7 @@
     "@upstash/ratelimit": "^2.0.5",
     "@upstash/redis": "^1.33.0",
     "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "axios": "^1.8.4",
     "canvas": "^3.2.0",
     "class-variance-authority": "^0.7.1",
