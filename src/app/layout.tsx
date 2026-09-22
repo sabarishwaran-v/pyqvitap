@@ -121,7 +121,16 @@ export const metadata: Metadata = {
     "VITAP important questions",
     "VITAP question paper solutions",
   ],
-  robots: "index, follow",
+  alternates: {
+    canonical: "https://pyqvitap.vercel.app/",
+  },
+  verification: {
+    google: "7eR_r20eSByy6ReESw2g-EcMaBRmh_Zpz3q8SbvCH64",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 export const revalidate = 60;
 
@@ -132,11 +141,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
-      <meta
-        name="google-site-verification"
-        content="SjVFuH8GzIj3Ooh2JcWufBoSMWTzo77TACHomonCKVs"
-      />
       <head>
+        <meta
+          name="google-site-verification"
+          content="7eR_r20eSByy6ReESw2g-EcMaBRmh_Zpz3q8SbvCH64"
+        />
         <Script
            async
           src="https://www.googletagmanager.com/gtag/js?id=G-J5CD036GJP"
