@@ -21,19 +21,22 @@ function SideBar() {
   } = useFilters();
   const exams =
     filterOptions?.unique_exams
+      ?.slice()
       .sort((a, b) => a.localeCompare(b))
       .map((exam) => ({ label: exam, value: exam })) ?? [];
   const slots =
     filterOptions?.unique_slots
-      .filter((slot) => Boolean(slot && slot.trim()))
+      ?.filter((slot) => Boolean(slot && slot.trim()))
+      .slice()
       .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
       .map((slot) => ({ label: formatSlotDisplay(slot), value: slot })) ?? [];
   const years =
     filterOptions?.unique_years
+      ?.slice()
       .sort((a, b) => b.localeCompare(a))
       .map((year) => ({ label: year, value: year })) ?? [];
   const semesters =
-    filterOptions?.unique_semesters.map((semester) => ({
+    filterOptions?.unique_semesters?.map((semester) => ({
       label: semester,
       value: semester,
     })) ?? [];
