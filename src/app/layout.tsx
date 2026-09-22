@@ -135,7 +135,7 @@ export default function RootLayout({
     <html lang="en" className={`${GeistSans.variable}`}>
       <meta
         name="google-site-verification"
-        content="SjVFuH8GzIj3Ooh2JcWufBoSMWTzo77TACHomonCKVs"
+        content="7eR_r20eSByy6ReESw2g-EcMaBRmh_Zpz3q8SbvCH64"
       />
       <head>
         <Script

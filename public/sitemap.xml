@@ -11,10 +11,23 @@
   <priority>1.00</priority>
 </url>
 <url>
-  <loc>https://pyqvitap.vercel.app/upload</loc>
-  <lastmod>2024-11-03T19:02:33+00:00</lastmod>
+  <loc>https://pyqvitap.vercel.app/catalogue</loc>
+  <lastmod>2025-02-22T00:00:00+00:00</lastmod>
+  <priority>0.90</priority>
+</url>
+<url>
+  <loc>https://pyqvitap.vercel.app/request</loc>
+  <lastmod>2025-02-22T00:00:00+00:00</lastmod>
   <priority>0.80</priority>
 </url>
-
-
+<url>
+  <loc>https://pyqvitap.vercel.app/upload</loc>
+  <lastmod>2025-02-22T00:00:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://pyqvitap.vercel.app/disclaimer</loc>
+  <lastmod>2025-02-22T00:00:00+00:00</lastmod>
+  <priority>0.50</priority>
+</url>
 </urlset>

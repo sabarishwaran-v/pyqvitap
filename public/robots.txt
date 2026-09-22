@@ -1,0 +1,7 @@
+# Allow all search engine crawlers
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://pyqvitap.vercel.app/sitemap.xml
