@@ -17,6 +17,7 @@ import { type IPaper, type Filters } from "@/interface";
 import JSZip from "jszip";
 import { toast } from "react-hot-toast";
 import { getSecureUrl, generateFileName } from "@/lib/utils/download";
+import { applyWatermarkAndDisclaimer } from "@/lib/utils/pdfWatermark";
 
 interface FilterState {
   selectedExams: string[];
@@ -160,24 +161,81 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
         new Set(selectedPapers.map((paper) => paper._id)),
       ).map((id) => selectedPapers.find((paper) => paper._id === id)) as IPaper[];
 
-      let failedCount = 0;
+      // Deduplicate filenames within this ZIP archive:
+      // Keep the first occurrence unchanged, and append (1), (2), ... for subsequent collisions.
+      const usedFilenames = new Map<string, number>();
+      const paperEntries = uniquePapers.map((paper) => {
+        const baseFilename = generateFileName(paper);
+        const count = usedFilenames.get(baseFilename) ?? 0;
+        usedFilenames.set(baseFilename, count + 1);
 
-      await Promise.all(
-        uniquePapers.map(async (paper) => {
-          try {
-            const response = await fetch(getSecureUrl(paper.file_url));
-            if (!response.ok) {
-              throw new Error(`HTTP ${response.status}`);
+        if (count === 0) {
+          return { paper, filename: baseFilename };
+        }
+
+        const lastDotIndex = baseFilename.lastIndexOf(".");
+        const name =
+          lastDotIndex !== -1 ? baseFilename.slice(0, lastDotIndex) : baseFilename;
+        const ext = lastDotIndex !== -1 ? baseFilename.slice(lastDotIndex) : "";
+
+        return {
+          paper,
+          filename: `${name} (${count})${ext}`,
+        };
+      });
+
+      let failedCount = 0;
+      const BATCH_SIZE = 10;
+
+      for (let i = 0; i < paperEntries.length; i += BATCH_SIZE) {
+        const batch = paperEntries.slice(i, i + BATCH_SIZE);
+        await Promise.all(
+          batch.map(async ({ paper, filename }) => {
+            try {
+              let response: Response | null = null;
+              for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                  response = await fetch(getSecureUrl(paper.file_url));
+                  if (response.ok) break;
+                } catch {
+                  if (attempt < 2) {
+                    await new Promise((r) => setTimeout(r, 300));
+                  }
+                }
+              }
+
+              if (!response || !response.ok) {
+                throw new Error(`HTTP ${response?.status ?? "FAILED"}`);
+              }
+
+              const blob = await response.blob();
+              let finalBlob: Blob = blob;
+
+              try {
+                const buffer = await blob.arrayBuffer();
+                const transformedBytes = await applyWatermarkAndDisclaimer(
+                  buffer,
+                  filename,
+                  paper.file_url,
+                );
+                finalBlob = new Blob([transformedBytes as BlobPart], {
+                  type: "application/pdf",
+                });
+              } catch (wmErr) {
+                console.error(
+                  `Failed to watermark paper ${filename}:`,
+                  wmErr,
+                );
+              }
+
+              zip.file(filename, finalBlob);
+            } catch (err) {
+              failedCount += 1;
+              console.error(`Failed to fetch ${paper.file_url}`, err);
             }
-            const blob = await response.blob();
-            const filename = generateFileName(paper);
-            zip.file(filename, blob);
-          } catch (err) {
-            failedCount += 1;
-            console.error(`Failed to fetch ${paper.file_url}`, err);
-          }
-        }),
-      );
+          }),
+        );
+      }
 
       if (failedCount === uniquePapers.length) {
         toast.error("Couldn't prepare the download. Please try again.", {
