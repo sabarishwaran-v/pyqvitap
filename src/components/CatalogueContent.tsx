@@ -93,9 +93,14 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
   useEffect(() => {
     setIsMounted(true);
     if (searchParams) {
-      const currentPinnedSubjects = JSON.parse(
-        localStorage.getItem("userSubjects") ?? "[]",
-      ) as StoredSubjects;
+      let currentPinnedSubjects: StoredSubjects = [];
+      try {
+        currentPinnedSubjects = JSON.parse(
+          localStorage.getItem("userSubjects") ?? "[]",
+        ) as StoredSubjects;
+      } catch {
+        currentPinnedSubjects = [];
+      }
       const subjectName = searchParams.get("subject");
       setSelectedExams(
         searchParams.get("exams")?.split(",").filter(Boolean) ?? [],
