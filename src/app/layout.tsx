@@ -7,8 +7,8 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChildrenWrapper from "@/components/ChildrenWrapper";
+import GitHubStarPrompt from "@/components/GitHubStarPrompt";
 import { CoursesProvider } from "@/context/courseContext";
-import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
@@ -162,10 +162,10 @@ export default function RootLayout({
               <Navbar />
               <ChildrenWrapper>{children}</ChildrenWrapper>
               <Footer />
+              <GitHubStarPrompt />
             </CoursesProvider>
           </div>
         </ThemeProvider>
-        <Analytics />
         <SpeedInsights />
       </body>
     </html>

@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
-import { ChevronDown, UploadIcon } from "lucide-react";
+import { ChevronDown, UploadIcon, Github } from "lucide-react";
 import ModeToggle from "./toggle-theme";
 
 import {
@@ -69,6 +69,18 @@ export default function FloatingNavbar({ onNavigate }: Props) {
             className="rounded-lg px-2.5 py-1.5 hover:bg-slate-200 dark:hover:bg-[#1F2A3D] dark:focus:bg-[#1F2A3D] cursor-pointer"
           >
             <RequestModal />
+          </DropdownMenuItem>
+
+          <DropdownMenuItem asChild className="rounded-lg px-2.5 py-1.5 hover:bg-slate-200 dark:hover:bg-[#1F2A3D] dark:focus:bg-[#1F2A3D] cursor-pointer">
+            <a
+              href="https://github.com/sabarishwaran-v/pyqvitap"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex w-full items-center gap-2.5 bg-transparent hover:bg-transparent"
+            >
+              <Github className="h-4 w-4" />
+              <span className="text-xs font-medium">⭐ Star us on GitHub</span>
+            </a>
           </DropdownMenuItem>
 
           <div className="pt-1 mt-1 border-t border-gray-300 dark:border-[#2E2B3E] flex items-center justify-between px-2.5 py-1">

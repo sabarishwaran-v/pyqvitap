@@ -8,6 +8,7 @@ import ModeToggle from "@/components/toggle-theme";
 import {
   ArrowDownLeftIcon,
   ChevronDown,
+  Github,
 } from "lucide-react";
 import FloatingNavbar from "./FloatingNavbar";
 import PWAInstallButton from "./ui/PWAInstallButton";
@@ -155,6 +156,18 @@ function Navbar() {
                       <RequestModal />
                     </div>
                   </DropdownMenuItem>
+
+                  <DropdownMenuItem asChild>
+                    <a
+                      href="https://github.com/sabarishwaran-v/pyqvitap"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-1 text-sm font-medium transition hover:bg-[#1A1823] hover:text-white"
+                    >
+                      <Github className="h-4 w-4" />
+                      <span>⭐ Star us on GitHub</span>
+                    </a>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -192,6 +205,17 @@ function Navbar() {
                     >
                       <RequestModal />
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <a
+                        href="https://github.com/sabarishwaran-v/pyqvitap"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-1 text-sm font-medium transition hover:bg-[#1A1823] hover:text-white"
+                      >
+                        <Github className="h-4 w-4" />
+                        <span>⭐ Star us on GitHub</span>
+                      </a>
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -215,6 +239,17 @@ function Navbar() {
         <div
           className={`${pathname === "/catalogue" ? "xl:flex" : "lg:flex"} hidden items-center gap-4`}
         >
+          <a
+            href="https://github.com/sabarishwaran-v/pyqvitap"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex h-8 items-center gap-1.5 rounded-full border border-[#3A3745] bg-[#e8e9ff] px-2.5 py-1 text-xs font-semibold text-gray-700 transition hover:bg-slate-50 hover:text-black dark:bg-black dark:text-white dark:hover:bg-[#1A1823] sm:h-9 sm:px-3 sm:text-sm md:h-10 md:px-3.5"
+            title="Star us on GitHub"
+            aria-label="Star us on GitHub"
+          >
+            <Github className="h-4 w-4 shrink-0 text-gray-700 dark:text-white" />
+            <span className="truncate">⭐ us on GitHub</span>
+          </a>
           <div className="rounded-full border border-[#3A3745] p-1">
             <ModeToggle />
           </div>
