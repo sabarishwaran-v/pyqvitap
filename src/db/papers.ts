@@ -57,6 +57,14 @@ const paperSchema = new Schema<IPaper>({
   thumbnail_url: { type: String, required: true },
   subject: { type: String, required: true, index: true },
   slot: { type: String, default: "" },
+  slotSource: {
+    type: String,
+    enum: ["dspace", "manual", "crowdsourced"],
+    required: false,
+    default: undefined,
+  },
+  slotConfirmedAt: { type: Date, required: false },
+  slotContributionCount: { type: Number, default: 0 },
   year: { type: String, required: true },
   exam: {
     type: String,

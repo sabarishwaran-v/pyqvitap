@@ -13,6 +13,7 @@ export const fetchPaperID = async (id: string): Promise<PaperResponse> => {
   }
 
   return {
+    _id: paper._id.toString(),
     file_url: paper.file_url,
     subject: paper.subject ?? "",
     year: paper.year ?? "",
@@ -21,5 +22,8 @@ export const fetchPaperID = async (id: string): Promise<PaperResponse> => {
     semester: paper.semester ?? "",
     school: paper.school,
     pdf_sha256: paper.pdf_sha256,
+    slotSource: paper.slotSource,
+    slotConfirmedAt: paper.slotConfirmedAt ? new Date(paper.slotConfirmedAt).toISOString() : undefined,
+    slotContributionCount: paper.slotContributionCount ?? 0,
   };
 };

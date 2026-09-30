@@ -12,6 +12,7 @@ export interface IUpcomingSubject {
 }
 
 export interface PaperResponse {
+  _id?: string;
   file_url: string;
   subject: string;
   year: string;
@@ -20,6 +21,9 @@ export interface PaperResponse {
   semester?: string;
   school?: string;
   pdf_sha256?: string;
+  slotSource?: "dspace" | "manual" | "crowdsourced";
+  slotConfirmedAt?: Date | string;
+  slotContributionCount?: number;
 }
 
 export interface IAdminPaper {
@@ -144,6 +148,9 @@ export interface IPaper {
     | "VITBS"
     | "SBST";
   slot: string;
+  slotSource?: "dspace" | "manual" | "crowdsourced";
+  slotConfirmedAt?: Date | string;
+  slotContributionCount?: number;
   subject: string;
   course_name?: string;
   year: string;
@@ -186,4 +193,25 @@ export interface ICourseWithCount {
   _id: string;
   name: string;
   count: number;
+}
+
+export interface ISlotContribution {
+  _id?: string;
+  paperId: string;
+  slot: string;
+  contributorId: string;
+  createdAt?: Date | string;
+}
+
+export interface SlotCrowdsourceStatus {
+  paperId: string;
+  eligible: boolean;
+  isConfirmed: boolean;
+  currentSlot: string;
+  slotSource?: "dspace" | "manual" | "crowdsourced" | null;
+  slotConfirmedAt?: string | null;
+  totalContributions: number;
+  userContributed: boolean;
+  userSlot?: string | null;
+  voteDistribution?: Record<string, number>;
 }
