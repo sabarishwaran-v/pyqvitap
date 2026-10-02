@@ -7,7 +7,7 @@
   import { DocumentContent, DocumentManagerPluginPackage } from '@embedpdf/plugin-document-manager/react';
   import { useZoom, ZoomPluginPackage, ZoomMode }          from '@embedpdf/plugin-zoom/react';
   import { RenderLayer, RenderPluginPackage }              from '@embedpdf/plugin-render/react';
-  import { ExportPluginPackage }                           from '@embedpdf/plugin-export/react';
+  import { ExportPluginPackage, useExport }                from '@embedpdf/plugin-export/react';
 
   import { Download, ZoomIn, ZoomOut, Maximize2, Minimize2, BookOpenText, X } from "lucide-react";
   import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -21,7 +21,7 @@
     documentId: string;
     toggleFullscreen: () => void;
     isFullscreen: boolean;
-    onDownload: () => Promise<void>;
+    onDownload: (preloadedBuffer?: ArrayBuffer) => Promise<void>;
     forceMobile?: boolean;
     isMobile: boolean;
     isSmall: boolean;
@@ -68,6 +68,7 @@
 
     const { provides: zoomProv, state: zoomState } = useZoom(documentId);
     const { provides: scrollProv, state: scrollState } = useScroll(documentId);
+    const { provides: exportProv } = useExport(documentId);
     const { provides: scrollCapability } = useScrollCapability();
     const [pageNo, setPageNo] = useState("1");
     const [totalPages, setTotalPages] = useState(0);
@@ -136,6 +137,23 @@
     const zoomIn = () => zoomProv.zoomIn();
     const zoomOut = () => zoomProv.zoomOut();
     const { zoomLevel } = zoomState;
+
+    const handleDownloadClick = useCallback(async () => {
+      let preloadedBuffer: ArrayBuffer | undefined;
+      if (exportProv) {
+        try {
+          const task = exportProv.saveAsCopy();
+          preloadedBuffer = await task.toPromise();
+        } catch (err) {
+          console.warn(
+            "Could not extract in-memory PDF buffer from viewer, falling back to network fetch:",
+            err,
+          );
+        }
+      }
+      await onDownload(preloadedBuffer);
+    }, [exportProv, onDownload]);
+
     const fullScreenStyle = {
       bottom: 20,
       left: "50%",
@@ -207,7 +225,7 @@
         </Button>
 
         <Button
-          onClick={onDownload}
+          onClick={handleDownloadClick}
           className="h-10 w-10 rounded p-0 text-white bg-[#6536c1] transition hover:bg-[#7d4fc7]"
           title="Download PDF"
         >
@@ -467,19 +485,35 @@
     const [isReadingMode, setIsReadingMode] = useState(false);
     const [showReadingCoachmark, setShowReadingCoachmark] = useState(false);
     const viewerRef = useRef<HTMLDivElement>(null);
+    const pdfBufferRef = useRef<ArrayBuffer | null>(null);
     const effectiveBackgroundColor =
       backgroundColor ?? (resolvedTheme === "light" ? "#F3F5FF" : "#070114");
     const loaderTextColor =
       resolvedTheme === "light" ? "rgba(17,24,39,0.6)" : "rgba(255,255,255,0.5)";
 
-    const handleDownload = useCallback(async () => {
-      window.dataLayer?.push({
-        event: "pdf_download_start",
-        paper_title: name,
-        paper_url: url,
-      });
-      await downloadFile(url, `${name}.pdf`);
-    }, [url, name]);
+    useEffect(() => {
+      pdfBufferRef.current = null;
+      return () => {
+        pdfBufferRef.current = null;
+      };
+    }, [url]);
+
+    const handleDownload = useCallback(
+      async (preloadedBuffer?: ArrayBuffer) => {
+        if (preloadedBuffer && preloadedBuffer.byteLength > 0) {
+          pdfBufferRef.current = preloadedBuffer;
+        }
+        window.dataLayer?.push({
+          event: "pdf_download_start",
+          paper_title: name,
+          paper_url: url,
+        });
+        const bufferToUse =
+          preloadedBuffer ?? pdfBufferRef.current ?? undefined;
+        await downloadFile(url, `${name}.pdf`, bufferToUse);
+      },
+      [url, name],
+    );
 
     const toggleFullscreen = useCallback(() => {
       if (!document.fullscreenElement) {
