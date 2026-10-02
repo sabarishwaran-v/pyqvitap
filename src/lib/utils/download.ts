@@ -17,13 +17,22 @@ export const generateFileName = (paper: IPaper): string => {
 export const downloadFile = async (
   url: string,
   filename: string,
+  preloadedBuffer?: ArrayBuffer,
 ): Promise<void> => {
   try {
-    const response = await axios.get(url, { responseType: "blob" });
-    let blob = new Blob([response.data]);
+    let buffer: ArrayBuffer;
+    let blob: Blob;
+
+    if (preloadedBuffer && preloadedBuffer.byteLength > 0) {
+      buffer = preloadedBuffer;
+      blob = new Blob([buffer], { type: "application/pdf" });
+    } else {
+      const response = await axios.get(url, { responseType: "blob" });
+      blob = new Blob([response.data]);
+      buffer = await response.data.arrayBuffer();
+    }
 
     try {
-      const buffer = await response.data.arrayBuffer();
       const transformedBytes = await applyWatermarkAndDisclaimer(
         buffer,
         filename,
