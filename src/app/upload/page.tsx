@@ -26,6 +26,7 @@ import Dropzone from "react-dropzone";
 import { Upload, XIcon } from "lucide-react";
 import { GlobalWorkerOptions } from "pdfjs-dist";
 import type { ApiResponse } from "@/interface";
+import { convertImagesToPdf } from "@/lib/utils/imageToPdf";
 
 GlobalWorkerOptions.workerSrc =
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.worker.min.mjs";
@@ -263,20 +264,35 @@ export default function Page() {
   }, [previews]);
 
   const handleUpload = async () => {
-    const isPdf = files.length === 1 && files[0]?.type === "application/pdf";
-    const formData = new FormData();
+    if (files.length === 0) {
+      toast.error("Please select a file to upload.");
+      return;
+    }
 
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-    formData.append("campus", campus);
-    formData.append("isPdf", String(isPdf));
+    const isDirectPdf = files.length === 1 && files[0]?.type === "application/pdf";
 
     setIsUploading(true);
 
     try {
       await toast.promise(
         async () => {
+          let fileToUpload: File;
+
+          if (isDirectPdf) {
+            fileToUpload = files[0]!;
+          } else {
+            fileToUpload = await convertImagesToPdf(files);
+          }
+
+          if (fileToUpload.size > 5 * 1024 * 1024) {
+            throw new Error("File exceeds 5MB limit. Please select a smaller file or fewer images.");
+          }
+
+          const formData = new FormData();
+          formData.append("files", fileToUpload);
+          formData.append("campus", campus);
+          formData.append("isPdf", "true");
+
           try {
             await axios.post<ApiResponse<uploadResponse>>(
               "/api/upload",
@@ -294,7 +310,7 @@ export default function Page() {
           }
         },
         {
-          loading: "Uploading papers...",
+          loading: isDirectPdf ? "Uploading paper..." : "Converting images & uploading paper...",
           success: "Papers uploaded successfully!",
           error: (err: Error) => err.message,
         },

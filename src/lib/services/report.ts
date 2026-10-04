@@ -1,4 +1,4 @@
-import { connectToDatabase } from "@/lib/database/mongoose";
+import { withDatabase } from "@/lib/database/mongoose";
 import TagReport from "@/db/tagReport";
 import { CustomError } from "@/lib/utils/error";
 
@@ -22,22 +22,16 @@ interface ReportedFieldInput {
 }
 
 export async function reportTag(paperId: string, body: ReportTagBody) {
-  await connectToDatabase(); 
-  const count = await TagReport.countDocuments({ paperId });
+  const reportedFields: ReportedFieldInput[] = Array.isArray(body.reportedFields)
+    ? body.reportedFields
+      .map((r): ReportedFieldInput | null => {
+        if (!r || typeof r !== "object") return null;
 
-  if (count >= MAX_REPORTS_PER_PAPER) {
-    throw new CustomError("Received many reports; we are currently working on it.", 429)
-  }
-    const reportedFields: ReportedFieldInput[] = Array.isArray(body.reportedFields)
-      ? body.reportedFields
-        .map((r): ReportedFieldInput | null => {
-          if (!r || typeof r !== "object") return null;
-
-          const field = typeof (r as { field?: unknown }).field === "string" ? (r as { field: string }).field.trim() : "";
-          const value = typeof (r as { value?: unknown }).value === "string" ? (r as { value: string }).value.trim() : undefined;
-          return field ? { field, value } : null;
-        })
-          .filter((r): r is ReportedFieldInput => r !== null):[];
+        const field = typeof (r as { field?: unknown }).field === "string" ? (r as { field: string }).field.trim() : "";
+        const value = typeof (r as { value?: unknown }).value === "string" ? (r as { value: string }).value.trim() : undefined;
+        return field ? { field, value } : null;
+      })
+        .filter((r): r is ReportedFieldInput => r !== null):[];
 
   for (const rf of reportedFields) {
     if (!ALLOWED_FIELDS.includes(rf.field)) {
@@ -57,13 +51,20 @@ export async function reportTag(paperId: string, body: ReportTagBody) {
     }
   }
 
-  const newReport = await TagReport.create({
-    paperId,
-    reportedFields,
-    comment: typeof body.comment === "string" ? body.comment : undefined,
-    reporterEmail: typeof body.reporterEmail === "string" ? body.reporterEmail : undefined,
-    reporterId: typeof body.reporterId === "string" ? body.reporterId : undefined,
+  return await withDatabase(async () => {
+    const count = await TagReport.countDocuments({ paperId });
 
+    if (count >= MAX_REPORTS_PER_PAPER) {
+      throw new CustomError("Received many reports; we are currently working on it.", 429);
+    }
+
+    const newReport = await TagReport.create({
+      paperId,
+      reportedFields,
+      comment: typeof body.comment === "string" ? body.comment : undefined,
+      reporterEmail: typeof body.reporterEmail === "string" ? body.reporterEmail : undefined,
+      reporterId: typeof body.reporterId === "string" ? body.reporterId : undefined,
+    });
+    return newReport.toObject();
   });
-  return newReport;
 }

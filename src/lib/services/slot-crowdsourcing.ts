@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import Paper from "@/db/papers";
 import SlotContribution from "@/db/slotContribution";
-import { connectToDatabase } from "@/lib/database/mongoose";
+import { withDatabase } from "@/lib/database/mongoose";
 import {
   AUTHORITATIVE_SLOTS,
   MIN_SLOT_CONSENSUS,
@@ -92,61 +92,61 @@ export async function getSlotCrowdsourceStatus(
     throw new CustomError("Invalid paper ID.", 400);
   }
 
-  await connectToDatabase();
+  return await withDatabase(async () => {
+    const paper = await Paper.findById(paperId).lean();
+    if (!paper) {
+      throw new CustomError("Paper not found.", 404);
+    }
 
-  const paper = await Paper.findById(paperId).lean();
-  if (!paper) {
-    throw new CustomError("Paper not found.", 404);
-  }
+    const hasExistingSlot = Boolean(paper.slot && paper.slot.trim() !== "");
+    const isCrowdsourcedConfirmed = paper.slotSource === "crowdsourced";
 
-  const hasExistingSlot = Boolean(paper.slot && paper.slot.trim() !== "");
-  const isCrowdsourcedConfirmed = paper.slotSource === "crowdsourced";
+    if (hasExistingSlot || isCrowdsourcedConfirmed) {
+      return {
+        paperId,
+        eligible: false,
+        isConfirmed: true,
+        currentSlot: paper.slot ?? "",
+        slotSource: paper.slotSource ?? "dspace",
+        slotConfirmedAt: paper.slotConfirmedAt ? new Date(paper.slotConfirmedAt).toISOString() : null,
+        totalContributions: paper.slotContributionCount ?? 0,
+        userContributed: false,
+        userSlot: null,
+      };
+    }
 
-  if (hasExistingSlot || isCrowdsourcedConfirmed) {
+    // Paper has no slot - crowdsourcing is eligible
+    const totalContributions = await SlotContribution.countDocuments({
+      paperId: new Types.ObjectId(paperId),
+    });
+
+    let userContributed = false;
+    let userSlot: string | null = null;
+
+    if (contributorId && isValidContributorId(contributorId)) {
+      const userDoc = await SlotContribution.findOne({
+        paperId: new Types.ObjectId(paperId),
+        contributorId: contributorId.trim(),
+      }).lean();
+
+      if (userDoc) {
+        userContributed = true;
+        userSlot = userDoc.slot;
+      }
+    }
+
     return {
       paperId,
-      eligible: false,
-      isConfirmed: true,
-      currentSlot: paper.slot ?? "",
-      slotSource: paper.slotSource ?? "dspace",
-      slotConfirmedAt: paper.slotConfirmedAt ? new Date(paper.slotConfirmedAt).toISOString() : null,
-      totalContributions: paper.slotContributionCount ?? 0,
-      userContributed: false,
-      userSlot: null,
+      eligible: true,
+      isConfirmed: false,
+      currentSlot: "",
+      slotSource: null,
+      slotConfirmedAt: null,
+      totalContributions,
+      userContributed,
+      userSlot,
     };
-  }
-
-  // Paper has no slot - crowdsourcing is eligible
-  const totalContributions = await SlotContribution.countDocuments({
-    paperId: new Types.ObjectId(paperId),
   });
-
-  let userContributed = false;
-  let userSlot: string | null = null;
-
-  if (contributorId && isValidContributorId(contributorId)) {
-    const userDoc = await SlotContribution.findOne({
-      paperId: new Types.ObjectId(paperId),
-      contributorId: contributorId.trim(),
-    }).lean();
-
-    if (userDoc) {
-      userContributed = true;
-      userSlot = userDoc.slot;
-    }
-  }
-
-  return {
-    paperId,
-    eligible: true,
-    isConfirmed: false,
-    currentSlot: "",
-    slotSource: null,
-    slotConfirmedAt: null,
-    totalContributions,
-    userContributed,
-    userSlot,
-  };
 }
 
 /**
@@ -177,97 +177,97 @@ export async function submitSlotContribution(input: {
   const normalizedSlot = normalizeSlot(slot);
   const cleanContributorId = contributorId.trim();
 
-  await connectToDatabase();
-
-  // 1. Verify paper existence and eligibility
-  const paper = await Paper.findById(paperId);
-  if (!paper) {
-    throw new CustomError("Paper not found.", 404);
-  }
-
-  if ((paper.slot && paper.slot.trim() !== "") || paper.slotSource === "crowdsourced") {
-    throw new CustomError(
-      "This paper already has an authoritative or confirmed slot. Slot contributions are no longer accepted.",
-      400
-    );
-  }
-
-  // 2. Insert contribution atomically (preventing duplicate votes via unique index)
-  try {
-    await SlotContribution.create({
-      paperId: new Types.ObjectId(paperId),
-      slot: normalizedSlot,
-      contributorId: cleanContributorId,
-    });
-  } catch (err: unknown) {
-    if (typeof err === "object" && err !== null && "code" in err && (err as { code: number }).code === 11000) {
-      throw new CustomError("You have already submitted a slot contribution for this paper.", 409);
+  return await withDatabase(async () => {
+    // 1. Verify paper existence and eligibility
+    const paper = await Paper.findById(paperId);
+    if (!paper) {
+      throw new CustomError("Paper not found.", 404);
     }
-    throw err;
-  }
 
-  // 3. Aggregate vote counts for this paper
-  const aggregation = await SlotContribution.aggregate<{ _id: string; count: number }>([
-    { $match: { paperId: new Types.ObjectId(paperId) } },
-    { $group: { _id: "$slot", count: { $sum: 1 } } },
-  ]);
+    if ((paper.slot && paper.slot.trim() !== "") || paper.slotSource === "crowdsourced") {
+      throw new CustomError(
+        "This paper already has an authoritative or confirmed slot. Slot contributions are no longer accepted.",
+        400
+      );
+    }
 
-  const countsBySlot: Record<string, number> = {};
-  for (const item of aggregation) {
-    countsBySlot[item._id] = item.count;
-  }
+    // 2. Insert contribution atomically (preventing duplicate votes via unique index)
+    try {
+      await SlotContribution.create({
+        paperId: new Types.ObjectId(paperId),
+        slot: normalizedSlot,
+        contributorId: cleanContributorId,
+      });
+    } catch (err: unknown) {
+      if (typeof err === "object" && err !== null && "code" in err && (err as { code: number }).code === 11000) {
+        throw new CustomError("You have already submitted a slot contribution for this paper.", 409);
+      }
+      throw err;
+    }
 
-  // 4. Evaluate consensus
-  const consensus = evaluateConsensus(countsBySlot);
+    // 3. Aggregate vote counts for this paper
+    const aggregation = await SlotContribution.aggregate<{ _id: string; count: number }>([
+      { $match: { paperId: new Types.ObjectId(paperId) } },
+      { $group: { _id: "$slot", count: { $sum: 1 } } },
+    ]);
 
-  // 5. If consensus reached, atomically update paper
-  if (consensus.isConsensusReached && consensus.winningSlot) {
-    const updated = await Paper.findOneAndUpdate(
+    const countsBySlot: Record<string, number> = {};
+    for (const item of aggregation) {
+      countsBySlot[item._id] = item.count;
+    }
+
+    // 4. Evaluate consensus
+    const consensus = evaluateConsensus(countsBySlot);
+
+    // 5. If consensus reached, atomically update paper
+    if (consensus.isConsensusReached && consensus.winningSlot) {
+      const updated = await Paper.findOneAndUpdate(
+        {
+          _id: paperId,
+          $or: [{ slot: "" }, { slot: null }, { slot: { $exists: false } }],
+          slotSource: { $ne: "crowdsourced" },
+        },
+        {
+          $set: {
+            slot: consensus.winningSlot,
+            slotSource: "crowdsourced",
+            slotConfirmedAt: new Date(),
+            slotContributionCount: consensus.totalContributions,
+          },
+        },
+        { new: true }
+      );
+
+      return {
+        success: true,
+        status: "confirmed",
+        isConfirmed: true,
+        confirmedSlot: updated?.slot ? (updated.slot as AuthoritativeSlot) : consensus.winningSlot,
+        totalContributions: consensus.totalContributions,
+        userSlot: normalizedSlot,
+        message: `Consensus reached! Slot confirmed as ${consensus.winningSlot}.`,
+      };
+    }
+
+    // Consensus not reached yet: update contribution count on paper for fast indexing
+    await Paper.updateOne(
       {
         _id: paperId,
         $or: [{ slot: "" }, { slot: null }, { slot: { $exists: false } }],
-        slotSource: { $ne: "crowdsourced" },
       },
       {
-        $set: {
-          slot: consensus.winningSlot,
-          slotSource: "crowdsourced",
-          slotConfirmedAt: new Date(),
-          slotContributionCount: consensus.totalContributions,
-        },
-      },
-      { new: true }
+        $set: { slotContributionCount: consensus.totalContributions },
+      }
     );
 
     return {
       success: true,
-      status: "confirmed",
-      isConfirmed: true,
-      confirmedSlot: updated?.slot ? (updated.slot as AuthoritativeSlot) : consensus.winningSlot,
+      status: "recorded",
+      isConfirmed: false,
+      confirmedSlot: null,
       totalContributions: consensus.totalContributions,
       userSlot: normalizedSlot,
-      message: `Consensus reached! Slot confirmed as ${consensus.winningSlot}.`,
+      message: "Thanks! Your contribution was recorded.",
     };
-  }
-
-  // Consensus not reached yet: update contribution count on paper for fast indexing
-  await Paper.updateOne(
-    {
-      _id: paperId,
-      $or: [{ slot: "" }, { slot: null }, { slot: { $exists: false } }],
-    },
-    {
-      $set: { slotContributionCount: consensus.totalContributions },
-    }
-  );
-
-  return {
-    success: true,
-    status: "recorded",
-    isConfirmed: false,
-    confirmedSlot: null,
-    totalContributions: consensus.totalContributions,
-    userSlot: normalizedSlot,
-    message: "Thanks! Your contribution was recorded.",
-  };
+  });
 }

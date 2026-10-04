@@ -1,5 +1,5 @@
 import { verifyEmail } from "@devmehq/email-validator-js";
-import { connectToDatabase } from "@/lib/database/mongoose";
+import { withDatabase } from "@/lib/database/mongoose";
 import { EmailSub } from "@/db/email";
 import { CustomError } from "@/lib/utils/error";
 
@@ -21,13 +21,13 @@ export async function subscribeEmail(email: string) {
     throw new CustomError("Email domain is invalid", 400);
   }
 
-  await connectToDatabase();
+  return await withDatabase(async () => {
+    const existing = await EmailSub.findOne({ email: normalizedEmail }).lean();
+    if (existing) {
+      return { alreadySubscribed: true };
+    }
 
-  const existing = await EmailSub.findOne({ email: normalizedEmail });
-  if (existing) {
-    return { alreadySubscribed: true };
-  }
-
-  await EmailSub.create({ email: normalizedEmail });
-  return { alreadySubscribed: false };
+    await EmailSub.create({ email: normalizedEmail });
+    return { alreadySubscribed: false };
+  });
 }

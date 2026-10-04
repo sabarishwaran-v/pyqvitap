@@ -11,7 +11,11 @@ export const config = {
 };
 
 export default async function middleware(request: NextRequest) {
-  const ip = request.ip ?? "127.0.0.1";
+  const ip =
+    request.headers.get("cf-connecting-ip") ??
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    request.ip ??
+    "127.0.0.1";
   const { pathname } = request.nextUrl;
 
   if (pathname === "/api/upload") {

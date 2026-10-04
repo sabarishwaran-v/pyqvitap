@@ -2,7 +2,7 @@ import Paper from "@/db/papers";
 import { type IPaper } from "@/interface";
 import { escapeRegExp } from "@/lib/utils/regex";
 import { extractUniqueValues } from "@/lib/utils/paper-aggregation";
-import { connectToDatabase } from "../database/mongoose";
+import { withDatabase } from "../database/mongoose";
 import CourseCount from "@/db/course";
 import PaperRequest from "@/db/paperRequest";
 import { type StoredSubjects } from "@/interface";
@@ -19,84 +19,87 @@ export async function getPapersBySubject(subject: string) {
 	if (!subject){
 		throw new Error("Subject query parameter is required");
 	}
-	await connectToDatabase();
-	
-	const escapedSubject = escapeRegExp(subject);
-	console.log("[getPapersBySubject] querying for subject:", subject);
-	console.log("[getPapersBySubject] escaped subject:", escapedSubject);
-	const papers: IPaper[] = await Paper.find({
-		subject: { $regex: new RegExp(`^${escapedSubject}$`, "i") },
-	});
-	console.log("[getPapersBySubject] exact regex match count:", papers.length);
+	return await withDatabase(async () => {
+		const escapedSubject = escapeRegExp(subject);
+		console.log("[getPapersBySubject] querying for subject:", subject);
+		console.log("[getPapersBySubject] escaped subject:", escapedSubject);
+		const papers: IPaper[] = await Paper.find({
+			subject: { $regex: new RegExp(`^${escapedSubject}$`, "i") },
+		}).lean<IPaper[]>();
+		console.log("[getPapersBySubject] exact regex match count:", papers.length);
 
-	let finalPapers = papers;
-	if (papers.length === 0) {
-		// Fallback to searching without exact boundary
-		finalPapers = await Paper.find({
-			subject: { $regex: new RegExp(`${escapedSubject}`, "i") },
-		});
-		console.log("[getPapersBySubject] loose regex match count:", finalPapers.length);
-	}
-	if (finalPapers.length === 0) {
-		// Fallback to code search if subject is like 'NAME [CODE]'
-		const codeMatch = subject.match(/\[([A-Z0-9]+)\]/);
-		if (codeMatch && codeMatch[1]) {
+		let finalPapers = papers;
+		if (papers.length === 0) {
+			// Fallback to searching without exact boundary
 			finalPapers = await Paper.find({
-				subject: { $regex: new RegExp(`\\[${codeMatch[1]}\\]`, "i") },
-			});
-			console.log(`[getPapersBySubject] code fallback [${codeMatch[1]}] match count:`, finalPapers.length);
+				subject: { $regex: new RegExp(`${escapedSubject}`, "i") },
+			}).lean<IPaper[]>();
+			console.log("[getPapersBySubject] loose regex match count:", finalPapers.length);
 		}
-	}
+		if (finalPapers.length === 0) {
+			// Fallback to code search if subject is like 'NAME [CODE]'
+			const codeMatch = subject.match(/\[([A-Z0-9]+)\]/);
+			if (codeMatch && codeMatch[1]) {
+				finalPapers = await Paper.find({
+					subject: { $regex: new RegExp(`\\[${codeMatch[1]}\\]`, "i") },
+				}).lean<IPaper[]>();
+				console.log(`[getPapersBySubject] code fallback [${codeMatch[1]}] match count:`, finalPapers.length);
+			}
+		}
 
-	const uniqueValues = extractUniqueValues(finalPapers);
+		const uniqueValues = extractUniqueValues(finalPapers);
 
-	return {
-		papers: finalPapers,
-		...uniqueValues,
-	}
-
+		return {
+			papers: finalPapers,
+			...uniqueValues,
+		};
+	});
 }
 
 export async function getPaperById(id: string) {
-	await connectToDatabase();
-	const paper = await Paper.findById(id);
+	return await withDatabase(async () => {
+		const paper = await Paper.findById(id).lean<IPaper | null>();
 
-	if (!paper) {
-		throw new Error("Paper not found"); // 404
-	}
+		if (!paper) {
+			throw new Error("Paper not found"); // 404
+		}
 
-	return paper;
+		return paper;
+	});
 }
 
 export async function getCourseCounts(){
-	await connectToDatabase();
+	return await withDatabase(async () => {
+		const count = await CourseCount.find().lean();
 
-	const count = await CourseCount.find().lean();
+		const formatted = count.map((item) => ({
+			name: item.name,
+			count: item.count,
+		}));
 
-	const formatted = count.map((item) => ({
-		name: item.name,
-		count: item.count,
-	}));
-
-	return formatted;
+		return formatted;
+	});
 }
 
 export async function createPaperRequest({ subject, exam, slot, year} : CreatePaperInputType){
-  await connectToDatabase();
-  return await PaperRequest.create({ subject, exam, slot, year });
+	return await withDatabase(async () => {
+		const request = await PaperRequest.create({ subject, exam, slot, year });
+		return request.toObject();
+	});
 }
 
 export async function getSelectedPapers() {
-	await connectToDatabase();
-  return await Paper.find({ isSelected: true }).limit(8);
+	return await withDatabase(async () => {
+		return await Paper.find({ isSelected: true }).limit(8).lean();
+	});
 }
 
 export async function getPapersBySubjects(subjects: StoredSubjects) {
-	await connectToDatabase();
+	return await withDatabase(async () => {
+		const usersPapers = await Paper.find({
+			subject: { $in: subjects },
+		}).lean<IPaper[]>();
 
-  const usersPapers = await Paper.find({
-    subject: { $in: subjects },
-  });
-
-	return transformPapersToSubjectSlots(usersPapers);
+		return transformPapersToSubjectSlots(usersPapers);
+	});
 }

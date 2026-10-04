@@ -101,14 +101,6 @@ const config = {
       },
     ];
   },
-  webpack: (config, options) => {
-    config.resolve.alias.canvas = false;
-    config.module.rules.push({
-      test: /\.node/,
-      use: "raw-loader",
-    });
-    return config;
-  },
 };
 
 export default config;

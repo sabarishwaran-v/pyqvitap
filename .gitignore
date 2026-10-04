@@ -20,6 +20,8 @@
 
 # production build
 /build
+/.open-next/
+/.wrangler/
 
 # misc & OS
 .DS_Store
@@ -42,6 +44,8 @@ yarn-error.log*
 .env.prod
 .env.staging
 .env.production
+.dev.vars
+.dev.vars.*
 .vercel
 
 # typescript
