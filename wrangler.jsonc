@@ -22,8 +22,7 @@
   "r2_buckets": [
     {
       "binding": "R2_MEDIA",
-      "bucket_name": "pyqvitap-media",
-      "remote": true
+      "bucket_name": "pyqvitap-media"
     }
   ],
   "flagship": [
