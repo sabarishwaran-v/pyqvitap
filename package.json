@@ -10,7 +10,7 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
-    "test": "node scripts/test-paper-transform.cjs && node scripts/test-paper-by-id-cache.cjs && node scripts/test-media-range.cjs && node scripts/test-media-cache.cjs",
+    "test": "node scripts/test-paper-transform.cjs && node scripts/test-paper-by-id-cache.cjs && node scripts/test-media-range.cjs && node scripts/test-media-cache.cjs && node scripts/test-announcement-modal.cjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
