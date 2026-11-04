@@ -202,13 +202,27 @@ export default function DisclaimerPage() {
           </section>
         </div>
 
-        {/* Back to Home Link */}
-        <div className="pt-4 text-center">
+        {/* Footer Navigation Bar */}
+        <div className="flex flex-wrap items-center justify-center gap-4 border-t border-gray-200 pt-6 dark:border-[#3A3745] sm:gap-6">
           <Link
             href="/"
             className="font-play text-sm font-semibold text-[#562EE7] underline underline-offset-4 transition-colors hover:text-[#4531b3] dark:text-[#A47DE5] dark:hover:text-[#FFC6E8]"
           >
-            ← Back to Home
+            &larr; Back to Home
+          </Link>
+          <span className="text-gray-400 dark:text-gray-600">&bull;</span>
+          <Link
+            href="/terms"
+            className="font-play text-sm font-semibold text-[#562EE7] underline underline-offset-4 transition-colors hover:text-[#4531b3] dark:text-[#A47DE5] dark:hover:text-[#FFC6E8]"
+          >
+            Terms of Service
+          </Link>
+          <span className="text-gray-400 dark:text-gray-600">&bull;</span>
+          <Link
+            href="/privacy"
+            className="font-play text-sm font-semibold text-[#562EE7] underline underline-offset-4 transition-colors hover:text-[#4531b3] dark:text-[#A47DE5] dark:hover:text-[#FFC6E8]"
+          >
+            Privacy Policy
           </Link>
         </div>
       </div>

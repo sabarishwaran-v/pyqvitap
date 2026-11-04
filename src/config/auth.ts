@@ -96,6 +96,8 @@ export function isPublicPath(pathname: string): boolean {
     pathname.startsWith("/sign-up") ||
     pathname === "/unauthorized" ||
     pathname.startsWith("/disclaimer") ||
+    pathname.startsWith("/terms") ||
+    pathname.startsWith("/privacy") ||
     pathname === "/api/health" ||
     pathname === "/manifest.webmanifest" ||
     pathname === "/robots.txt" ||

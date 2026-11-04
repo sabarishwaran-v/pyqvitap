@@ -151,8 +151,22 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* Dedicated Legal Page Link */}
-        <div className="mt-3 pb-2 text-center">
+        {/* Dedicated Legal Pages Links */}
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-3 pb-2 text-center sm:gap-4">
+          <Link
+            href="/terms"
+            className="font-play text-xs font-semibold text-[#562EE7] underline underline-offset-4 transition-colors hover:text-[#4531b3] dark:text-[#A47DE5] dark:hover:text-[#FFC6E8]"
+          >
+            Terms of Service
+          </Link>
+          <span className="text-xs text-gray-400 dark:text-gray-600">&bull;</span>
+          <Link
+            href="/privacy"
+            className="font-play text-xs font-semibold text-[#562EE7] underline underline-offset-4 transition-colors hover:text-[#4531b3] dark:text-[#A47DE5] dark:hover:text-[#FFC6E8]"
+          >
+            Privacy Policy
+          </Link>
+          <span className="text-xs text-gray-400 dark:text-gray-600">&bull;</span>
           <Link
             href="/disclaimer"
             className="font-play text-xs font-semibold text-[#562EE7] underline underline-offset-4 transition-colors hover:text-[#4531b3] dark:text-[#A47DE5] dark:hover:text-[#FFC6E8]"
