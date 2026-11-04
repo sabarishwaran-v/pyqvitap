@@ -5,7 +5,7 @@ import {
   subscribeRatelimit,
 } from "./lib/utils/ratelimit";
 import { failure } from "@/lib/utils/response";
-import { MAINTENANCE_MODE } from "@/config/maintenance";
+import { MAINTENANCE_MODE, isMaintenanceMode } from "@/config/maintenance";
 import { isAuthEnabled, isAuthorizedEmail, isPublicPath } from "@/config/auth";
 import { clerkMiddleware, createClerkClient } from "@clerk/nextjs/server";
 
@@ -804,8 +804,8 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
       </div>
 
       <div class="return-card">
-        <div class="return-label">Expected Return</div>
-        <div class="return-val">Before 9 October 2026</div>
+        <div class="return-label">Status</div>
+        <div class="return-val">Scheduled Maintenance &bull; Back Soon</div>
       </div>
 
       <p class="closing-note">We’re working to get everything back up as soon as possible. Thank you for your patience and support. 💜</p>
@@ -871,7 +871,11 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
         <p>Question papers and related content may originate from publicly accessible institutional resources, including VIT-AP DSpace. Rights to the underlying materials remain with their respective owners.</p>
       </div>
 
-      <div class="disclaimer-btn-wrap">
+      <div class="disclaimer-btn-wrap" style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+        <a class="disclaimer-btn" href="/terms">Terms of Service</a>
+        <span style="color: var(--footer-card-border); font-size: 12px;">&bull;</span>
+        <a class="disclaimer-btn" href="/privacy">Privacy Policy</a>
+        <span style="color: var(--footer-card-border); font-size: 12px;">&bull;</span>
         <a class="disclaimer-btn" href="/disclaimer">Disclaimer &amp; Rights</a>
       </div>
     </div>
@@ -955,8 +959,9 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
 
 export default async function middleware(request: NextRequest, event: NextFetchEvent) {
   const { pathname } = request.nextUrl;
+  const maintenanceActive = await isMaintenanceMode();
 
-  if (MAINTENANCE_MODE) {
+  if (maintenanceActive || MAINTENANCE_MODE) {
     // 1. Allow static assets, images, icons, and web manifests
     if (
       pathname.startsWith("/_next") ||
@@ -986,21 +991,28 @@ export default async function middleware(request: NextRequest, event: NextFetchE
         JSON.stringify({
           success: false,
           message:
-            "PyqVitAp is currently under maintenance. Expected return: Before 9 October 2026.",
+            "PyqVitAp is currently undergoing scheduled maintenance. Please check back shortly.",
         }),
         {
           status: 503,
           headers: {
             "Content-Type": "application/json",
-            "Retry-After": "86400",
+            "Retry-After": "3600",
             "Cache-Control": "no-store, max-age=0",
           },
         }
       );
     }
 
-    // 5. Explicit public maintenance exception: allow /disclaimer to render normally
-    if (pathname === "/disclaimer" || pathname === "/disclaimer/") {
+    // 5. Explicit public maintenance exception: allow legal pages to render normally
+    if (
+      pathname === "/disclaimer" ||
+      pathname === "/disclaimer/" ||
+      pathname === "/terms" ||
+      pathname === "/terms/" ||
+      pathname === "/privacy" ||
+      pathname === "/privacy/"
+    ) {
       return NextResponse.next();
     }
 
