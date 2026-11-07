@@ -1004,14 +1004,16 @@ export default async function middleware(request: NextRequest, event: NextFetchE
       );
     }
 
-    // 5. Explicit public maintenance exception: allow legal pages to render normally
+    // 5. Explicit public maintenance exception: allow legal and unsubscribe pages to render normally
     if (
       pathname === "/disclaimer" ||
       pathname === "/disclaimer/" ||
       pathname === "/terms" ||
       pathname === "/terms/" ||
       pathname === "/privacy" ||
-      pathname === "/privacy/"
+      pathname === "/privacy/" ||
+      pathname === "/unsubscribe" ||
+      pathname === "/unsubscribe/"
     ) {
       return NextResponse.next();
     }
