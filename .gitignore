@@ -61,6 +61,7 @@ AGENTS.md
 scratch/
 workbench/
 reports/
+/templates/
 
 # test runs & telemetry dumps
 scripts/*.jsonl
