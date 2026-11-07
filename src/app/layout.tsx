@@ -14,6 +14,7 @@ import MaintenanceGate from "@/components/MaintenanceGate";
 import { AuthProvider } from "@/components/AuthProvider";
 import PostHogProviderWrapper from "@/components/analytics/PostHogProvider";
 import ReliabilityAnnouncementModal from "@/components/ReliabilityAnnouncementModal";
+import PwaUpdatePrompt from "@/components/pwa/PwaUpdatePrompt";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -211,6 +212,7 @@ export default function RootLayout({
                       <ChildrenWrapper>{children}</ChildrenWrapper>
                       <GitHubStarPrompt />
                       <ReliabilityAnnouncementModal />
+                      <PwaUpdatePrompt />
                     </>
                   )}
                   <Footer />

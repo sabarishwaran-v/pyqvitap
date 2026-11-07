@@ -6,9 +6,17 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  "workers_dev": true,
+  "preview_urls": true,
   "alias": {
     "mongoose": "mongoose/index.js"
   },
+  "routes": [
+    {
+      "pattern": "pyqvitap.site",
+      "custom_domain": true
+    }
+  ],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"

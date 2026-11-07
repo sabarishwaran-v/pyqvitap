@@ -9,12 +9,12 @@ interface ExtendedScreenshot {
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    id: "pyqvitap-pwa",
+    id: "pyqvitap-pwa-v5",
     name: "PyqVitAp",
     short_name: "PyqVitAp",
     description:
       "Prepare and ace your CAT and FAT exams with PyqVitAp. Search 5k+ question papers across all branches, slots, and years in seconds.",
-    start_url: "/",
+    start_url: "/?pwa=v5",
     scope: "/",
     display: "standalone",
     background_color: "#10011a",
@@ -30,7 +30,7 @@ export default function manifest(): MetadataRoute.Manifest {
         "name": "Upload",
         "short_name": "Upload",
         "description": "Upload a paper",
-        "url": "/upload",
+        "url": "/upload?pwa=v5",
         "icons": [
           {
             "src": "/assets/icons/icon-192x192-v5.webp",

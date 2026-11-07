@@ -1,16 +1,24 @@
 import Info from "@/components/screens/Info";
 import Faq from "@/components/screens/Faq";
 import Hero from "@/components/screens/Hero";
+import { isAuthEnabled } from "@/config/auth";
 
-const HomePage = () => {
+export const revalidate = 60;
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams?: { test_auth?: string };
+}) {
+  const authEnabled =
+    searchParams?.test_auth === "true" || (await isAuthEnabled());
+
   return (
     <div>
-      <Hero />
+      <Hero authEnabled={authEnabled} />
       <Info />
       <Faq />
       {/* Happy Birthday Abhi broski, Hope you have an amazing year!!! Love you lots*/}
     </div>
   );
-};
-
-export default HomePage;
+}

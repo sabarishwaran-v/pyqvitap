@@ -38,13 +38,13 @@
     "*.js",
     "*.cjs",
     "src/**/*.js",
-    "scripts/**/*.cjs",
     ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
     ".next",
     ".open-next",
-    ".wrangler"
+    ".wrangler",
+    "scripts"
   ]
 }

@@ -50,3 +50,4 @@ jobs:
         env:
           SKIP_ENV_VALIDATION: "1"
           NODE_ENV: "production"
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_d2FybS13YWxydXMtNDc4NS5jbGVyay5hY2NvdW50cy5kZXYk"

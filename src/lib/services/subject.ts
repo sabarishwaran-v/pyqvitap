@@ -1,14 +1,18 @@
 import { withDatabase } from "@/lib/database/mongoose";
-import { type IRelatedSubject } from "@/interface";
+import { type ICourse, type IRelatedSubject } from "@/interface";
 import { escapeRegExp } from "@/lib/utils/regex";
 import { Course } from "@/db/course";
 import RelatedSubject from "@/db/relatedSubjects";
 import UpcomingSubject from "@/db/upcoming-paper";
 import { checkAndSyncUpcomingSlots } from "@/lib/services/upcoming-sync";
 
-export async function getCourseList(){
+export async function getCourseList(): Promise<ICourse[]> {
 	return await withDatabase(async () => {
-		return await Course.find().lean();
+		const courses = await Course.find().lean();
+		return courses.map((course) => ({
+			_id: course._id.toString(),
+			name: course.name,
+		}));
 	});
 }
 
