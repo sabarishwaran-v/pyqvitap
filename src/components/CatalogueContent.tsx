@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { type IPaper, type Filters, type StoredSubjects, type ApiResponse } from "@/interface";
@@ -62,6 +62,7 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
     handleSelectAll,
     handleDeselectAll,
     handleDownloadSelected,
+    activeFilterCount,
     isDownloading,
   } = useFilters();
 
@@ -159,53 +160,53 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
   };
 
   // Fetch papers ONLY when subject changes (not when filters change!)
-  useEffect(() => {
-    if (!isMounted) return;
-
+  const fetchPapers = useCallback(async () => {
     if (!subject) {
       setLoading(false);
       setPapers([]);
       return;
     }
 
-    const fetchPapers = async () => {
-      setLoading(true);
-      const reqStart = performance.now();
-      try {
-        const papersResponse = await axios.get<ApiResponse<Filters>>(
-          "/api/papers",
-          {
-            params: { subject },
-          },
-        );
-        
-        const data = papersResponse.data.data!;
-        const papersData = data?.papers ?? [];
-        setFilterOptions(data);
-        setPapers(papersData);
+    setLoading(true);
+    setError(null);
+    const reqStart = performance.now();
+    try {
+      const papersResponse = await axios.get<ApiResponse<Filters>>(
+        "/api/papers",
+        {
+          params: { subject },
+        },
+      );
 
-        trackEvent("course_selected", {
-          course_name: subject,
-          paper_count: papersData.length,
-        });
-      } catch (error) {
-        setPapers([]);
-        const duration = performance.now() - reqStart;
-        const status = axios.isAxiosError(error) ? (error.response?.status ?? 0) : 0;
-        trackApiFailure("/api/papers", "GET", status, duration);
+      const data = papersResponse.data.data!;
+      const papersData = data?.papers ?? [];
+      setFilterOptions(data);
+      setPapers(papersData);
 
-        setError(
-          axios.isAxiosError<ApiResponse<never>>(error)
-            ? (error.response?.data.message ?? "Error fetching papers")
-            : "Error fetching papers",
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+      trackEvent("course_selected", {
+        course_name: subject,
+        paper_count: papersData.length,
+      });
+    } catch (error) {
+      setPapers([]);
+      const duration = performance.now() - reqStart;
+      const status = axios.isAxiosError(error) ? (error.response?.status ?? 0) : 0;
+      trackApiFailure("/api/papers", "GET", status, duration);
 
+      setError(
+        axios.isAxiosError<ApiResponse<never>>(error)
+          ? (error.response?.data.message ?? "Error fetching papers")
+          : "Error fetching papers",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [subject, setPapers, setFilterOptions]);
+
+  useEffect(() => {
+    if (!isMounted) return;
     void fetchPapers();
-  }, [subject, isMounted, setPapers, setFilterOptions]);
+  }, [fetchPapers, isMounted]);
 
   useEffect(() => {
     if (!papers.length) return;
@@ -303,20 +304,34 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
       <div className="w-full">
         {papers.length > 0 && (
           <Sheet>
-            <SheetTrigger asChild className="mx-8 mt-8 block md:hidden">
-              <Button
-                variant="outline"
-                className="flex gap-2 border-2 border-black font-sans font-semibold hover:bg-slate-800 hover:text-white dark:border-[#434dba] dark:hover:border-white dark:hover:bg-slate-900"
+            <SheetTrigger asChild>
+              <button
+                type="button"
+                aria-label={
+                  activeFilterCount > 0
+                    ? `Open filters (${activeFilterCount} active)`
+                    : "Open filters"
+                }
+                className="fixed z-40 flex h-12 items-center gap-2 rounded-full border-2 border-black bg-white px-5 font-sans text-sm font-semibold text-gray-900 shadow-[3px_3px_0_0_#000] transition-all duration-200 hover:bg-slate-50 hover:shadow-[4px_4px_0_0_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0_0_#000] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 dark:border-[#434dba] dark:bg-[#0c061d] dark:text-white dark:shadow-[3px_3px_0_0_#434dba] dark:hover:bg-[#150a30] dark:hover:shadow-[4px_4px_0_0_#7480FF] dark:active:shadow-[1px_1px_0_0_#434dba] dark:focus-visible:ring-[#7480FF] md:hidden"
+                style={{
+                  bottom: "max(1.5rem, calc(1.5rem + env(safe-area-inset-bottom, 0px)))",
+                  right: "max(1.25rem, calc(1.25rem + env(safe-area-inset-right, 0px)))",
+                }}
               >
-                <Filter size={18} />
-                Add Filters
-              </Button>
+                <Filter size={18} className="shrink-0 text-black dark:text-[#7480FF]" />
+                <span>Filters</span>
+                {activeFilterCount > 0 && (
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#562EE7] px-1.5 text-[11px] font-bold text-white dark:bg-[#7480FF]">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
             </SheetTrigger>
             <SheetContent
               side={"left"}
               className="m-0 bg-[#f3f5ff] p-0 pt-4 dark:bg-[#070114]"
             >
-              <SideBar />
+              <SideBar inDrawer />
             </SheetContent>
           </Sheet>
         )}
@@ -397,7 +412,7 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
         ) : loading ? (
           <Loader />
         ) : papers.length > 0 ? (
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center pb-32 md:pb-8">
             <div
               className={`grid h-fit grid-cols-1 gap-8 px-[30px] pb-[40px] md:grid-cols-2 lg:grid-cols-4 ${filtersPulled ? "blur-xl" : ""}`}
             >
@@ -441,6 +456,7 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
           <Error
             filtersPulled={filtersPulled}
             message={error ?? "No papers available for this subject."}
+            onRetry={error ? () => void fetchPapers() : undefined}
           />
         )}
       </div>

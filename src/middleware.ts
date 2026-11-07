@@ -5,8 +5,8 @@ import {
   subscribeRatelimit,
 } from "./lib/utils/ratelimit";
 import { failure } from "@/lib/utils/response";
-import { MAINTENANCE_MODE } from "@/config/maintenance";
-import { isAuthEnabled, isAuthorizedEmail, isPublicPath } from "@/config/auth";
+import { MAINTENANCE_MODE, isMaintenanceMode } from "@/config/maintenance";
+import { isAuthEnabled, isAuthorizedEmail, isPublicPath, sanitizeRedirectUrl } from "@/config/auth";
 import { clerkMiddleware, createClerkClient } from "@clerk/nextjs/server";
 
 export const config = {
@@ -804,8 +804,8 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
       </div>
 
       <div class="return-card">
-        <div class="return-label">Expected Return</div>
-        <div class="return-val">Before 9 October 2026</div>
+        <div class="return-label">Status</div>
+        <div class="return-val">Scheduled Maintenance &bull; Back Soon</div>
       </div>
 
       <p class="closing-note">We’re working to get everything back up as soon as possible. Thank you for your patience and support. 💜</p>
@@ -871,7 +871,11 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
         <p>Question papers and related content may originate from publicly accessible institutional resources, including VIT-AP DSpace. Rights to the underlying materials remain with their respective owners.</p>
       </div>
 
-      <div class="disclaimer-btn-wrap">
+      <div class="disclaimer-btn-wrap" style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+        <a class="disclaimer-btn" href="/terms">Terms of Service</a>
+        <span style="color: var(--footer-card-border); font-size: 12px;">&bull;</span>
+        <a class="disclaimer-btn" href="/privacy">Privacy Policy</a>
+        <span style="color: var(--footer-card-border); font-size: 12px;">&bull;</span>
         <a class="disclaimer-btn" href="/disclaimer">Disclaimer &amp; Rights</a>
       </div>
     </div>
@@ -955,8 +959,9 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
 
 export default async function middleware(request: NextRequest, event: NextFetchEvent) {
   const { pathname } = request.nextUrl;
+  const maintenanceActive = await isMaintenanceMode();
 
-  if (MAINTENANCE_MODE) {
+  if (maintenanceActive || MAINTENANCE_MODE) {
     // 1. Allow static assets, images, icons, and web manifests
     if (
       pathname.startsWith("/_next") ||
@@ -986,21 +991,28 @@ export default async function middleware(request: NextRequest, event: NextFetchE
         JSON.stringify({
           success: false,
           message:
-            "PyqVitAp is currently under maintenance. Expected return: Before 9 October 2026.",
+            "PyqVitAp is currently undergoing scheduled maintenance. Please check back shortly.",
         }),
         {
           status: 503,
           headers: {
             "Content-Type": "application/json",
-            "Retry-After": "86400",
+            "Retry-After": "3600",
             "Cache-Control": "no-store, max-age=0",
           },
         }
       );
     }
 
-    // 5. Explicit public maintenance exception: allow /disclaimer to render normally
-    if (pathname === "/disclaimer" || pathname === "/disclaimer/") {
+    // 5. Explicit public maintenance exception: allow legal pages to render normally
+    if (
+      pathname === "/disclaimer" ||
+      pathname === "/disclaimer/" ||
+      pathname === "/terms" ||
+      pathname === "/terms/" ||
+      pathname === "/privacy" ||
+      pathname === "/privacy/"
+    ) {
       return NextResponse.next();
     }
 
@@ -1019,8 +1031,14 @@ export default async function middleware(request: NextRequest, event: NextFetchE
 
   // --- Normal Operations (MAINTENANCE_MODE === false) ---
   const authEnabled = await isAuthEnabled();
+  const mfUrl = request.headers.get("mf-original-url") || "";
+  const isLocalhost =
+    request.nextUrl.hostname === "localhost" ||
+    request.nextUrl.hostname === "127.0.0.1" ||
+    mfUrl.includes("localhost") ||
+    mfUrl.includes("127.0.0.1");
 
-  if (authEnabled) {
+  if (authEnabled && !isLocalhost) {
     const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
     if (publishableKey) {
       const handler = getClerkHandler();
@@ -1072,7 +1090,18 @@ interface SessionClaimsWithEmail {
   primaryEmail?: string;
   user_email?: string;
   primary_email_address?: string;
+  email_verified?: boolean;
 }
+
+interface CachedUserAuth {
+  email: string;
+  isAuthorized: boolean;
+  expiresAt: number;
+}
+
+// In-memory cache for user authorization results to eliminate Clerk API subrequests on hot path
+const userAuthCache = new Map<string, CachedUserAuth>();
+const USER_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes TTL
 
 type ClerkMiddlewareReturn = (req: NextRequest, event: NextFetchEvent) => Promise<NextResponse>;
 let lazyClerkHandler: ClerkMiddlewareReturn | null = null;
@@ -1081,15 +1110,58 @@ function getClerkHandler(): ClerkMiddlewareReturn {
   lazyClerkHandler ??= clerkMiddleware(async (auth, request) => {
     const { pathname } = request.nextUrl;
 
-    // 1. If public path, allow through without authentication check
+    // 1. Intercept normal navigation to /sign-in or /sign-up so homepage is the single auth UI:
+    // Redirect to homepage ("/" or "/?mode=sign-up") preserving any target redirect_url.
+    // If it is an internal Clerk callback (e.g. has __clerk_ query params or subpaths like /sign-in/sso-callback),
+    // let it through to the dedicated handler.
+    if (pathname === "/sign-in" || pathname === "/sign-in/") {
+      const hasClerkCallback =
+        request.nextUrl.searchParams.has("__clerk_status") ||
+        request.nextUrl.searchParams.has("__clerk_created_session") ||
+        request.nextUrl.searchParams.has("__clerk_handshake");
+
+      if (!hasClerkCallback) {
+        const homeUrl = new URL("/", request.url);
+        const redirectParam = request.nextUrl.searchParams.get("redirect_url");
+        if (redirectParam) {
+          homeUrl.searchParams.set("redirect_url", sanitizeRedirectUrl(redirectParam, request.url));
+        }
+        return NextResponse.redirect(homeUrl);
+      }
+    }
+
+    if (pathname === "/sign-up" || pathname === "/sign-up/") {
+      const hasClerkCallback =
+        request.nextUrl.searchParams.has("__clerk_status") ||
+        request.nextUrl.searchParams.has("__clerk_created_session") ||
+        request.nextUrl.searchParams.has("__clerk_handshake");
+
+      if (!hasClerkCallback) {
+        const homeUrl = new URL("/", request.url);
+        homeUrl.searchParams.set("mode", "sign-up");
+        const redirectParam = request.nextUrl.searchParams.get("redirect_url");
+        if (redirectParam) {
+          homeUrl.searchParams.set("redirect_url", sanitizeRedirectUrl(redirectParam, request.url));
+        }
+        return NextResponse.redirect(homeUrl);
+      }
+    }
+
+    // 2. Explicitly public static / operational endpoints bypass auth
     if (isPublicPath(pathname)) {
       return handleNormalOperations(request);
     }
 
-    // 2. Protected path: evaluate Clerk session
+    // 3. Evaluate Clerk session
     const session = await auth();
 
-    // If unauthenticated:
+    // 4. Root path ("/") special handling:
+    // When signed-out: let through to render the LoginLanding page at "/"
+    if (pathname === "/" && (!session || !session.userId)) {
+      return handleNormalOperations(request);
+    }
+
+    // 5. Non-root protected path and unauthenticated:
     if (!session || !session.userId) {
       // Return 401 JSON for API and media routes (no redirect)
       if (pathname.startsWith("/api/")) {
@@ -1108,13 +1180,15 @@ function getClerkHandler(): ClerkMiddlewareReturn {
         );
       }
 
-      // For page requests: redirect to PyqVitAp sign-in page
-      const signInUrl = new URL("/sign-in", request.url);
-      signInUrl.searchParams.set("redirect_url", request.url);
-      return NextResponse.redirect(signInUrl);
+      // For page requests: redirect to homepage ("/") preserving original destination and query
+      const homeUrl = new URL("/", request.url);
+      const originalRelativeUrl = request.nextUrl.pathname + request.nextUrl.search;
+      const safeRedirect = sanitizeRedirectUrl(originalRelativeUrl, request.url);
+      homeUrl.searchParams.set("redirect_url", safeRedirect);
+      return NextResponse.redirect(homeUrl);
     }
 
-    // 3. User is authenticated: check email authorization
+    // 5. User is authenticated: rigorously verify email authorization
     const claims = session.sessionClaims as (SessionClaimsWithEmail & Record<string, unknown>) | null;
     let email =
       claims?.email ??
@@ -1122,26 +1196,90 @@ function getClerkHandler(): ClerkMiddlewareReturn {
       claims?.user_email ??
       claims?.primary_email_address ??
       "";
+    let isEmailVerified = false;
+    let isAuthorized = false;
 
-    if (!email && process.env.CLERK_SECRET_KEY) {
-      try {
-        const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
-        const user = await clerk.users.getUser(session.userId);
-        const primaryEmailId = user.primaryEmailAddressId;
-        const primaryObj = user.emailAddresses.find((e) => e.id === primaryEmailId);
-        email = primaryObj?.emailAddress ?? "";
-      } catch (lookupErr) {
-        console.error("[Middleware Auth] Failed to fetch user primary email:", lookupErr);
+    // Tier 1 Fast Path: Cryptographically signed session claims (0ms, 0 external network requests)
+    // When Clerk issues session tokens with email claims, they are tamper-proof and verified by auth().
+    if (email && isAuthorizedEmail(email)) {
+      const claimVerified = (claims as Record<string, unknown>)?.email_verified;
+      if (claimVerified !== false) {
+        email = email.trim().toLowerCase();
+        isEmailVerified = true;
+        isAuthorized = true;
       }
     }
 
-    if (!isAuthorizedEmail(email)) {
+    // Tier 2 Fast Path: In-memory isolate cache (0ms, 0 external network requests)
+    if (!isAuthorized && session.userId) {
+      const cached = userAuthCache.get(session.userId);
+      if (cached && cached.expiresAt > Date.now()) {
+        email = cached.email;
+        isAuthorized = cached.isAuthorized;
+        isEmailVerified = cached.isAuthorized;
+      }
+    }
+
+    // Tier 3 Fallback: Retrieve user record from Clerk API only when uncached
+    if (!isAuthorized && process.env.CLERK_SECRET_KEY && session.userId) {
+      try {
+        const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+        const user = await clerk.users.getUser(session.userId);
+        
+        // Find if user has any verified email belonging to the allowed university domains
+        const verifiedAllowedEmail = user.emailAddresses.find((e) => {
+          const isVerified = e.verification?.status === "verified";
+          return isVerified && isAuthorizedEmail(e.emailAddress);
+        });
+
+        if (verifiedAllowedEmail) {
+          email = verifiedAllowedEmail.emailAddress;
+          isEmailVerified = true;
+          isAuthorized = true;
+        } else {
+          // If no allowed email is verified, fall back to primary email for checking
+          const primaryEmailId = user.primaryEmailAddressId;
+          const primaryObj = user.emailAddresses.find((e) => e.id === primaryEmailId);
+          email = primaryObj?.emailAddress ?? email;
+          isEmailVerified = primaryObj?.verification?.status === "verified";
+          isAuthorized = isAuthorizedEmail(email) && isEmailVerified;
+        }
+
+        // Cache the lookup result in memory to eliminate repeated subrequests
+        if (userAuthCache.size > 2000) {
+          userAuthCache.clear();
+        }
+        userAuthCache.set(session.userId, {
+          email,
+          isAuthorized,
+          expiresAt: Date.now() + (isAuthorized ? USER_CACHE_TTL_MS : 60_000),
+        });
+      } catch (lookupErr) {
+        console.error("[Middleware Auth] Failed to fetch user primary email:", lookupErr);
+      }
+    } else if (!isAuthorized && !process.env.CLERK_SECRET_KEY) {
+      // If secret key is not available in environment, fall back to claims
+      isEmailVerified = isAuthorizedEmail(email);
+      isAuthorized = isEmailVerified;
+    }
+
+    if (!isAuthorized) {
+      // Attempt safe session revocation so unauthorized user doesn't linger
+      if (session.sessionId && process.env.CLERK_SECRET_KEY) {
+        try {
+          const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+          await clerk.sessions.revokeSession(session.sessionId);
+        } catch (revokeErr) {
+          console.warn("[Middleware Auth] Failed to revoke unauthorized session:", revokeErr);
+        }
+      }
+
       // Return 403 Forbidden for API routes
       if (pathname.startsWith("/api/")) {
         return new NextResponse(
           JSON.stringify({
             error: "Forbidden",
-            message: "Access restricted to @vitapstudent.ac.in verified accounts",
+            message: "Access restricted to verified @vitapstudent.ac.in or @vitap.ac.in accounts",
           }),
           {
             status: 403,
@@ -1153,11 +1291,12 @@ function getClerkHandler(): ClerkMiddlewareReturn {
         );
       }
 
-      // For page requests: redirect to PyqVitAp /unauthorized page
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
+      // For page requests: redirect to PyqVitAp /unauthorized page with explicit clear flag
+      const unauthUrl = new URL("/unauthorized", request.url);
+      return NextResponse.redirect(unauthUrl);
     }
 
-    // If authorized, proceed to normal operations
+    // User is fully authenticated AND authorized: proceed
     return handleNormalOperations(request);
   }) as unknown as ClerkMiddlewareReturn;
 

@@ -2,8 +2,32 @@ import { SignIn } from "@clerk/nextjs";
 import { pyqvitapClerkAppearance } from "@/config/clerk-theme";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { sanitizeRedirectUrl } from "@/config/auth";
 
-export default function SignInPage() {
+export default function SignInPage({
+  searchParams,
+}: {
+  searchParams?: { redirect_url?: string; __clerk_status?: string; __clerk_created_session?: string; __clerk_handshake?: string };
+}) {
+  const isClerkCallback = Boolean(
+    searchParams?.__clerk_status ||
+    searchParams?.__clerk_created_session ||
+    searchParams?.__clerk_handshake
+  );
+
+  // If this is a normal navigation to /sign-in, redirect to homepage ("/")
+  // while preserving any requested redirect_url
+  if (!isClerkCallback) {
+    const rawRedirect = searchParams?.redirect_url;
+    const safeRedirect = sanitizeRedirectUrl(rawRedirect, "/");
+    if (safeRedirect && safeRedirect !== "/") {
+      redirect(`/?redirect_url=${encodeURIComponent(safeRedirect)}`);
+    } else {
+      redirect("/");
+    }
+  }
+
   return (
     <div className="relative flex min-h-[85vh] flex-col items-center justify-center px-4 py-12">
       {/* Background radial gradient */}
@@ -25,7 +49,7 @@ export default function SignInPage() {
           </span>
         </Link>
         <p className="mt-2 text-xs font-medium text-zinc-400">
-          Sign in with your <span className="text-purple-300 font-semibold">@vitapstudent.ac.in</span> account
+          Sign in with your <span className="text-purple-300 font-semibold">@vitapstudent.ac.in</span> or <span className="text-purple-300 font-semibold">@vitap.ac.in</span> account
         </p>
       </div>
 
@@ -36,6 +60,8 @@ export default function SignInPage() {
             routing="path"
             path="/sign-in"
             signUpUrl="/sign-up"
+            fallbackRedirectUrl="/"
+            signUpFallbackRedirectUrl="/"
           />
         ) : (
           <div className="rounded-2xl border border-purple-500/20 bg-[#0f0926]/90 p-8 text-center text-zinc-300 shadow-2xl backdrop-blur-xl">

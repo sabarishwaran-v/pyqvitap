@@ -1,17 +1,29 @@
 import { type IPaper, type TransformedPaper } from "../../interface";
 
 export function transformPapersToSubjectSlots(papers: IPaper[]): TransformedPaper[] {
-  return papers.reduce<TransformedPaper[]>((acc, paper) => {
-    const existing = acc.find((item) => item.subject === paper.subject);
+  if (!papers || papers.length === 0) {
+    return [];
+  }
 
-    if (existing) {
-      if (!existing.slots.includes(paper.slot)) {
-        existing.slots.push(paper.slot);
-      }
-    } else {
-      acc.push({ subject: paper.subject, slots: [paper.slot] });
+  const subjectMap = new Map<string, { slotsSet: Set<string>; slotsList: string[] }>();
+  const result: TransformedPaper[] = [];
+
+  for (const paper of papers) {
+    if (!paper) continue;
+    const subject = paper.subject;
+    const slot = paper.slot;
+
+    const entry = subjectMap.get(subject);
+    if (!entry) {
+      const slotsList: string[] = [slot];
+      const slotsSet = new Set<string>([slot]);
+      subjectMap.set(subject, { slotsSet, slotsList });
+      result.push({ subject, slots: slotsList });
+    } else if (!entry.slotsSet.has(slot)) {
+      entry.slotsSet.add(slot);
+      entry.slotsList.push(slot);
     }
+  }
 
-    return acc;
-  }, []);
+  return result;
 }

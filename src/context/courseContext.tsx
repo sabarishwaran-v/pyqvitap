@@ -39,18 +39,15 @@ export function CoursesProvider({ children }: { children: React.ReactNode }) {
     }
     setLoading(true);
     setError(null);
-    // 1. Fetch course-list independently
-    let rawCourses: ICourse[] = [];
-    try {
-      const res = await axios.get<ApiResponse<ICourse[]>>("/api/course-list");
-      rawCourses = res.data.data ?? [];
-      const initialCourses: ICourseWithCount[] = rawCourses.map((course) => ({
-        _id: course._id,
-        name: course.name,
-        count: 0,
-      }));
-      setCourses(initialCourses);
-    } catch (err: unknown) {
+
+    // Parallelize course-list and papers/count fetching to eliminate sequential waterfall
+    const [coursesResult, countResult] = await Promise.allSettled([
+      axios.get<ApiResponse<ICourse[]>>("/api/course-list"),
+      axios.get<ApiResponse<ICourseCount[]>>("/api/papers/count"),
+    ]);
+
+    if (coursesResult.status === "rejected") {
+      const err = coursesResult.reason;
       if (axios.isAxiosError<ApiResponse<never>>(err)) {
         setError(err.response?.data?.message ?? err.message);
       } else if (err instanceof Error) {
@@ -62,24 +59,28 @@ export function CoursesProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // 2. Fetch /api/papers/count independently
-    try {
-      const countRes = await axios.get<ApiResponse<ICourseCount[]>>("/api/papers/count");
-      const countMap = new Map<string, number>(
-        (countRes.data.data ?? []).map((c) => [c.name, c.count]),
-      );
+    const rawCourses = coursesResult.value.data.data ?? [];
+    let countMap = new Map<string, number>();
 
-      setCourses((prevCourses) =>
-        prevCourses.map((course) => ({
-          ...course,
-          count: countMap.get(course.name) ?? course.count ?? 0,
-        }))
+    if (countResult.status === "fulfilled") {
+      countMap = new Map<string, number>(
+        (countResult.value.data.data ?? []).map((c) => [c.name, c.count]),
       );
-    } catch (countErr: unknown) {
-      console.warn("Failed to fetch paper counts, retaining course list with default counts:", countErr);
-    } finally {
-      setLoading(false);
+    } else {
+      console.warn(
+        "Failed to fetch paper counts, retaining course list with default counts:",
+        countResult.reason,
+      );
     }
+
+    const mergedCourses: ICourseWithCount[] = rawCourses.map((course) => ({
+      _id: course._id,
+      name: course.name,
+      count: countMap.get(course.name) ?? 0,
+    }));
+
+    setCourses(mergedCourses);
+    setLoading(false);
   }, []);
 
   useEffect(() => {

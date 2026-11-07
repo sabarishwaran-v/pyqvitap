@@ -10,9 +10,15 @@ interface MaintenanceGateProps {
 
 export default function MaintenanceGate({ children }: MaintenanceGateProps) {
   const pathname = usePathname();
-  const isDisclaimer = pathname === "/disclaimer" || pathname === "/disclaimer/";
+  const isLegalPage =
+    pathname === "/disclaimer" ||
+    pathname === "/disclaimer/" ||
+    pathname === "/terms" ||
+    pathname === "/terms/" ||
+    pathname === "/privacy" ||
+    pathname === "/privacy/";
 
-  if (isDisclaimer) {
+  if (isLegalPage) {
     return (
       <main className="flex-1">
         <div className="mx-auto max-w-[1440px]">{children}</div>

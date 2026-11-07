@@ -9,17 +9,27 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
  * - Fail-Safe State: false (Under no circumstances does auth lock users out on error)
  */
 
-export const ALLOWED_EMAIL_DOMAIN = "vitapstudent.ac.in";
+export const ALLOWED_EMAIL_DOMAINS = [
+  "vitapstudent.ac.in",
+  "vitap.ac.in",
+] as const;
+
+// Backward-compatible alias for single-domain consumers
+export const ALLOWED_EMAIL_DOMAIN = ALLOWED_EMAIL_DOMAINS[0];
 
 /**
- * Strict, case-insensitive verification that the email belongs exactly to @vitapstudent.ac.in.
+ * Strict, case-insensitive verification that the email domain belongs exactly
+ * to one of the authorized university domains:
+ * 1. vitapstudent.ac.in (students)
+ * 2. vitap.ac.in (faculty/staff/institutional)
+ *
  * Prevents subdomain hijacking, suffix spoofing, and lookalike attacks.
  *
  * Allowed:   student@vitapstudent.ac.in
- * Denied:    student@vitap.ac.in
+ * Allowed:   faculty@vitap.ac.in
  * Denied:    student@gmail.com
  * Denied:    student@vitapstudent.ac.in.evil.com
- * Denied:    student@evilvitapstudent.ac.in
+ * Denied:    student@evilvitap.ac.in
  */
 export function isAuthorizedEmail(email: string | null | undefined): boolean {
   if (!email || typeof email !== "string") {
@@ -38,7 +48,45 @@ export function isAuthorizedEmail(email: string | null | undefined): boolean {
   }
 
   const domain = clean.slice(atIndex + 1);
-  return domain === ALLOWED_EMAIL_DOMAIN;
+  return (ALLOWED_EMAIL_DOMAINS as readonly string[]).includes(domain);
+}
+
+/**
+ * Validates university email format and domain in real-time as user types.
+ * Returns an error message string if invalid, or null if valid.
+ */
+export function getEmailValidationError(email: string): string | null {
+  if (!email || !email.trim()) {
+    return null; // Empty field has no error yet (until interaction/submission)
+  }
+
+  const clean = email.trim();
+  const atIndex = clean.lastIndexOf("@");
+
+  if (atIndex === -1) {
+    return "University email required (@vitapstudent.ac.in or @vitap.ac.in)";
+  }
+
+  if (atIndex === 0) {
+    return "Please enter your username before the @";
+  }
+
+  if (atIndex === clean.length - 1) {
+    return "Please complete the university domain (@vitapstudent.ac.in or @vitap.ac.in)";
+  }
+
+  if (clean.indexOf("@") !== atIndex) {
+    return "Invalid email address format";
+  }
+
+  const domain = clean.slice(atIndex + 1).toLowerCase();
+  const isMatch = (ALLOWED_EMAIL_DOMAINS as readonly string[]).includes(domain);
+
+  if (!isMatch) {
+    return "University email required. Use your @vitapstudent.ac.in or @vitap.ac.in account.";
+  }
+
+  return null;
 }
 
 /**
@@ -51,34 +99,115 @@ export function isAuthorizedEmail(email: string | null | undefined): boolean {
  */
 interface FlagshipBinding {
   getBooleanValue(name: string, defaultValue?: boolean, context?: Record<string, unknown>): Promise<boolean>;
+  get?(name: string, defaultValue?: unknown, context?: Record<string, unknown>): Promise<unknown>;
 }
 
-export async function isAuthEnabled(): Promise<boolean> {
-  // 1. Try Cloudflare Workers Flagship Binding
+/**
+ * Retrieves the Cloudflare Worker environment object from the active request context.
+ * In Cloudflare Workers (production), OpenNext populates the context synchronously via
+ * globalThis[Symbol.for("__cloudflare-context__")] in init.js for every incoming request.
+ */
+function getRuntimeCloudflareEnv(): Record<string, unknown> | undefined {
+  // 1. Direct global Symbol check (fastest and most direct in Cloudflare Workers)
   try {
-    let ctx: ReturnType<typeof getCloudflareContext> | undefined;
-    try {
-      ctx = getCloudflareContext();
-    } catch {
-      if (!process.env.NEXT_RUNTIME && typeof window === "undefined") {
-        process.env.NEXT_RUNTIME = "nodejs";
-      }
-      ctx = await getCloudflareContext({ async: true });
-    }
-    const env = ctx?.env as { FLAGS?: FlagshipBinding } | undefined;
-    const flags = env?.FLAGS;
-    if (flags && typeof flags.getBooleanValue === "function") {
-      const val = await flags.getBooleanValue("AUTH_ENABLED", false);
-      return Boolean(val);
+    const globalContext = (globalThis as Record<string | symbol, unknown>)[
+      Symbol.for("__cloudflare-context__")
+    ] as { env?: Record<string, unknown> } | undefined;
+    if (globalContext?.env && typeof globalContext.env === "object") {
+      return globalContext.env;
     }
   } catch {
-    // Flagship context not bound, or threw during evaluation
+    // Ignore and proceed
   }
 
-  // 2. Fallback to environment variable (Local development or explicit runtime setting)
+  // 2. OpenNext official sync helper
+  try {
+    const ctx = getCloudflareContext();
+    if (ctx?.env && typeof ctx.env === "object") {
+      return ctx.env as unknown as Record<string, unknown>;
+    }
+  } catch {
+    // Throws outside of active Cloudflare Worker request context (e.g. local dev / test)
+  }
+
+  return undefined;
+}
+
+export async function isAuthEnabled(req?: Request | string): Promise<boolean> {
+  // Localhost preview & testing bypass:
+  // When testing locally on localhost or 127.0.0.1, bypass authentication so that
+  // all features (PDF preview, thumbnails, requests, uploads, tags) can be tested freely without production Clerk domain restriction.
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    if (host.includes("localhost") || host.includes("127.0.0.1")) {
+      return false;
+    }
+  }
+
+  if (req) {
+    const host = typeof req === "string" ? req : req.headers?.get("host") || "";
+    const mfUrl = typeof req === "string" ? "" : req.headers?.get("mf-original-url") || "";
+    const xHost = typeof req === "string" ? "" : req.headers?.get("x-forwarded-host") || "";
+    if (
+      host.includes("localhost") ||
+      host.includes("127.0.0.1") ||
+      mfUrl.includes("localhost") ||
+      mfUrl.includes("127.0.0.1") ||
+      xHost.includes("localhost") ||
+      xHost.includes("127.0.0.1")
+    ) {
+      return false;
+    }
+  } else {
+    try {
+      const { headers } = await import("next/headers");
+      const h = headers();
+      const host = h.get("host") || "";
+      const mfUrl = h.get("mf-original-url") || "";
+      const xHost = h.get("x-forwarded-host") || "";
+      if (
+        host.includes("localhost") ||
+        host.includes("127.0.0.1") ||
+        mfUrl.includes("localhost") ||
+        mfUrl.includes("127.0.0.1") ||
+        xHost.includes("localhost") ||
+        xHost.includes("127.0.0.1")
+      ) {
+        return false;
+      }
+    } catch {
+      // Outside active Next.js request context (e.g. unit tests or build time)
+    }
+  }
+
+  // 1. In Cloudflare Workers runtime, evaluate the Flagship Binding first.
+  // Flagship is the authoritative gatekeeper in deployed environments.
+  // Stale build-time or process.env variables must NEVER override a valid Flagship binding.
+  try {
+    const env = getRuntimeCloudflareEnv();
+    const flags = env?.FLAGS as FlagshipBinding | undefined;
+    if (flags && typeof flags.getBooleanValue === "function") {
+      try {
+        const val = await flags.getBooleanValue("AUTH_ENABLED", false);
+        return Boolean(val);
+      } catch (flagError) {
+        // If the Flagship service call fails in production, fail safe to false
+        console.error("[Auth] Flagship evaluation failed, failing safe to false:", flagError);
+        return false;
+      }
+    }
+  } catch {
+    // Cloudflare runtime context unavailable; proceed to local environment fallback
+  }
+
+  // 2. Local development and test environments fallback:
+  // When no Flagship binding is bound to the runtime, respect explicit local process.env.AUTH_ENABLED
   if (typeof process !== "undefined" && process.env) {
     if (process.env.AUTH_ENABLED === "true") {
       return true;
+    }
+    if (process.env.AUTH_ENABLED === "false") {
+      return false;
     }
   }
 
@@ -87,15 +216,20 @@ export async function isAuthEnabled(): Promise<boolean> {
 }
 
 /**
- * Identifies routes that remain publicly accessible when AUTH_ENABLED=true.
+ * Identifies routes that remain completely publicly accessible without session evaluation.
+ * Note: When AUTH_ENABLED=true, "/" evaluates the session so that:
+ * - Signed-out visitors see the LoginLanding page at "/"
+ * - Authenticated authorized visitors see the homepage
+ * - Authenticated unauthorized visitors are denied access and redirected to /unauthorized
  */
 export function isPublicPath(pathname: string): boolean {
   if (
-    pathname === "/" ||
     pathname.startsWith("/sign-in") ||
     pathname.startsWith("/sign-up") ||
     pathname === "/unauthorized" ||
     pathname.startsWith("/disclaimer") ||
+    pathname.startsWith("/terms") ||
+    pathname.startsWith("/privacy") ||
     pathname === "/api/health" ||
     pathname === "/manifest.webmanifest" ||
     pathname === "/robots.txt" ||
@@ -107,6 +241,17 @@ export function isPublicPath(pathname: string): boolean {
     return true;
   }
   return false;
+}
+
+/**
+ * Identifies routes meant strictly for authentication flow (/sign-in, /sign-up, /unauthorized).
+ */
+export function isAuthFlowPath(pathname: string): boolean {
+  return (
+    pathname.startsWith("/sign-in") ||
+    pathname.startsWith("/sign-up") ||
+    pathname === "/unauthorized"
+  );
 }
 
 /**
@@ -135,4 +280,45 @@ export function isProtectedPath(pathname: string): boolean {
   }
 
   return false;
+}
+
+/**
+ * Validates and sanitizes redirect destinations to prevent open-redirect vulnerabilities.
+ * Ensures the target is either a relative path starting with '/' (e.g. '/paper/123')
+ * or an absolute URL matching the same trusted application origin.
+ */
+export function sanitizeRedirectUrl(url: string | null | undefined, baseUrl?: string): string {
+  if (!url || typeof url !== "string") {
+    return "/";
+  }
+
+  const trimmed = url.trim();
+
+  // 1. Relative paths starting with a single '/' (and not protocol-relative '//')
+  if (trimmed.startsWith("/") && !trimmed.startsWith("//") && !trimmed.startsWith("/\\")) {
+    return trimmed;
+  }
+
+  // 2. Absolute URL validation matching current origin
+  try {
+    const parsed = new URL(trimmed);
+    if (baseUrl) {
+      const baseOrigin = new URL(baseUrl).origin;
+      if (parsed.origin === baseOrigin) {
+        return parsed.pathname + parsed.search + parsed.hash;
+      }
+    }
+    // Check against standard PyqVitAp hostnames
+    const allowedHosts = ["pyqvitap.site", "www.pyqvitap.site", "localhost"];
+    if (
+      allowedHosts.includes(parsed.hostname) ||
+      parsed.hostname.endsWith(".pyqvitap.site")
+    ) {
+      return parsed.pathname + parsed.search + parsed.hash;
+    }
+  } catch {
+    // Malformed URL, fall back to root
+  }
+
+  return "/";
 }

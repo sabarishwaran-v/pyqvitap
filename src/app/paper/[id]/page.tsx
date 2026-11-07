@@ -4,7 +4,7 @@ import RelatedPapers from "@/components/RelatedPaper";
 import { type PaperResponse } from "@/interface";
 import { extractBracketContent, formatSlotDisplay } from "@/lib/utils/string";
 import { type Metadata } from "next";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { PaperProvider } from "@/context/PaperContext";
 import PdfViewerClientWrapper from "@/components/PdfViewerClientWrapper";
 import SlotContributionBox from "@/components/SlotContributionBox";
@@ -163,7 +163,7 @@ export async function generateMetadata({
 const PaperPage = async ({ params }: { params: { id: string } }) => {
   const paper = await getPaper(params.id);
   if (!paper) {
-    redirect("/");
+    notFound();
   }
   const pdfUrl = getMediaGatewayUrl(paper.file_url);
 

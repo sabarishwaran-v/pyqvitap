@@ -2,8 +2,32 @@ import { SignUp } from "@clerk/nextjs";
 import { pyqvitapClerkAppearance } from "@/config/clerk-theme";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { sanitizeRedirectUrl } from "@/config/auth";
 
-export default function SignUpPage() {
+export default function SignUpPage({
+  searchParams,
+}: {
+  searchParams?: { redirect_url?: string; __clerk_status?: string; __clerk_created_session?: string; __clerk_handshake?: string };
+}) {
+  const isClerkCallback = Boolean(
+    searchParams?.__clerk_status ||
+    searchParams?.__clerk_created_session ||
+    searchParams?.__clerk_handshake
+  );
+
+  // If this is a normal navigation to /sign-up, redirect to homepage ("/?mode=sign-up")
+  // while preserving any requested redirect_url
+  if (!isClerkCallback) {
+    const rawRedirect = searchParams?.redirect_url;
+    const safeRedirect = sanitizeRedirectUrl(rawRedirect, "/");
+    if (safeRedirect && safeRedirect !== "/") {
+      redirect(`/?mode=sign-up&redirect_url=${encodeURIComponent(safeRedirect)}`);
+    } else {
+      redirect("/?mode=sign-up");
+    }
+  }
+
   return (
     <div className="relative flex min-h-[85vh] flex-col items-center justify-center px-4 py-12">
       {/* Background radial gradient */}
@@ -25,7 +49,7 @@ export default function SignUpPage() {
           </span>
         </Link>
         <p className="mt-2 text-xs font-medium text-zinc-400">
-          Create an account using your <span className="text-purple-300 font-semibold">@vitapstudent.ac.in</span> email
+          Create an account using your <span className="text-purple-300 font-semibold">@vitapstudent.ac.in</span> or <span className="text-purple-300 font-semibold">@vitap.ac.in</span> email
         </p>
       </div>
 
@@ -36,6 +60,7 @@ export default function SignUpPage() {
             routing="path"
             path="/sign-up"
             signInUrl="/sign-in"
+            fallbackRedirectUrl="/"
           />
         ) : (
           <div className="rounded-2xl border border-purple-500/20 bg-[#0f0926]/90 p-8 text-center text-zinc-300 shadow-2xl backdrop-blur-xl">

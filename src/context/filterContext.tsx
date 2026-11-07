@@ -20,6 +20,26 @@ import { getSecureUrl, generateFileName } from "@/lib/utils/download";
 import { applyWatermarkAndDisclaimer } from "@/lib/utils/pdfWatermark";
 import { trackEvent } from "@/lib/telemetry";
 
+export interface ActiveFilterCountInput {
+  selectedExams?: string[];
+  selectedSlots?: string[];
+  selectedYears?: string[];
+  selectedSemesters?: string[];
+  selectedCampuses?: string[];
+  selectedAnswerKeyIncluded?: boolean;
+}
+
+export function getActiveFilterCount(filters: ActiveFilterCountInput): number {
+  return (
+    (filters.selectedExams?.length ?? 0) +
+    (filters.selectedSlots?.length ?? 0) +
+    (filters.selectedYears?.length ?? 0) +
+    (filters.selectedSemesters?.length ?? 0) +
+    (filters.selectedCampuses?.length ?? 0) +
+    (filters.selectedAnswerKeyIncluded ? 1 : 0)
+  );
+}
+
 interface FilterState {
   selectedExams: string[];
   selectedSlots: string[];
@@ -27,6 +47,7 @@ interface FilterState {
   selectedSemesters: string[];
   selectedCampuses: string[];
   selectedAnswerKeyIncluded: boolean;
+  activeFilterCount: number;
 
   papers: IPaper[];
   filteredPapers: IPaper[];
@@ -366,6 +387,26 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
     [appliedFilters, filteredPapers.length, papers.length, papersPerPage],
   );
 
+  const activeFilterCount = useMemo(
+    () =>
+      getActiveFilterCount({
+        selectedExams,
+        selectedSlots,
+        selectedYears,
+        selectedSemesters,
+        selectedCampuses,
+        selectedAnswerKeyIncluded,
+      }),
+    [
+      selectedExams,
+      selectedSlots,
+      selectedYears,
+      selectedSemesters,
+      selectedCampuses,
+      selectedAnswerKeyIncluded,
+    ],
+  );
+
   const stateValue: FilterState = useMemo(
     () => ({
       selectedExams,
@@ -374,6 +415,7 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
       selectedSemesters,
       selectedCampuses,
       selectedAnswerKeyIncluded,
+      activeFilterCount,
       papers,
       filteredPapers,
       selectedPapers,
@@ -393,6 +435,7 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
       selectedSemesters,
       selectedCampuses,
       selectedAnswerKeyIncluded,
+      activeFilterCount,
       papers,
       filteredPapers,
       selectedPapers,

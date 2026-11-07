@@ -30,7 +30,16 @@ function getSelectedGroupKeys(slot: SlotKey): SlotKey[] {
   return next ? [current, next] : [current];
 }
 
-export async function checkAndSyncUpcomingSlots(): Promise<void> {
+let lastSyncCheckTime = 0;
+const SYNC_CHECK_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes TTL
+
+export async function checkAndSyncUpcomingSlots(force = false): Promise<void> {
+  const now = Date.now();
+  if (!force && now - lastSyncCheckTime < SYNC_CHECK_INTERVAL_MS) {
+    return; // Fast path: already verified exam schedule recently in this isolate
+  }
+  lastSyncCheckTime = now;
+
   const today = getTodayDateInIST();
   if (!today) return;
 

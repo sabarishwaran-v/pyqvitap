@@ -1,0 +1,85 @@
+<re-html>
+<re-head>
+    <re-title>Verification code - PyqVitAp</re-title>
+    <re-style>
+        img {
+            max-width: 100% !important;
+            height: auto !important;
+        }
+        @media only screen and (max-width: 600px) {
+            .mobile-content {
+                padding: 24px 18px 28px 18px !important;
+            }
+            .mobile-otp {
+                font-size: 30px !important;
+                letter-spacing: 5px !important;
+            }
+            .mobile-heading {
+                font-size: 22px !important;
+                line-height: 28px !important;
+            }
+        }
+    </re-style>
+</re-head>
+<re-body background-color="#f8fafc" padding="36px 12px">
+    <re-preheader>
+        Your PyqVitAp verification code is {{otp_code}}.
+    </re-preheader>
+    <re-main background-color="#ffffff" border-radius="16px" border="1px solid #e2e8f0" width="100%">
+        
+        <!-- Header Branding: App Icon + Wordmark -->
+        <re-block padding="32px 20px 22px 20px" margin="0" background-color="#ffffff" align="center">
+            <re-text align="center" margin="0" font-size="20px" line-height="46px" color="#111827">
+                <img src="https://pyqvitap.site/assets/images/email-otp-icon-512x512-v5.jpg" width="44" height="44" alt="PyqVitAp logo" style="vertical-align:middle;display:inline-block;border-radius:10px;margin-right:10px;width:44px;height:44px;"><img src="https://pyqvitap.site/assets/images/pyqvitap-wordmark.png" width="165" alt="PyqVitAp" style="vertical-align:middle;display:inline-block;width:165px;max-width:60%;height:auto;">
+            </re-text>
+        </re-block>
+
+        <re-divider background-color="#f1f5f9" height="1px"></re-divider>
+
+        <!-- Content Area -->
+        <re-block class="mobile-content" padding="30px 32px 36px 32px" margin="0" background-color="#ffffff" align="center">
+            <re-heading class="mobile-heading" level="h1" align="center" color="#0f172a" font-size="24px" line-height="32px" margin="0 0 8px 0">
+                Verification code
+            </re-heading>
+
+            <re-text align="center" font-size="15px" line-height="24px" color="#64748b" margin="8px 0 24px 0">
+                Enter the one-time code below to securely sign in to PyqVitAp:
+            </re-text>
+
+            <!-- Modern Cool OTP Box -->
+            <re-block margin="18px 0 14px 0" padding="16px 12px" background-color="#f5f3ff" border="1px solid #c4b5fd" border-radius="12px" align="center">
+                <re-text class="mobile-otp" align="center" margin="0" font-size="34px" line-height="42px" font-weight="bold" color="#4338ca">
+                    <span style="font-family:'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;letter-spacing:6px;font-weight:700;">{{otp_code}}</span>
+                </re-text>
+            </re-block>
+
+            <re-text align="center" font-size="13px" line-height="20px" color="#dc2626" margin="12px 0 24px 0">
+                ⏱️ This code expires in <b>10 minutes</b>. Never share your code with anyone.
+            </re-text>
+
+            <re-divider background-color="#f1f5f9" height="1px"></re-divider>
+
+            <!-- Security Context Box -->
+            <re-block margin="22px 0 0 0" padding="14px 16px" background-color="#f8fafc" border="1px solid #e2e8f0" border-radius="10px" align="left">
+                <re-text align="left" font-size="13px" line-height="18px" font-weight="bold" color="#334155" margin="0 0 4px 0">
+                    Didn't request this code?
+                </re-text>
+                <re-text align="left" font-size="12px" line-height="18px" color="#64748b" margin="0">
+                    This code was requested from <b>{{requested_from}}</b> at <b>{{requested_at}}</b>. If you didn't make this request, you can safely ignore this email.
+                </re-text>
+            </re-block>
+        </re-block>
+
+    </re-main>
+
+    <!-- Footer -->
+    <re-footer padding="20px 16px">
+        <re-text align="center" font-size="12px" line-height="18px" color="#94a3b8" margin="0 0 4px 0">
+            © {{current_year}} PyqVitAp • Built by students for students ❤️
+        </re-text>
+        <re-text align="center" font-size="11px" line-height="16px" color="#cbd5e1" margin="0">
+            VIT-AP University Previous-Year Paper Archive
+        </re-text>
+    </re-footer>
+</re-body>
+</re-html>

@@ -65,10 +65,11 @@ const PWAInstallButton = () => {
         md:hidden h-9">
         <div className="flex items-center gap-3">
           <Image
-            src="/assets/images/papers_logo.png?v=4"
+            src="/assets/icons/icon-192x192-v5.png"
             alt="Pyq App"
             width={32}
             height={32}
+            className="rounded-lg shadow-sm"
           />
           <span className="text-lg font-semibold">Pyq App</span>
         </div>
@@ -95,7 +96,13 @@ const PWAInstallButton = () => {
           transition hover:bg-slate-50 dark:hover:bg-[#1A1823] 
           h-9 sm:h-10"
       >
-        <Image src="/assets/images/papers_logo.png?v=4" alt="Pyq App" width={28} height={28} />
+        <Image
+          src="/assets/icons/icon-192x192-v5.png"
+          alt="Pyq App"
+          width={28}
+          height={28}
+          className="rounded-md shadow-sm"
+        />
         <span className="text-sm font-semibold">Pyq App</span>
       </div>
     </>

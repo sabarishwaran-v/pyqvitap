@@ -196,3 +196,174 @@ body {
     animation-play-state: paused;
   }
 }
+
+/* ========================================================================= */
+/* PyqVitAp Clerk Prebuilt UI - Theme & Restriction Notice Styling           */
+/* ========================================================================= */
+
+/* Constrain sign-in and sign-up cards while exempting multi-column UserProfile & Modals */
+.cl-signIn-root .cl-card,
+.cl-signUp-root .cl-card,
+.cl-card:not(.cl-userProfile-root .cl-card):not(.cl-modalContent .cl-card) {
+  width: 100% !important;
+  max-width: 480px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  border-radius: 0.375rem !important;
+}
+
+/* Institutional restriction message immediately below Clerk sign-in/sign-up subtitle */
+.cl-signIn-root .cl-headerSubtitle::after,
+.cl-signUp-root .cl-headerSubtitle::after {
+  content: "Please sign in using your VIT-AP institutional account.";
+  display: block;
+  margin-top: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #7c3aed;
+}
+
+.dark .cl-signIn-root .cl-headerSubtitle::after,
+.dark .cl-signUp-root .cl-headerSubtitle::after {
+  color: #a78bfa;
+}
+
+/* ========================================================================= */
+/* PyqVitAp Clerk User Profile Modal Layout & Responsiveness                */
+/* ========================================================================= */
+
+/* Modal Backdrop: Center modal with refined dark purple overlay */
+.cl-modalBackdrop {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1.5rem !important;
+  background-color: rgba(15, 9, 38, 0.75) !important;
+  backdrop-filter: blur(4px) !important;
+  z-index: 1000 !important;
+}
+
+/* Modal Content Dialog Window: Full spacious desktop width */
+.cl-modalContent {
+  width: 100% !important;
+  max-width: 56rem !important; /* 896px: optimal width for two-column Clerk UserProfile */
+  margin-left: auto !important;
+  margin-right: auto !important;
+  border-radius: 0.5rem !important;
+  overflow: hidden !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 25px -5px rgba(124, 58, 237, 0.2) !important;
+}
+
+/* UserProfile Container & Card inside Modal: Prevent cramped sizing */
+.cl-userProfile-root,
+.cl-userProfile-root .cl-cardBox,
+.cl-userProfile-root .cl-card,
+.cl-modalContent .cl-card {
+  width: 100% !important;
+  max-width: 56rem !important;
+  min-height: 560px !important;
+  border-radius: 0.5rem !important;
+}
+
+/* UserProfile Content & Scroll Containers: Eliminate horizontal scrolling */
+.cl-userProfile-root .cl-scrollBox,
+.cl-userProfile-root .cl-pageScrollBox {
+  overflow-x: hidden !important;
+}
+
+/* Profile sections: Ensure proper padding, alignment, and border styling */
+.cl-userProfile-root .cl-navbar {
+  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+html:not(.dark) .cl-userProfile-root .cl-navbar {
+  border-right: 1px solid #CBD5E1 !important;
+}
+
+/* Mobile Responsiveness: Adapt gracefully for screens under 640px */
+@media (max-width: 640px) {
+  .cl-modalBackdrop {
+    padding: 0.5rem !important;
+  }
+
+  .cl-modalContent {
+    max-width: 100% !important;
+    max-height: 95vh !important;
+    border-radius: 0.375rem !important;
+  }
+
+  .cl-userProfile-root,
+  .cl-userProfile-root .cl-cardBox,
+  .cl-userProfile-root .cl-card,
+  .cl-modalContent .cl-card {
+    min-height: auto !important;
+    max-width: 100% !important;
+    border-radius: 0.375rem !important;
+  }
+}
+
+/* Homepage Clerk Card: Ensure visible, properly aligned sign-in/sign-up footer links */
+.cl-card-homepage .cl-footerAction {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding-bottom: 0.25rem !important;
+}
+
+.cl-card-homepage .cl-footerActionText {
+  color: #64748b !important;
+}
+
+.dark .cl-card-homepage .cl-footerActionText {
+  color: #9ca3af !important;
+}
+
+.cl-card-homepage .cl-footerActionLink {
+  display: inline !important;
+  font-weight: 600 !important;
+  color: #7c3aed !important;
+}
+
+.dark .cl-card-homepage .cl-footerActionLink {
+  color: #a78bfa !important;
+}
+
+/* Homepage Clerk Card: Transparent inner container & seamless containment */
+.cl-card-homepage .cl-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  padding-top: 2px !important;
+  margin-top: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+.cl-card-homepage .cl-cardBox {
+  box-shadow: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+
+.cl-card-homepage .cl-rootBox {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.cl-card-homepage .cl-header,
+.cl-card-homepage .cl-headerTitle,
+.cl-card-homepage .cl-headerSubtitle {
+  display: none !important;
+}
+
+.cl-card-homepage .cl-headerSubtitle::after {
+  display: none !important;
+}
+
+.cl-card-homepage .cl-footer {
+  background: transparent !important;
+  padding-top: 0.5rem !important;
+}
+

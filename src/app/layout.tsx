@@ -13,6 +13,8 @@ import { MAINTENANCE_MODE } from "@/config/maintenance";
 import MaintenanceGate from "@/components/MaintenanceGate";
 import { AuthProvider } from "@/components/AuthProvider";
 import PostHogProviderWrapper from "@/components/analytics/PostHogProvider";
+import MaintenanceToast from "@/components/MaintenanceToast";
+import PwaUpdatePrompt from "@/components/pwa/PwaUpdatePrompt";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -30,7 +32,7 @@ export const metadata: Metadata = {
     : "Prepare and ace your CAT and FAT exams with PyqVitAp. Search 5k+ question papers across all branches, slots, and years in seconds.",
   icons: [
     { rel: "icon", url: "/assets/images/favicon.svg?v=4" },
-    { rel: "apple-touch-icon", url: "/assets/images/apple-touch-icon.png?v=5" },
+    { rel: "apple-touch-icon", url: "/assets/images/apple-touch-icon-v5.png" },
   ],
   openGraph: {
     title: MAINTENANCE_MODE
@@ -209,6 +211,8 @@ export default function RootLayout({
                     <>
                       <ChildrenWrapper>{children}</ChildrenWrapper>
                       <GitHubStarPrompt />
+                      <MaintenanceToast />
+                      <PwaUpdatePrompt />
                     </>
                   )}
                   <Footer />

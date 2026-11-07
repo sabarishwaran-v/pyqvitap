@@ -7,7 +7,11 @@ import SidebarSection from "./SidebarSection";
 import { useFilters } from "@/context/filterContext";
 import { formatSlotDisplay } from "@/lib/utils/string";
 
-function SideBar() {
+interface SideBarProps {
+  inDrawer?: boolean;
+}
+
+function SideBar({ inDrawer = false }: SideBarProps) {
   // Get everything from context - no more prop drilling!
   const {
     selectedExams,
@@ -153,6 +157,7 @@ function SideBar() {
             selected={section.selected}
             updater={section.updater}
             note={section.note}
+            inDrawer={inDrawer}
           />
         ))}
     </div>

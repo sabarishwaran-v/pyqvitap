@@ -99,12 +99,39 @@ export async function getSelectedPapers() {
 	});
 }
 
+interface CachedSubjectsPapers {
+	data: ReturnType<typeof transformPapersToSubjectSlots>;
+	expiresAt: number;
+}
+const papersBySubjectsCache = new Map<string, CachedSubjectsPapers>();
+const PAPERS_BY_SUBJECTS_TTL_MS = 15 * 60 * 1000; // 15 minutes TTL
+
 export async function getPapersBySubjects(subjects: StoredSubjects) {
+	if (!Array.isArray(subjects) || subjects.length === 0) {
+		return [];
+	}
+
+	const cacheKey = subjects.slice().sort().join("::");
+	const cached = papersBySubjectsCache.get(cacheKey);
+	if (cached && cached.expiresAt > Date.now()) {
+		return cached.data;
+	}
+
 	return await withDatabase(async () => {
 		const usersPapers = await Paper.find({
 			subject: { $in: subjects },
 		}).lean<IPaper[]>();
 
-		return transformPapersToSubjectSlots(usersPapers);
+		const transformed = transformPapersToSubjectSlots(usersPapers);
+
+		if (papersBySubjectsCache.size > 500) {
+			papersBySubjectsCache.clear();
+		}
+		papersBySubjectsCache.set(cacheKey, {
+			data: transformed,
+			expiresAt: Date.now() + PAPERS_BY_SUBJECTS_TTL_MS,
+		});
+
+		return transformed;
 	});
 }
