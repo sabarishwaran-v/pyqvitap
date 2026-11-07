@@ -139,6 +139,15 @@ export default function Footer() {
             <Github className="h-4 w-4" />
             <span>GitHub</span>
           </a>
+          <a
+            href="https://github.com/sabarishwaran-v/pyqvitap/releases/tag/v1.0.0"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-1 inline-flex items-center rounded-full bg-[#562EE7]/10 px-2 py-0.5 text-xs font-semibold text-[#562EE7] no-underline transition-colors hover:bg-[#562EE7]/20 dark:bg-[#A47DE5]/20 dark:text-[#FFC6E8] dark:hover:bg-[#A47DE5]/30"
+            title="PyqVitAp Release v1.0.0"
+          >
+            v1.0.0
+          </a>
         </p>
 
         {/* Independent Project / Legal Notice */}
