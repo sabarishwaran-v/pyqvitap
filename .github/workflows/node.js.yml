@@ -51,3 +51,5 @@ jobs:
           SKIP_ENV_VALIDATION: "1"
           NODE_ENV: "production"
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_d2FybS13YWxydXMtNDc4NS5jbGVyay5hY2NvdW50cy5kZXYk"
+          NEXT_PUBLIC_POSTHOG_KEY: "phc_xuizP7wS5d8kYLAp9sPC5EU3uGt5aFxucvwMB53mUTae"
+          NEXT_PUBLIC_POSTHOG_HOST: "https://us.i.posthog.com"

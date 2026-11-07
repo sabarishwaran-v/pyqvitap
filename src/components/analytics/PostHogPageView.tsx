@@ -23,6 +23,7 @@ export default function PostHogPageView(): null {
       lastCapturedRef.current = fullUrl;
 
       posthog.capture("$pageview", {
+        $current_url: window.location.href,
         path: currentPath,
         search_params: search || undefined,
         referrer: document.referrer || undefined,
