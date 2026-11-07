@@ -7,13 +7,11 @@ import type { Metadata, Viewport } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChildrenWrapper from "@/components/ChildrenWrapper";
-import GitHubStarPrompt from "@/components/GitHubStarPrompt";
 import { CoursesProvider } from "@/context/courseContext";
 import { MAINTENANCE_MODE } from "@/config/maintenance";
 import MaintenanceGate from "@/components/MaintenanceGate";
 import { AuthProvider } from "@/components/AuthProvider";
 import PostHogProviderWrapper from "@/components/analytics/PostHogProvider";
-import ReliabilityAnnouncementModal from "@/components/ReliabilityAnnouncementModal";
 import PwaUpdatePrompt from "@/components/pwa/PwaUpdatePrompt";
 
 export const viewport: Viewport = {
@@ -210,8 +208,6 @@ export default function RootLayout({
                   ) : (
                     <>
                       <ChildrenWrapper>{children}</ChildrenWrapper>
-                      <GitHubStarPrompt />
-                      <ReliabilityAnnouncementModal />
                       <PwaUpdatePrompt />
                     </>
                   )}
