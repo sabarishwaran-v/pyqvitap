@@ -8,6 +8,7 @@ import Fuse from "fuse.js";
 import { type ICourseWithCount } from "@/interface";
 import { rankCourses } from "@/lib/utils/search-ranking";
 import { trackEvent } from "@/lib/telemetry";
+import { useCourses } from "@/context/courseContext";
 
 function SearchBarChild({
   initialSubjects,
@@ -17,6 +18,9 @@ function SearchBarChild({
   filtersNotPulled?: () => void;
 }) {
   const router = useRouter();
+  const { courses, loading, refetch } = useCourses();
+  const effectiveSubjects = initialSubjects && initialSubjects.length > 0 ? initialSubjects : courses;
+
   const [searchText, setSearchText] = useState("");
   const [suggestions, setSuggestions] = useState<ICourseWithCount[]>([]);
   const suggestionsRef = useRef<HTMLUListElement | null>(null);
@@ -30,9 +34,15 @@ function SearchBarChild({
   );
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
 
+  const ensureCoursesLoaded = () => {
+    if (effectiveSubjects.length === 0 && !loading) {
+      void refetch();
+    }
+  };
+
   useEffect(() => {
-    if (initialSubjects && initialSubjects.length > 0) {
-      const newFuse = new Fuse(initialSubjects, {
+    if (effectiveSubjects && effectiveSubjects.length > 0) {
+      const newFuse = new Fuse(effectiveSubjects, {
         keys: ["name"],
         threshold: 0.3,
         ignoreLocation: true,
@@ -41,18 +51,22 @@ function SearchBarChild({
 
       // Automatically re-evaluate suggestions if user typed before course data arrived
       if (searchText.length > 1) {
-        const filteredSuggestions = rankCourses(initialSubjects, searchText, newFuse).slice(0, 10);
+        const filteredSuggestions = rankCourses(effectiveSubjects, searchText, newFuse).slice(0, 10);
         setSuggestions(filteredSuggestions);
       }
     }
-  }, [initialSubjects, searchText]);
+  }, [effectiveSubjects, searchText]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value;
     setSearchText(text);
 
-    if (text.length > 1 && initialSubjects.length > 0) {
-      const filteredSuggestions = rankCourses(initialSubjects, text, fuzzy).slice(0, 10);
+    if (effectiveSubjects.length === 0) {
+      ensureCoursesLoaded();
+    }
+
+    if (text.length > 1 && effectiveSubjects.length > 0) {
+      const filteredSuggestions = rankCourses(effectiveSubjects, text, fuzzy).slice(0, 10);
       setSuggestions(filteredSuggestions);
       trackEvent("search_performed", {
         query_length: text.trim().length,
@@ -115,6 +129,7 @@ function SearchBarChild({
           <Input
             type="text"
             value={searchText}
+            onFocus={ensureCoursesLoaded}
             onChange={handleSearchChange}
             placeholder="Search by subject..."
             className={`text-md rounded-lg bg-[#B2B8FF] px-4 py-6 pr-10 font-play tracking-wider text-black shadow-sm ring-0 placeholder:text-black focus:outline-none focus:ring-0 dark:bg-[#7480FF66] dark:text-white placeholder:dark:text-white ${suggestions.length > 0 ? "rounded-b-none" : ""}`}

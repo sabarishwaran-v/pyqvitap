@@ -8,6 +8,7 @@ import Fuse from "fuse.js";
 import { type StoredSubjects, type ICourseWithCount, type IUpcomingPaper } from "@/interface";
 import { rankCourses } from "@/lib/utils/search-ranking";
 import { trackEvent } from "@/lib/telemetry";
+import { useCourses } from "@/context/courseContext";
 
 function PinnedSearchBar({
   initialSubjects,
@@ -19,6 +20,9 @@ function PinnedSearchBar({
   displayPapers : IUpcomingPaper[];
   filtersNotPulled?: () => void;
 }) {
+  const { courses, loading, refetch } = useCourses();
+  const effectiveSubjects = initialSubjects && initialSubjects.length > 0 ? initialSubjects : courses;
+
   const [searchText, setSearchText] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const suggestionsRef = useRef<HTMLUListElement | null>(null);
@@ -29,26 +33,37 @@ function PinnedSearchBar({
     () => new Fuse<ICourseWithCount>([], { keys: ["name"], threshold: 0.3 }),
   );
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
+
+  const ensureCoursesLoaded = () => {
+    if (effectiveSubjects.length === 0 && !loading) {
+      void refetch();
+    }
+  };
+
   useEffect(() => {
-    if (initialSubjects && initialSubjects.length > 0) {
-      const newFuse = new Fuse(initialSubjects, { keys: ["name"], threshold: 0.3 });
+    if (effectiveSubjects && effectiveSubjects.length > 0) {
+      const newFuse = new Fuse(effectiveSubjects, { keys: ["name"], threshold: 0.3 });
       setFuzzy(newFuse);
 
       if (searchText.length > 1) {
-        const filteredSuggestions = rankCourses(initialSubjects, searchText, newFuse)
+        const filteredSuggestions = rankCourses(effectiveSubjects, searchText, newFuse)
           .map((item) => item.name)
           .slice(0, 10);
         setSuggestions(filteredSuggestions);
       }
     }
-  }, [initialSubjects, searchText]);
+  }, [effectiveSubjects, searchText]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value;
     setSearchText(text);
 
-    if (text.length > 1 && initialSubjects.length > 0) {
-      const filteredSuggestions = rankCourses(initialSubjects, text, fuzzy)
+    if (effectiveSubjects.length === 0) {
+      ensureCoursesLoaded();
+    }
+
+    if (text.length > 1 && effectiveSubjects.length > 0) {
+      const filteredSuggestions = rankCourses(effectiveSubjects, text, fuzzy)
         .map((item) => item.name)
         .slice(0, 10);
 
@@ -198,6 +213,7 @@ function PinnedSearchBar({
                   type="text"
                   value={searchText}
                   ref={searchRef}
+                  onFocus={ensureCoursesLoaded}
                   onChange={handleSearchChange}
                   placeholder="Search subject to pin..."
                   className={`text-md w-full rounded-lg bg-[#B2B8FF] px-4 py-6 pr-10 font-play tracking-wider text-black shadow-sm ring-0 placeholder:text-black focus:outline-none focus:ring-0 dark:bg-[#7480FF66] dark:text-white placeholder:dark:text-white ${
