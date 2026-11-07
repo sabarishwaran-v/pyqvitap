@@ -139,10 +139,9 @@ export default function HomepageSignInCard() {
     const btn = clerkContainerRef.current?.querySelector(".cl-formButtonPrimary");
     if (!btn) return;
     const span = btn.querySelector("span");
-    if (span) {
-      span.textContent = text;
-    } else {
-      btn.textContent = text;
+    const target = span || btn;
+    if (target.textContent !== text) {
+      target.textContent = text;
     }
   }, []);
 
@@ -153,7 +152,12 @@ export default function HomepageSignInCard() {
     const container = clerkContainerRef.current;
     if (!container) return;
 
+    let isInternalMutation = false;
+    let timeoutId: NodeJS.Timeout | null = null;
+
     const updateFromClerkError = () => {
+      if (isInternalMutation) return;
+
       const errorEl = container.querySelector(
         ".cl-formFieldErrorText, .cl-alertText, .cl-formFieldError, [data-localization-key*='form_identifier_not_found']"
       );
@@ -169,9 +173,10 @@ export default function HomepageSignInCard() {
         const input = container.querySelector(
           'input[name="identifier"], input[type="email"], input[type="text"]'
         ) as HTMLInputElement | null;
-        if (input && input.value.trim()) {
-          setTypedEmail(input.value.trim());
-          typedEmailRef.current = input.value.trim();
+        const currentVal = input?.value.trim() || typedEmailRef.current;
+        if (currentVal && typedEmailRef.current !== currentVal) {
+          typedEmailRef.current = currentVal;
+          setTypedEmail(currentVal);
         }
 
         if (!isAccountNotFoundRef.current) {
@@ -179,20 +184,33 @@ export default function HomepageSignInCard() {
           setIsAccountNotFound(true);
         }
 
-        // Change button to "Continue sign-up with this email"
-        setSubmitButtonText("Continue sign-up with this email");
+        // Change button to "Continue sign-up with this email" safely without looping
+        isInternalMutation = true;
+        try {
+          setSubmitButtonText("Continue sign-up with this email");
+        } finally {
+          setTimeout(() => {
+            isInternalMutation = false;
+          }, 50);
+        }
       }
     };
 
     updateFromClerkError();
 
     const observer = new MutationObserver(() => {
-      updateFromClerkError();
+      if (isInternalMutation) return;
+      if (timeoutId) return;
+      timeoutId = setTimeout(() => {
+        timeoutId = null;
+        updateFromClerkError();
+      }, 60);
     });
 
     observer.observe(container, { childList: true, subtree: true, characterData: true });
 
     return () => {
+      if (timeoutId) clearTimeout(timeoutId);
       observer.disconnect();
     };
   }, [mode, setSubmitButtonText]);
@@ -266,13 +284,19 @@ export default function HomepageSignInCard() {
 
     checkOtpScreen();
 
+    let otpTimeoutId: NodeJS.Timeout | null = null;
     const observer = new MutationObserver(() => {
-      checkOtpScreen();
+      if (otpTimeoutId) return;
+      otpTimeoutId = setTimeout(() => {
+        otpTimeoutId = null;
+        checkOtpScreen();
+      }, 100);
     });
 
-    observer.observe(container, { childList: true, subtree: true, characterData: true });
+    observer.observe(container, { childList: true, subtree: true });
 
     return () => {
+      if (otpTimeoutId) clearTimeout(otpTimeoutId);
       observer.disconnect();
     };
   }, [mode]);
@@ -522,6 +546,36 @@ export default function HomepageSignInCard() {
           >
             <AlertCircle className="h-4 w-4 flex-shrink-0" />
             <span>{domainError}</span>
+          </div>
+        )}
+
+        {/* Account Not Found helper banner */}
+        {isAccountNotFound && mode === "sign-in" && (
+          <div className="mt-4 flex flex-col gap-2 rounded-xl border border-[#562EE7]/40 bg-[#562EE7]/10 p-3.5 text-xs text-gray-900 dark:text-gray-100 transition-all animate-in fade-in slide-in-from-top-1">
+            <div className="flex items-center gap-2 font-semibold text-[#562EE7] dark:text-[#A78BFA]">
+              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              <span>No account found with this email</span>
+            </div>
+            <p className="text-gray-600 dark:text-gray-300">
+              Would you like to create a new PyqVitAp account with <strong>{typedEmail || typedEmailRef.current}</strong>?
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                isAccountNotFoundRef.current = false;
+                setIsAccountNotFound(false);
+                setDomainError(null);
+                const emailToTransfer = typedEmail || typedEmailRef.current;
+                const targetSignUpUrl = hasCustomDestination
+                  ? `/?mode=sign-up&email_address=${encodeURIComponent(emailToTransfer)}&redirect_url=${encodeURIComponent(destination)}`
+                  : `/?mode=sign-up&email_address=${encodeURIComponent(emailToTransfer)}`;
+                setMode("sign-up");
+                window.history.pushState({}, "", targetSignUpUrl);
+              }}
+              className="mt-1 w-full rounded-lg bg-gradient-to-r from-[#562EE7] to-[#7480FF] py-2 px-3 text-center text-xs font-semibold text-white shadow transition hover:opacity-90 active:scale-95 cursor-pointer"
+            >
+              Continue to sign up
+            </button>
           </div>
         )}
 
