@@ -31,3 +31,16 @@ export async function subscribeEmail(email: string) {
     return { alreadySubscribed: false };
   });
 }
+
+export async function unsubscribeEmail(email: string) {
+  const normalizedEmail = email.trim().toLowerCase();
+
+  if (!normalizedEmail || !normalizedEmail.includes("@")) {
+    throw new CustomError("Invalid email address", 400);
+  }
+
+  return await withDatabase(async () => {
+    const result = await EmailSub.deleteOne({ email: normalizedEmail });
+    return { success: true, deletedCount: result.deletedCount };
+  });
+}

@@ -230,6 +230,8 @@ export function isPublicPath(pathname: string): boolean {
     pathname.startsWith("/disclaimer") ||
     pathname.startsWith("/terms") ||
     pathname.startsWith("/privacy") ||
+    pathname.startsWith("/unsubscribe") ||
+    pathname.startsWith("/api/unsubscribe") ||
     pathname === "/api/health" ||
     pathname === "/manifest.webmanifest" ||
     pathname === "/robots.txt" ||

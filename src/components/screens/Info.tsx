@@ -32,7 +32,7 @@ function Info() {
                 <div className="grid grid-cols-3 gap-2 overflow-hidden font-play text-xs text-black dark:text-white sm:text-sm lg:gap-4 lg:text-lg xl:text-base">
                   <FeatureCard
                     icon={<ShieldCheck size={24} />}
-                    text="Restricted to VIT-APians"
+                    text="Restricted to VITAPians"
                   />
                   <FeatureCard
                     isHighlight
