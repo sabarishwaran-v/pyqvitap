@@ -219,6 +219,12 @@ export function getPyqvitapClerkAppearance(
         fontSize: "0.875rem",
         fontWeight: "500",
       },
+      formFieldLabel__optional: {
+        display: "none",
+      },
+      formFieldOptional: {
+        display: "none",
+      },
       dividerLine: {
         backgroundColor: isDark ? "rgba(255, 255, 255, 0.15)" : "#CBD5E1",
       },

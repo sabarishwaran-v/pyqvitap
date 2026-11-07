@@ -13,11 +13,6 @@ const faqs = [
         "Most of our exam papers are sourced directly from the university's DSpace repository. Additionally, users can contribute by uploading papers directly to our platform, helping us grow our collection.",
     },
     {
-      question: "Is logging in required to download exam papers?",
-      answer:
-        "No login is needed! You can freely browse and download exam papers without creating an account.",
-    },
-    {
       question: 'What is meant by "flexible search" for exam papers?',
       answer:
         "Our flexible search feature allows you to filter exam papers using multiple criteria, such as exam type, slot, year, subject, and more, making it easy to find exactly what you need.",
