@@ -1,5 +1,5 @@
 import {
-  User,
+  ShieldCheck,
   Download,
   Database,
   Filter,
@@ -31,8 +31,8 @@ function Info() {
               <div className="origin-top-left">
                 <div className="grid grid-cols-3 gap-2 overflow-hidden font-play text-xs text-black dark:text-white sm:text-sm lg:gap-4 lg:text-lg xl:text-base">
                   <FeatureCard
-                    icon={<User size={24} />}
-                    text="No Sign-up required"
+                    icon={<ShieldCheck size={24} />}
+                    text="Restricted to VIT-APians"
                   />
                   <FeatureCard
                     isHighlight

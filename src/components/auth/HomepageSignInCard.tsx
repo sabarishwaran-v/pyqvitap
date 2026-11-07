@@ -11,7 +11,6 @@ import {
   isAuthorizedEmail,
   sanitizeRedirectUrl,
 } from "@/config/auth";
-import { AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function HomepageSignInCard() {
@@ -217,20 +216,98 @@ export default function HomepageSignInCard() {
 
   // Autofill email into Clerk's Sign-Up input if transitioning from Sign-In
   useEffect(() => {
-    if (mode === "sign-up" && typedEmailRef.current) {
-      const timer = setTimeout(() => {
-        const input = clerkContainerRef.current?.querySelector(
-          'input[name="emailAddress"], input[name="identifier"], input[type="email"]'
-        ) as HTMLInputElement | null;
-        if (input && !input.value) {
-          input.value = typedEmailRef.current;
+    if (mode !== "sign-up") return;
+
+    let emailToFill = typedEmailRef.current;
+    if (!emailToFill && typeof window !== "undefined") {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        emailToFill = params.get("email_address") || "";
+      } catch {}
+    }
+
+    if (!emailToFill) return;
+
+    const tryFillInput = (): boolean => {
+      const container = clerkContainerRef.current;
+      if (!container) return false;
+
+      const input = container.querySelector(
+        'input[name="emailAddress"], input[name="identifier"], input[type="email"]'
+      ) as HTMLInputElement | null;
+
+      if (input) {
+        if (input.value !== emailToFill) {
+          const nativeSetter = Object.getOwnPropertyDescriptor(
+            window.HTMLInputElement.prototype,
+            "value"
+          )?.set;
+          if (nativeSetter) {
+            nativeSetter.call(input, emailToFill);
+          } else {
+            input.value = emailToFill;
+          }
           input.dispatchEvent(new Event("input", { bubbles: true }));
           input.dispatchEvent(new Event("change", { bubbles: true }));
         }
-      }, 60);
-      return () => clearTimeout(timer);
-    }
+        return true;
+      }
+      return false;
+    };
+
+    if (tryFillInput()) return;
+
+    const startTime = Date.now();
+    const interval = setInterval(() => {
+      const filled = tryFillInput();
+      if (filled || Date.now() - startTime > 3000) {
+        clearInterval(interval);
+      }
+    }, 50);
+
+    return () => clearInterval(interval);
   }, [mode]);
+
+  // Render domain error directly beneath Clerk's email input (matching Clerk's native error styling)
+  useEffect(() => {
+    const container = clerkContainerRef.current;
+    if (!container) return;
+
+    const input = container.querySelector(
+      'input[name="identifier"], input[name="emailAddress"], input[type="email"], input[type="text"]'
+    ) as HTMLInputElement | null;
+
+    const existingCustomErr = container.querySelector("#pyq-domain-error");
+
+    if (domainError && input) {
+      input.style.borderColor = "#EF4444";
+      input.style.boxShadow = "0 0 0 1px #EF4444";
+
+      if (existingCustomErr) {
+        existingCustomErr.textContent = `● ${domainError}`;
+      } else {
+        const errP = document.createElement("p");
+        errP.id = "pyq-domain-error";
+        errP.className = "cl-formFieldErrorText cl-custom-domain-error";
+        errP.style.color = "#EF4444";
+        errP.style.fontSize = "0.8125rem";
+        errP.style.marginTop = "0.375rem";
+        errP.style.display = "flex";
+        errP.style.alignItems = "center";
+        errP.style.gap = "0.375rem";
+        errP.textContent = `● ${domainError}`;
+        input.parentElement?.appendChild(errP);
+      }
+    } else {
+      if (input) {
+        input.style.borderColor = "";
+        input.style.boxShadow = "";
+      }
+      if (existingCustomErr) {
+        existingCustomErr.remove();
+      }
+    }
+  }, [domainError]);
 
   // Real-time observer to inform users as soon as an OTP verification code is generated
   useEffect(() => {
@@ -445,7 +522,7 @@ export default function HomepageSignInCard() {
             domain.includes(".") && (domain.split(".").pop()?.length ?? 0) >= 2;
           if (isCompleteDomain) {
             setDomainError(
-              "Please use your official VIT-AP email (@vitapstudent.ac.in or @vitap.ac.in)"
+              "Access restricted. Please use your official VIT-AP email (@vitapstudent.ac.in or @vitap.ac.in)"
             );
           } else {
             setDomainError(null);
@@ -490,7 +567,7 @@ export default function HomepageSignInCard() {
         e.preventDefault();
         e.stopPropagation();
         setDomainError(
-          "Please use your official VIT-AP email (@vitapstudent.ac.in or @vitap.ac.in)"
+          "Access restricted. Please use your official VIT-AP email (@vitapstudent.ac.in or @vitap.ac.in)"
         );
         return;
       }
@@ -537,47 +614,6 @@ export default function HomepageSignInCard() {
               : "Sign in with your VIT-AP email to access previous papers."}
           </p>
         </div>
-
-        {/* Real-time Domain Validation Error Notice */}
-        {domainError && (
-          <div
-            role="alert"
-            className="mt-4 flex items-center gap-2 rounded-xl border border-red-500/40 bg-red-500/10 px-3.5 py-2.5 text-xs font-semibold text-red-500 dark:text-red-400 transition-all animate-in fade-in slide-in-from-top-1"
-          >
-            <AlertCircle className="h-4 w-4 flex-shrink-0" />
-            <span>{domainError}</span>
-          </div>
-        )}
-
-        {/* Account Not Found helper banner */}
-        {isAccountNotFound && mode === "sign-in" && (
-          <div className="mt-4 flex flex-col gap-2 rounded-xl border border-[#562EE7]/40 bg-[#562EE7]/10 p-3.5 text-xs text-gray-900 dark:text-gray-100 transition-all animate-in fade-in slide-in-from-top-1">
-            <div className="flex items-center gap-2 font-semibold text-[#562EE7] dark:text-[#A78BFA]">
-              <AlertCircle className="h-4 w-4 flex-shrink-0" />
-              <span>No account found with this email</span>
-            </div>
-            <p className="text-gray-600 dark:text-gray-300">
-              Would you like to create a new PyqVitAp account with <strong>{typedEmail || typedEmailRef.current}</strong>?
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                isAccountNotFoundRef.current = false;
-                setIsAccountNotFound(false);
-                setDomainError(null);
-                const emailToTransfer = typedEmail || typedEmailRef.current;
-                const targetSignUpUrl = hasCustomDestination
-                  ? `/?mode=sign-up&email_address=${encodeURIComponent(emailToTransfer)}&redirect_url=${encodeURIComponent(destination)}`
-                  : `/?mode=sign-up&email_address=${encodeURIComponent(emailToTransfer)}`;
-                setMode("sign-up");
-                window.history.pushState({}, "", targetSignUpUrl);
-              }}
-              className="mt-1 w-full rounded-lg bg-gradient-to-r from-[#562EE7] to-[#7480FF] py-2 px-3 text-center text-xs font-semibold text-white shadow transition hover:opacity-90 active:scale-95 cursor-pointer"
-            >
-              Continue to sign up
-            </button>
-          </div>
-        )}
 
         {/* Embedded Clerk Form */}
         <div ref={clerkContainerRef} className="mt-6 w-full">
