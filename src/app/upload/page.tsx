@@ -1,4 +1,4 @@
-"use client";
+  "use client";
 
 import { useCallback, useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
@@ -468,7 +468,6 @@ export default function Page() {
                     <input {...getInputProps()} />
                     <div className="flex w-max gap-4">
                       <div className="scrollbar-hide flex w-[80vw] max-w-4xl flex-col justify-between overflow-x-auto overflow-y-hidden rounded-[40px] border-[6px] border-[#A78BFA] bg-indigo-900/10 p-4 dark:border-indigo-900 sm:p-6 md:w-max md:p-8">
-                        j
                         <DndContext
                           sensors={sensors}
                           collisionDetection={closestCenter}

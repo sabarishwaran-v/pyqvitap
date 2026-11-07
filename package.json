@@ -11,7 +11,13 @@
     "lint": "next lint",
     "smoke-test": "node scripts/smoke-test.cjs",
     "start": "next start",
+    "deploy:worker": "wrangler deploy",
+    "dev": "next dev",
+    "lint": "next lint",
+    "smoke-test": "node scripts/smoke-test.cjs",
+    "start": "next start",
     "test": "node scripts/test-paper-transform.cjs && node scripts/test-paper-by-id-cache.cjs && node scripts/test-media-range.cjs && node scripts/test-media-cache.cjs && node scripts/test-announcement-modal.cjs && node scripts/test-auth-integration.cjs && node scripts/test-edge-cache-endpoints.cjs && node scripts/test-middleware-hotpath.cjs && node scripts/test-course-context-parallel.cjs && node scripts/test-stage5-search-cache.cjs && node scripts/benchmark-architecture-restoration.cjs",
+    "typecheck": "tsc --noEmit"
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

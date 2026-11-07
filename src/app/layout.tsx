@@ -13,7 +13,7 @@ import { MAINTENANCE_MODE } from "@/config/maintenance";
 import MaintenanceGate from "@/components/MaintenanceGate";
 import { AuthProvider } from "@/components/AuthProvider";
 import PostHogProviderWrapper from "@/components/analytics/PostHogProvider";
-import MaintenanceToast from "@/components/MaintenanceToast";
+import ReliabilityAnnouncementModal from "@/components/ReliabilityAnnouncementModal";
 import PwaUpdatePrompt from "@/components/pwa/PwaUpdatePrompt";
 
 export const viewport: Viewport = {
@@ -211,7 +211,7 @@ export default function RootLayout({
                     <>
                       <ChildrenWrapper>{children}</ChildrenWrapper>
                       <GitHubStarPrompt />
-                      <MaintenanceToast />
+                      <ReliabilityAnnouncementModal />
                       <PwaUpdatePrompt />
                     </>
                   )}
