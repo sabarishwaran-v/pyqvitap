@@ -15,7 +15,14 @@ export default function SearchBar({
   displayPapers?:IUpcomingPaper[]
   setDisplayPapers?: React.Dispatch<React.SetStateAction<IUpcomingPaper[]>> 
 }) {
-  const { courses } = useCourses();
+  const { courses, loading, refetch } = useCourses();
+
+  // If SearchBar mounts (e.g. user just authenticated) and courses are empty, fetch immediately
+  React.useEffect(() => {
+    if (courses.length === 0 && !loading) {
+      void refetch();
+    }
+  }, [courses.length, loading, refetch]);
 
   return type === "pinned" && setDisplayPapers !== undefined && displayPapers !== undefined ? (
     <PinnedSearchBar initialSubjects={courses} setDisplayPapers={setDisplayPapers} displayPapers={displayPapers} />
