@@ -13,11 +13,7 @@ const LOCAL_DEV_CLERK_KEY = "pk_test_d2FybS13YWxydXMtNDc4NS5jbGVyay5hY2NvdW50cy5
  * When present, initializes Clerk with the PyqVitAp custom dark purple appearance.
  */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-
-  if (!publishableKey) {
-    return <>{children}</>;
-  }
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || LOCAL_DEV_CLERK_KEY;
 
   // Detect localhost on both server (via headers) and client to ensure matching dev keys
   let effectiveKey = publishableKey;
