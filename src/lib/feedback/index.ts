@@ -10,6 +10,8 @@ export const DEFAULT_MIN_PAPERS = 2;
 export const DEFAULT_MIN_DURATION_SECONDS = 60;
 export const DEFAULT_COOLDOWN_DAYS = 14;
 export const DEFAULT_GITHUB_REPO = "https://github.com/sabarishwaran-v/papersvitap";
+export const DEFAULT_UPI_ID = "sabarishvenkat@ptsbi";
+export const DEFAULT_UPI_NAME = "Sabarishwaran V";
 
 /**
  * Increments the local paper engagement counter (views or downloads)

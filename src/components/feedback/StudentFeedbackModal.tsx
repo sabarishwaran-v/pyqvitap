@@ -50,6 +50,7 @@ export default function StudentFeedbackModal() {
   const [comment, setComment] = useState("");
   const [amount, setAmount] = useState(20);
   const [customAmount, setCustomAmount] = useState("");
+  const [showCoffeePayment, setShowCoffeePayment] = useState(false);
   const [isMobileDevice, setIsMobileDevice] = useState(true);
   const [forceDesktopQr, setForceDesktopQr] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
@@ -97,8 +98,8 @@ export default function StudentFeedbackModal() {
       min_papers: payloadFromFlag?.min_papers ?? DEFAULT_MIN_PAPERS,
       min_duration_seconds: payloadFromFlag?.min_duration_seconds ?? DEFAULT_MIN_DURATION_SECONDS,
       cooldown_days: payloadFromFlag?.cooldown_days ?? DEFAULT_COOLDOWN_DAYS,
-      upi_id: payloadFromFlag?.upi_id || process.env.NEXT_PUBLIC_UPI_ID || "support@pyqvitap.site",
-      upi_name: payloadFromFlag?.upi_name || process.env.NEXT_PUBLIC_UPI_NAME || "PyqVitAp Student Developer",
+      upi_id: payloadFromFlag?.upi_id || process.env.NEXT_PUBLIC_UPI_ID || "sabarishvenkat@ptsbi",
+      upi_name: payloadFromFlag?.upi_name || process.env.NEXT_PUBLIC_UPI_NAME || "Sabarishwaran V",
       github_repo: payloadFromFlag?.github_repo || DEFAULT_GITHUB_REPO,
     };
   }, [posthog]);
@@ -120,6 +121,7 @@ export default function StudentFeedbackModal() {
       setStep("rating");
       setRating(0);
       setHoverRating(0);
+      setShowCoffeePayment(false);
       console.log("🧹 [PyqVitAp] Feedback storage reset! You can test fresh.");
     };
 
@@ -229,8 +231,8 @@ export default function StudentFeedbackModal() {
   // UPI deep link
   const currentUpiUrl = useMemo(() => {
     return generateUpiUrl(
-      campaignConfig.upi_id || "support@pyqvitap.site",
-      campaignConfig.upi_name || "PyqVitAp Student Developer",
+      campaignConfig.upi_id || "sabarishvenkat@ptsbi",
+      campaignConfig.upi_name || "Sabarishwaran V",
       amount,
       "PyqVitAp Student Support"
     );
@@ -329,10 +331,6 @@ export default function StudentFeedbackModal() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
               </svg>
             </button>
-
-            <p className="text-center text-[10px] text-slate-400 dark:text-slate-500">
-              Asked only once per semester • 100% anonymous
-            </p>
           </div>
         )}
 
@@ -487,117 +485,130 @@ export default function StudentFeedbackModal() {
               </div>
 
               {/* 3. Send Me a Coffee via UPI */}
-              <div className="space-y-2.5 rounded-xl border border-violet-300/60 bg-gradient-to-br from-violet-50/70 via-white to-purple-50/50 p-3 dark:border-violet-800/60 dark:from-violet-950/40 dark:via-slate-950/60 dark:to-purple-950/30">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+              <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 transition dark:border-slate-800 dark:bg-slate-950/60">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-2.5">
                     <span className="text-lg">☕</span>
                     <div>
-                      <h4 className="text-xs font-bold text-violet-800 dark:text-violet-300">
-                        Send Me a Coffee (via UPI)
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-slate-200">
+                        Send Me a Coffee (UPI)
                       </h4>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
                         Any amount through your usual UPI app. No ₹95 min limit.
                       </p>
                     </div>
                   </div>
-                  {/* Mode switch */}
                   <button
                     type="button"
-                    onClick={() => setForceDesktopQr((prev) => !prev)}
-                    className="rounded border border-violet-200 bg-violet-100/60 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 transition hover:bg-violet-200 dark:border-violet-800/60 dark:bg-violet-900/40 dark:text-violet-300"
+                    onClick={() => setShowCoffeePayment((prev) => !prev)}
+                    className="shrink-0 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 flex items-center gap-1.5"
                   >
-                    {isMobileDevice && !forceDesktopQr ? "Show QR Code" : "App Link"}
+                    <span>{showCoffeePayment ? "Close" : "Support"}</span>
+                    <span>☕</span>
                   </button>
                 </div>
 
-                {/* Amount presets */}
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {AMOUNT_PRESETS.map((preset) => {
-                    const isActive = amount === preset && !customAmount;
-                    return (
-                      <button
-                        key={preset}
-                        type="button"
-                        onClick={() => {
-                          setAmount(preset);
-                          setCustomAmount("");
-                        }}
-                        className={`rounded-lg px-2.5 py-1 text-xs font-bold transition ${
-                          isActive
-                            ? "border border-violet-500 bg-violet-600 text-white"
-                            : "border border-slate-200 bg-white text-slate-700 hover:border-violet-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-                        }`}
-                      >
-                        ₹{preset}
-                      </button>
-                    );
-                  })}
-                  <div className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-2 py-0.5 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
-                    <span>₹</span>
-                    <input
-                      type="number"
-                      min={1}
-                      placeholder="Custom"
-                      value={customAmount}
-                      onChange={(e) => {
-                        setCustomAmount(e.target.value);
-                        const num = parseInt(e.target.value, 10);
-                        if (num > 0) setAmount(num);
-                      }}
-                      className="w-14 bg-transparent pl-1 text-xs text-slate-900 focus:outline-none dark:text-white"
-                    />
-                  </div>
-                </div>
-
-                {/* Mobile Intent Button */}
-                {isMobileDevice && !forceDesktopQr ? (
-                  <a
-                    href={currentUpiUrl}
-                    onClick={() =>
-                      trackEvent("student_support_clicked", {
-                        action: "upi_intent",
-                        amount,
-                        version: campaignConfig.version,
-                      })
-                    }
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 py-2.5 px-4 text-xs font-bold text-white shadow-md shadow-violet-900/20 transition hover:opacity-95"
-                  >
-                    <span>✨ Pay ₹{amount} with UPI (GPay / PhonePe / Paytm)</span>
-                  </a>
-                ) : (
-                  /* Desktop QR View */
-                  <div className="flex flex-col items-center justify-center space-y-2 rounded-xl border border-slate-200 bg-white p-2.5 text-slate-900 dark:border-slate-700">
-                    <p className="text-[11px] font-semibold text-slate-700">
-                      Scan with any UPI app to send ₹{amount}:
-                    </p>
-                    <UpiQrCode upiUrl={currentUpiUrl} size={150} />
-                    <div className="flex items-center gap-2 text-[11px] text-slate-600">
-                      <span className="rounded border border-slate-200 bg-slate-100 px-2 py-0.5 font-mono text-[10px]">
-                        {campaignConfig.upi_id}
+                {/* Amount presets & payment reveal ONLY when clicked */}
+                {showCoffeePayment && (
+                  <div className="mt-3 space-y-2.5 border-t border-slate-200 pt-3 dark:border-slate-800 animate-in fade-in duration-200">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                        Choose amount:
                       </span>
+                      {/* Mode switch */}
                       <button
                         type="button"
-                        onClick={handleCopyUpiId}
-                        className="font-semibold text-violet-600 hover:underline"
+                        onClick={() => setForceDesktopQr((prev) => !prev)}
+                        className="rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 transition hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                       >
-                        {copiedUpi ? "Copied!" : "Copy"}
+                        {isMobileDevice && !forceDesktopQr ? "Show QR Code" : "App Link"}
                       </button>
                     </div>
+
+                    {/* Amount presets */}
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {AMOUNT_PRESETS.map((preset) => {
+                        const isActive = amount === preset && !customAmount;
+                        return (
+                          <button
+                            key={preset}
+                            type="button"
+                            onClick={() => {
+                              setAmount(preset);
+                              setCustomAmount("");
+                            }}
+                            className={`rounded-lg px-2.5 py-1 text-xs font-bold transition ${
+                              isActive
+                                ? "border border-violet-500 bg-violet-600 text-white"
+                                : "border border-slate-200 bg-white text-slate-700 hover:border-violet-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                            }`}
+                          >
+                            ₹{preset}
+                          </button>
+                        );
+                      })}
+                      <div className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-2 py-0.5 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                        <span>₹</span>
+                        <input
+                          type="number"
+                          min={1}
+                          placeholder="Custom"
+                          value={customAmount}
+                          onChange={(e) => {
+                            setCustomAmount(e.target.value);
+                            const num = parseInt(e.target.value, 10);
+                            if (num > 0) setAmount(num);
+                          }}
+                          className="w-14 bg-transparent pl-1 text-xs text-slate-900 focus:outline-none dark:text-white"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Mobile Intent Button */}
+                    {isMobileDevice && !forceDesktopQr ? (
+                      <a
+                        href={currentUpiUrl}
+                        onClick={() =>
+                          trackEvent("student_support_clicked", {
+                            action: "upi_intent",
+                            amount,
+                            version: campaignConfig.version,
+                          })
+                        }
+                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 py-2.5 px-4 text-xs font-bold text-white shadow-md shadow-violet-900/20 transition hover:opacity-95"
+                      >
+                        <span>✨ Pay ₹{amount} with UPI (GPay / PhonePe / Paytm)</span>
+                      </a>
+                    ) : (
+                      /* Desktop QR View */
+                      <div className="flex flex-col items-center justify-center space-y-2 rounded-xl border border-slate-200 bg-white p-2.5 text-slate-900 dark:border-slate-700">
+                        <p className="text-[11px] font-semibold text-slate-700">
+                          Scan with any UPI app to send ₹{amount}:
+                        </p>
+                        <UpiQrCode upiUrl={currentUpiUrl} size={150} />
+                        <div className="flex items-center gap-2 text-[11px] text-slate-600">
+                          <span className="rounded border border-slate-200 bg-slate-100 px-2 py-0.5 font-mono text-[10px]">
+                            {campaignConfig.upi_id}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleCopyUpiId}
+                            className="font-semibold text-violet-600 hover:underline"
+                          >
+                            {copiedUpi ? "Copied!" : "Copy"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             </div>
 
-            {/* ETHICS & TRANSPARENCY DISCLAIMER (As requested) */}
-            <div className="flex items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/70 p-2.5 text-[10px] leading-relaxed text-slate-500 dark:border-slate-800/80 dark:bg-slate-950/40 dark:text-slate-400">
-              <span className="shrink-0 text-sm">🛡️</span>
-              <div>
-                <strong className="font-semibold text-slate-700 dark:text-slate-300">
-                  No strings attached:
-                </strong>{" "}
-                Nothing above is required, and contributors receive nothing in return — no extra features are added, and no special badges. The site remains 100% identical and open for everyone either way.
-              </div>
-            </div>
+            {/* ETHICS & TRANSPARENCY DISCLAIMER (Outside any box, clean and visible) */}
+            <p className="px-1 text-center text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              Nothing above is required, and contributors receive nothing in return — no extra features are added, and no special badges. The site remains 100% identical and open for everyone either way.
+            </p>
 
             {/* Done button */}
             <button
