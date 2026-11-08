@@ -303,28 +303,38 @@ html:not(.dark) .cl-userProfile-root .cl-navbar {
 }
 
 /* Homepage Clerk Card: Ensure visible, properly aligned sign-in/sign-up footer links */
-.cl-card-homepage .cl-footerAction {
+.cl-card-homepage .cl-footerAction,
+.cl-signIn-root .cl-footerAction,
+.cl-signUp-root .cl-footerAction {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
   padding-bottom: 0.25rem !important;
 }
 
-.cl-card-homepage .cl-footerActionText {
+.cl-card-homepage .cl-footerActionText,
+.cl-signIn-root .cl-footerActionText,
+.cl-signUp-root .cl-footerActionText {
   color: #64748b !important;
 }
 
-.dark .cl-card-homepage .cl-footerActionText {
+.dark .cl-card-homepage .cl-footerActionText,
+.dark .cl-signIn-root .cl-footerActionText,
+.dark .cl-signUp-root .cl-footerActionText {
   color: #9ca3af !important;
 }
 
-.cl-card-homepage .cl-footerActionLink {
+.cl-card-homepage .cl-footerActionLink,
+.cl-signIn-root .cl-footerActionLink,
+.cl-signUp-root .cl-footerActionLink {
   display: inline !important;
   font-weight: 600 !important;
   color: #7c3aed !important;
 }
 
-.dark .cl-card-homepage .cl-footerActionLink {
+.dark .cl-card-homepage .cl-footerActionLink,
+.dark .cl-signIn-root .cl-footerActionLink,
+.dark .cl-signUp-root .cl-footerActionLink {
   color: #a78bfa !important;
 }
 
@@ -388,6 +398,257 @@ html:not(.dark) .cl-userProfile-root .cl-navbar {
   align-items: center !important;
   gap: 0.375rem !important;
   font-weight: 400 !important;
+}
+
+/* ========================================================================= */
+/* PyqVitAp Clerk Theme Synchronization (Instant Light & Dark Mode Tracking) */
+/* ========================================================================= */
+
+/* --- LIGHT MODE (Default / html:not(.dark)) --- */
+html:not(.dark) .cl-card-homepage .cl-socialButtonsBlockButton,
+html:not(.dark) .cl-signIn-root .cl-socialButtonsBlockButton,
+html:not(.dark) .cl-signUp-root .cl-socialButtonsBlockButton {
+  background-color: #F8F9FF !important;
+  border: 1px solid #94A3B8 !important;
+  color: #030712 !important;
+  box-shadow: none !important;
+  transition: all 0.15s ease-in-out !important;
+}
+
+html:not(.dark) .cl-card-homepage .cl-socialButtonsBlockButton:hover,
+html:not(.dark) .cl-signIn-root .cl-socialButtonsBlockButton:hover,
+html:not(.dark) .cl-signUp-root .cl-socialButtonsBlockButton:hover {
+  background-color: #EEEFF7 !important;
+  border-color: #64748B !important;
+}
+
+html:not(.dark) .cl-card-homepage .cl-socialButtonsBlockButton:focus,
+html:not(.dark) .cl-card-homepage .cl-socialButtonsBlockButton:focus-visible,
+html:not(.dark) .cl-signIn-root .cl-socialButtonsBlockButton:focus,
+html:not(.dark) .cl-signIn-root .cl-socialButtonsBlockButton:focus-visible,
+html:not(.dark) .cl-signUp-root .cl-socialButtonsBlockButton:focus,
+html:not(.dark) .cl-signUp-root .cl-socialButtonsBlockButton:focus-visible {
+  border-color: #7C3AED !important;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.35) !important;
+  outline: none !important;
+}
+
+html:not(.dark) .cl-card-homepage .cl-socialButtonsBlockButtonText,
+html:not(.dark) .cl-signIn-root .cl-socialButtonsBlockButtonText,
+html:not(.dark) .cl-signUp-root .cl-socialButtonsBlockButtonText {
+  color: #030712 !important;
+}
+
+html:not(.dark) .cl-card-homepage .cl-formFieldLabel,
+html:not(.dark) .cl-signIn-root .cl-formFieldLabel,
+html:not(.dark) .cl-signUp-root .cl-formFieldLabel {
+  color: #030712 !important;
+}
+
+html:not(.dark) .cl-card-homepage .cl-formFieldInput,
+html:not(.dark) .cl-signIn-root .cl-formFieldInput,
+html:not(.dark) .cl-signUp-root .cl-formFieldInput {
+  background-color: #F8F9FF !important;
+  border: 1px solid #94A3B8 !important;
+  color: #18181B !important;
+  transition: all 0.15s ease-in-out !important;
+}
+
+html:not(.dark) .cl-card-homepage .cl-formFieldInput:focus,
+html:not(.dark) .cl-card-homepage .cl-formFieldInput:focus-visible,
+html:not(.dark) .cl-signIn-root .cl-formFieldInput:focus,
+html:not(.dark) .cl-signIn-root .cl-formFieldInput:focus-visible,
+html:not(.dark) .cl-signUp-root .cl-formFieldInput:focus,
+html:not(.dark) .cl-signUp-root .cl-formFieldInput:focus-visible {
+  border-color: #7C3AED !important;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.3) !important;
+  outline: none !important;
+}
+
+html:not(.dark) .cl-card-homepage .cl-formFieldInput::placeholder,
+html:not(.dark) .cl-signIn-root .cl-formFieldInput::placeholder,
+html:not(.dark) .cl-signUp-root .cl-formFieldInput::placeholder {
+  color: #64748B !important;
+}
+
+html:not(.dark) .cl-card-homepage .cl-formFieldInput:-webkit-autofill,
+html:not(.dark) .cl-signIn-root .cl-formFieldInput:-webkit-autofill,
+html:not(.dark) .cl-signUp-root .cl-formFieldInput:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #F8F9FF inset !important;
+  -webkit-text-fill-color: #18181B !important;
+  caret-color: #18181B !important;
+}
+
+html:not(.dark) .cl-card-homepage .cl-dividerLine,
+html:not(.dark) .cl-signIn-root .cl-dividerLine,
+html:not(.dark) .cl-signUp-root .cl-dividerLine {
+  background-color: #CBD5E1 !important;
+}
+
+html:not(.dark) .cl-card-homepage .cl-dividerText,
+html:not(.dark) .cl-signIn-root .cl-dividerText,
+html:not(.dark) .cl-signUp-root .cl-dividerText {
+  color: #64748B !important;
+}
+
+html:not(.dark) .cl-card-homepage .cl-identityPreviewText,
+html:not(.dark) .cl-signIn-root .cl-identityPreviewText,
+html:not(.dark) .cl-signUp-root .cl-identityPreviewText {
+  color: #030712 !important;
+}
+
+html:not(.dark) .cl-card-homepage .cl-identityPreviewEditButtonIcon,
+html:not(.dark) .cl-signIn-root .cl-identityPreviewEditButtonIcon,
+html:not(.dark) .cl-signUp-root .cl-identityPreviewEditButtonIcon {
+  color: #7C3AED !important;
+}
+
+html:not(.dark) .cl-card-homepage .cl-otpCodeFieldInput,
+html:not(.dark) .cl-signIn-root .cl-otpCodeFieldInput,
+html:not(.dark) .cl-signUp-root .cl-otpCodeFieldInput {
+  background-color: #F8F9FF !important;
+  border: 1px solid #94A3B8 !important;
+  color: #18181B !important;
+}
+
+html:not(.dark) .cl-card-homepage .cl-formResendCodeLink,
+html:not(.dark) .cl-signIn-root .cl-formResendCodeLink,
+html:not(.dark) .cl-signUp-root .cl-formResendCodeLink {
+  color: #7C3AED !important;
+}
+
+/* --- DARK MODE (html.dark) --- */
+.dark .cl-card-homepage .cl-socialButtonsBlockButton,
+.dark .cl-signIn-root .cl-socialButtonsBlockButton,
+.dark .cl-signUp-root .cl-socialButtonsBlockButton {
+  background-color: #181033 !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #F9FAFB !important;
+  box-shadow: none !important;
+  transition: all 0.15s ease-in-out !important;
+}
+
+.dark .cl-card-homepage .cl-socialButtonsBlockButton:hover,
+.dark .cl-signIn-root .cl-socialButtonsBlockButton:hover,
+.dark .cl-signUp-root .cl-socialButtonsBlockButton:hover {
+  background-color: #231849 !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.dark .cl-card-homepage .cl-socialButtonsBlockButton:focus,
+.dark .cl-card-homepage .cl-socialButtonsBlockButton:focus-visible,
+.dark .cl-signIn-root .cl-socialButtonsBlockButton:focus,
+.dark .cl-signIn-root .cl-socialButtonsBlockButton:focus-visible,
+.dark .cl-signUp-root .cl-socialButtonsBlockButton:focus,
+.dark .cl-signUp-root .cl-socialButtonsBlockButton:focus-visible {
+  border-color: #7C3AED !important;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.35) !important;
+  outline: none !important;
+}
+
+.dark .cl-card-homepage .cl-socialButtonsBlockButtonText,
+.dark .cl-signIn-root .cl-socialButtonsBlockButtonText,
+.dark .cl-signUp-root .cl-socialButtonsBlockButtonText {
+  color: #F9FAFB !important;
+}
+
+.dark .cl-card-homepage .cl-formFieldLabel,
+.dark .cl-signIn-root .cl-formFieldLabel,
+.dark .cl-signUp-root .cl-formFieldLabel {
+  color: #F9FAFB !important;
+}
+
+.dark .cl-card-homepage .cl-formFieldInput,
+.dark .cl-signIn-root .cl-formFieldInput,
+.dark .cl-signUp-root .cl-formFieldInput {
+  background-color: #181033 !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #FFFFFF !important;
+  transition: all 0.15s ease-in-out !important;
+}
+
+.dark .cl-card-homepage .cl-formFieldInput:focus,
+.dark .cl-card-homepage .cl-formFieldInput:focus-visible,
+.dark .cl-signIn-root .cl-formFieldInput:focus,
+.dark .cl-signIn-root .cl-formFieldInput:focus-visible,
+.dark .cl-signUp-root .cl-formFieldInput:focus,
+.dark .cl-signUp-root .cl-formFieldInput:focus-visible {
+  border-color: #7C3AED !important;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.3) !important;
+  outline: none !important;
+}
+
+.dark .cl-card-homepage .cl-formFieldInput::placeholder,
+.dark .cl-signIn-root .cl-formFieldInput::placeholder,
+.dark .cl-signUp-root .cl-formFieldInput::placeholder {
+  color: #9CA3AF !important;
+}
+
+.dark .cl-card-homepage .cl-formFieldInput:-webkit-autofill,
+.dark .cl-signIn-root .cl-formFieldInput:-webkit-autofill,
+.dark .cl-signUp-root .cl-formFieldInput:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #181033 inset !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  caret-color: #FFFFFF !important;
+}
+
+.dark .cl-card-homepage .cl-dividerLine,
+.dark .cl-signIn-root .cl-dividerLine,
+.dark .cl-signUp-root .cl-dividerLine {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.dark .cl-card-homepage .cl-dividerText,
+.dark .cl-signIn-root .cl-dividerText,
+.dark .cl-signUp-root .cl-dividerText {
+  color: #9CA3AF !important;
+}
+
+.dark .cl-card-homepage .cl-identityPreviewText,
+.dark .cl-signIn-root .cl-identityPreviewText,
+.dark .cl-signUp-root .cl-identityPreviewText {
+  color: #F9FAFB !important;
+}
+
+.dark .cl-card-homepage .cl-identityPreviewEditButtonIcon,
+.dark .cl-signIn-root .cl-identityPreviewEditButtonIcon,
+.dark .cl-signUp-root .cl-identityPreviewEditButtonIcon {
+  color: #A78BFA !important;
+}
+
+.dark .cl-card-homepage .cl-otpCodeFieldInput,
+.dark .cl-signIn-root .cl-otpCodeFieldInput,
+.dark .cl-signUp-root .cl-otpCodeFieldInput {
+  background-color: #181033 !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #FFFFFF !important;
+}
+
+.dark .cl-card-homepage .cl-formResendCodeLink,
+.dark .cl-signIn-root .cl-formResendCodeLink,
+.dark .cl-signUp-root .cl-formResendCodeLink {
+  color: #A78BFA !important;
+}
+
+/* --- SHARED PRIMARY ACTION BUTTON --- */
+.cl-card-homepage .cl-formButtonPrimary,
+.cl-signIn-root .cl-formButtonPrimary,
+.cl-signUp-root .cl-formButtonPrimary {
+  background: linear-gradient(135deg, #7C3AED, #9333EA) !important;
+  background-color: #7C3AED !important;
+  color: #F9FAFB !important;
+  font-weight: 600 !important;
+  border-radius: 0.375rem !important;
+  box-shadow: 0 4px 14px 0 rgba(124, 58, 237, 0.35) !important;
+  transition: all 0.15s ease-in-out !important;
+}
+
+.cl-card-homepage .cl-formButtonPrimary:hover,
+.cl-signIn-root .cl-formButtonPrimary:hover,
+.cl-signUp-root .cl-formButtonPrimary:hover {
+  background: linear-gradient(135deg, #6D28D9, #7E22CE) !important;
+  background-color: #6D28D9 !important;
+  box-shadow: 0 6px 18px 0 rgba(124, 58, 237, 0.45) !important;
 }
 
 
