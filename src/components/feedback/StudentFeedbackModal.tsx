@@ -272,7 +272,7 @@ export default function StudentFeedbackModal() {
                   How has PyqVitAp helped you prepare?
                 </h3>
                 <p className="mt-1 text-xs leading-relaxed text-slate-300/80">
-                  Your rating takes 5 seconds and helps keep past papers free for all VIT-APians.
+                  Takes 5 seconds and helps to maintain and improve the platform for everyone.
                 </p>
               </div>
             </div>
