@@ -55,7 +55,7 @@ export default function TermsPage() {
                     By visiting, signing in, browsing, or utilizing any feature of <strong>PyqVitAp</strong> (&ldquo;the platform&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;), you acknowledge that you have read, understood, and agreed to be bound by these Terms of Service and our accompanying <Link href="/privacy" className="text-[#562EE7] underline dark:text-[#A47DE5]">Privacy Policy</Link> and <Link href="/disclaimer" className="text-[#562EE7] underline dark:text-[#A47DE5]">Disclaimer</Link>.
                   </p>
                   <p>
-                    <strong>Institutional Access Restriction:</strong> Access to protected academic archives, question paper downloads, and collaborative features on PyqVitAp is strictly restricted to active students, researchers, faculty, and academic staff associated with VIT-AP University. Eligible users must authenticate using an authorized institutional email domain (<code>@vitapstudent.ac.in</code> or <code>@vitap.ac.in</code>).
+                    <strong>Institutional Access Restriction:</strong> Access to protected academic archives, question paper downloads, and collaborative features on PyqVitAp is strictly restricted to active students associated with VIT-AP University. Eligible users must authenticate using an authorized student email domain (<code>@vitapstudent.ac.in</code>).
                   </p>
                   <p>
                     If you do not agree to these terms or do not meet institutional eligibility, you must immediately discontinue your use of the platform.

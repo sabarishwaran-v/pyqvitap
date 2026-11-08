@@ -11,7 +11,6 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 export const ALLOWED_EMAIL_DOMAINS = [
   "vitapstudent.ac.in",
-  "vitap.ac.in",
 ] as const;
 
 // Backward-compatible alias for single-domain consumers
@@ -19,14 +18,13 @@ export const ALLOWED_EMAIL_DOMAIN = ALLOWED_EMAIL_DOMAINS[0];
 
 /**
  * Strict, case-insensitive verification that the email domain belongs exactly
- * to one of the authorized university domains:
+ * to the authorized student domain:
  * 1. vitapstudent.ac.in (students)
- * 2. vitap.ac.in (faculty/staff/institutional)
  *
- * Prevents subdomain hijacking, suffix spoofing, and lookalike attacks.
+ * Prevents subdomain hijacking, suffix spoofing, lookalike attacks, and non-student access.
  *
  * Allowed:   student@vitapstudent.ac.in
- * Allowed:   faculty@vitap.ac.in
+ * Denied:    faculty@vitap.ac.in
  * Denied:    student@gmail.com
  * Denied:    student@vitapstudent.ac.in.evil.com
  * Denied:    student@evilvitap.ac.in
@@ -64,7 +62,7 @@ export function getEmailValidationError(email: string): string | null {
   const atIndex = clean.lastIndexOf("@");
 
   if (atIndex === -1) {
-    return "University email required (@vitapstudent.ac.in or @vitap.ac.in)";
+    return "Student email required (@vitapstudent.ac.in)";
   }
 
   if (atIndex === 0) {
@@ -72,7 +70,7 @@ export function getEmailValidationError(email: string): string | null {
   }
 
   if (atIndex === clean.length - 1) {
-    return "Please complete the university domain (@vitapstudent.ac.in or @vitap.ac.in)";
+    return "Please complete the student domain (@vitapstudent.ac.in)";
   }
 
   if (clean.indexOf("@") !== atIndex) {
@@ -83,7 +81,7 @@ export function getEmailValidationError(email: string): string | null {
   const isMatch = (ALLOWED_EMAIL_DOMAINS as readonly string[]).includes(domain);
 
   if (!isMatch) {
-    return "University email required. Use your @vitapstudent.ac.in or @vitap.ac.in account.";
+    return "Student email required. Use your @vitapstudent.ac.in account.";
   }
 
   return null;

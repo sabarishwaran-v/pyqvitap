@@ -19,8 +19,6 @@ export default function PostHogUserSync(): null {
         const email = user.primaryEmailAddress?.emailAddress;
         const role = email?.endsWith("@vitapstudent.ac.in")
           ? "student"
-          : email?.endsWith("@vitap.ac.in")
-          ? "faculty"
           : "user";
 
         posthog.identify(user.id, {

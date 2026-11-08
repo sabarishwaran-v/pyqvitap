@@ -205,7 +205,7 @@ async function run() {
   }
 
   // Model: EmailSub -> POST /api/subscribe (Self-cleaning)
-  const ephemeralEmail = `ephemeral-test-${Date.now()}-${Math.floor(Math.random() * 10000)}@vitap.ac.in`;
+  const ephemeralEmail = `ephemeral-test-${Date.now()}-${Math.floor(Math.random() * 10000)}@vitapstudent.ac.in`;
   try {
     const res = await fetchUrl('/api/subscribe', {
       method: 'POST',

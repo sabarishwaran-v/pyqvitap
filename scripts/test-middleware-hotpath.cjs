@@ -51,7 +51,7 @@ console.log("\nTest 3: Tier 1 fast path evaluation (student @vitapstudent.ac.in)
     }
   };
 
-  const isAuthorizedEmail = (e) => ["vitapstudent.ac.in", "vitap.ac.in"].includes(e.split("@")[1]);
+  const isAuthorizedEmail = (e) => ["vitapstudent.ac.in"].includes(e.split("@")[1]);
   
   let email = mockClaims.email;
   let isAuthorized = false;
@@ -69,12 +69,12 @@ console.log("\nTest 3: Tier 1 fast path evaluation (student @vitapstudent.ac.in)
   console.log("  [PASS] Student authorized via claims with 0 Clerk API calls");
 }
 
-// Test 4: Simulation of Tier 1 fast path (faculty domain)
-console.log("\nTest 4: Tier 1 fast path evaluation (faculty @vitap.ac.in)...");
+// Test 4: Strict rejection of non-student vitap.ac.in domain
+console.log("\nTest 4: Strict rejection of non-student vitap.ac.in domain...");
 {
   let clerkApiCalled = false;
   const mockClaims = { primaryEmail: "faculty@vitap.ac.in" };
-  const isAuthorizedEmail = (e) => ["vitapstudent.ac.in", "vitap.ac.in"].includes(e.split("@")[1]);
+  const isAuthorizedEmail = (e) => ["vitapstudent.ac.in"].includes(e.split("@")[1]);
 
   let email = mockClaims.primaryEmail;
   let isAuthorized = false;
@@ -84,9 +84,9 @@ console.log("\nTest 4: Tier 1 fast path evaluation (faculty @vitap.ac.in)...");
     isAuthorized = true;
   }
 
-  assert.strictEqual(isAuthorized, true, "Faculty email should be authorized");
-  assert.strictEqual(clerkApiCalled, false, "Clerk API must NOT be called for Tier 1 match");
-  console.log("  [PASS] Faculty authorized via claims with 0 Clerk API calls");
+  assert.strictEqual(isAuthorized, false, "Faculty email vitap.ac.in must NOT be authorized");
+  assert.strictEqual(clerkApiCalled, false, "Clerk API must NOT be called for unauthorized domain");
+  console.log("  [PASS] Faculty domain @vitap.ac.in strictly rejected");
 }
 
 // Test 5: Simulation of Tier 2 in-memory cache hit
@@ -130,8 +130,9 @@ console.log("\nTest 5: Tier 2 in-memory isolate cache hit...");
 // Test 6: Unauthorized email rejection
 console.log("\nTest 6: Unauthorized email rejection...");
 {
-  const isAuthorizedEmail = (e) => ["vitapstudent.ac.in", "vitap.ac.in"].includes(e.split("@")[1]);
+  const isAuthorizedEmail = (e) => ["vitapstudent.ac.in"].includes(e.split("@")[1]);
   assert.strictEqual(isAuthorizedEmail("user@gmail.com"), false);
+  assert.strictEqual(isAuthorizedEmail("faculty@vitap.ac.in"), false);
   assert.strictEqual(isAuthorizedEmail("hacker@outlook.com"), false);
   assert.strictEqual(isAuthorizedEmail("spoof@vitapstudent.ac.in.evil.com"), false);
   console.log("  [PASS] Unauthorized email domains correctly identified and rejected");

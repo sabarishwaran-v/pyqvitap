@@ -79,7 +79,7 @@ export default function PrivacyPage() {
                   <p>We collect and process only the following categories of data:</p>
                   <ul className="list-disc pl-5 space-y-2">
                     <li>
-                      <strong>Institutional Email Address:</strong> When you sign in or sign up, you provide your official VIT-AP email address (ending with <code>@vitapstudent.ac.in</code> or <code>@vitap.ac.in</code>).
+                      <strong>Institutional Email Address:</strong> When you sign in or sign up, you provide your official VIT-AP student email address (ending with <code>@vitapstudent.ac.in</code>).
                       <br />
                       <em>Purpose:</em> To verify your affiliation with the university and send you a secure 6-digit one-time password (OTP) verification code. This safeguards the past question paper archive from unauthorized public scrapers and bots.
                     </li>

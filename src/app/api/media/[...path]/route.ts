@@ -126,7 +126,7 @@ async function verifyMediaAuth(req?: Request): Promise<Response | null> {
       return new Response(
         JSON.stringify({
           error: "Forbidden",
-          message: "Access restricted to verified @vitapstudent.ac.in or @vitap.ac.in accounts",
+          message: "Access restricted to verified @vitapstudent.ac.in accounts",
         }),
         { status: 403, headers: { "Content-Type": "application/json" } }
       );

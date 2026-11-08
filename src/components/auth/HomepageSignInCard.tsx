@@ -643,18 +643,18 @@ export default function HomepageSignInCard() {
         );
 
         if (isPrefixOfAllowed) {
-          // The student is actively typing a legitimate VIT-AP email!
+          // The student is actively typing a legitimate VIT-AP student email!
           // NEVER show an error while they are typing the domain, dots, or sub-parts.
           setDomainError(null);
         } else {
-          // The typed domain cannot possibly become @vitapstudent.ac.in or @vitap.ac.in
-          // (e.g. "@gmail.com", "@yahoo.com", "@outlook.com")
+          // The typed domain cannot possibly become @vitapstudent.ac.in
+          // (e.g. "@gmail.com", "@yahoo.com", "@outlook.com", "@vitap.ac.in")
           // Only show error once they fully complete an unrecognized domain with a TLD
           const isCompleteDomain =
             domain.includes(".") && (domain.split(".").pop()?.length ?? 0) >= 2;
           if (isCompleteDomain) {
             setDomainError(
-              "Access restricted. Please use your official VIT-AP email (@vitapstudent.ac.in or @vitap.ac.in)"
+              "Access restricted. Please use your official VIT-AP student email (@vitapstudent.ac.in)"
             );
           } else {
             setDomainError(null);
@@ -699,7 +699,7 @@ export default function HomepageSignInCard() {
         e.preventDefault();
         e.stopPropagation();
         setDomainError(
-          "Access restricted. Please use your official VIT-AP email (@vitapstudent.ac.in or @vitap.ac.in)"
+          "Access restricted. Please use your official VIT-AP student email (@vitapstudent.ac.in)"
         );
         return;
       }

@@ -63,27 +63,26 @@ export default function UnauthorizedPage() {
           </div>
 
           <h1 className="mt-2 text-2xl font-extrabold text-white md:text-3xl">
-            University account required
+            Student account required
           </h1>
 
           <p className="mt-4 text-sm leading-relaxed text-zinc-300 md:text-base">
-            PyqVitAp is available only to verified members of <span className="font-semibold text-purple-300">VIT-AP University</span>.
-            Please sign in using your official university account to continue.
+            PyqVitAp is available only to verified students of <span className="font-semibold text-purple-300">VIT-AP University</span>.
+            Please sign in using your official student account to continue.
           </p>
 
           <div className="my-6 w-full rounded-xl border border-purple-500/30 bg-purple-950/30 p-4 text-left">
             <div className="text-xs font-semibold uppercase tracking-wider text-purple-400">
-              Supported University Email Domains
+              Supported Student Email Domain
             </div>
             <div className="mt-1 flex flex-wrap gap-2 font-mono text-sm font-bold text-white">
               <span className="rounded bg-purple-900/40 px-2 py-0.5">@vitapstudent.ac.in</span>
-              <span className="rounded bg-purple-900/40 px-2 py-0.5">@vitap.ac.in</span>
             </div>
             {hasClerk && <ClerkUserInfo />}
           </div>
 
           <p className="text-xs text-zinc-400">
-            Accounts with public email providers (such as Gmail, Yahoo, or Outlook) cannot access PyqVitAp. Please switch to your university account.
+            Accounts with public email providers (such as Gmail, Yahoo, or Outlook) or non-student emails cannot access PyqVitAp. Please switch to your student account.
           </p>
 
           <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row">
