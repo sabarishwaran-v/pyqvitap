@@ -157,6 +157,8 @@ export default function RootLayout({
         content="7eR_r20eSByy6ReESw2g-EcMaBRmh_Zpz3q8SbvCH64"
       />
       <head>
+        <link rel="preconnect" href="https://clerk.pyqvitap.site" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://clerk.pyqvitap.site" />
         <Script
            async
           src="https://www.googletagmanager.com/gtag/js?id=G-J5CD036GJP"

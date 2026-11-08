@@ -3,24 +3,21 @@ import { headers } from "next/headers";
 import { ClerkProvider } from "@clerk/nextjs";
 import { pyqvitapClerkAppearance } from "@/config/clerk-theme";
 
+const PROD_CLERK_KEY = "pk_live_Y2xlcmsucHlxdml0YXAuc2l0ZSQ";
 const LOCAL_DEV_CLERK_KEY = "pk_test_d2FybS13YWxydXMtNDc4NS5jbGVyay5hY2NvdW50cy5kZXYk";
 
 /**
  * Fail-Safe Clerk Auth Provider Wrapper
  *
  * If NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is not configured (e.g. during initial setup
- * or when AUTH_ENABLED=false), renders children cleanly without crashing the application.
+ * or when AUTH_ENABLED=false), defaults cleanly based on runtime environment:
+ * - Localhost: LOCAL_DEV_CLERK_KEY
+ * - Production: PROD_CLERK_KEY
  * When present, initializes Clerk with the PyqVitAp custom dark purple appearance.
  */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || LOCAL_DEV_CLERK_KEY;
-
-  if (!publishableKey) {
-    return <>{children}</>;
-  }
-
   // Detect localhost on both server (via headers) and client to ensure matching dev keys
-  let effectiveKey = publishableKey;
+  let isLocal = false;
   try {
     const headersList = headers();
     const host = headersList.get("host") || "";
@@ -34,16 +31,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       xHost.includes("localhost") ||
       xHost.includes("127.0.0.1")
     ) {
-      effectiveKey = LOCAL_DEV_CLERK_KEY;
+      isLocal = true;
     }
   } catch {
     if (typeof window !== "undefined") {
       const h = window.location.hostname;
       if (h === "localhost" || h === "127.0.0.1") {
-        effectiveKey = LOCAL_DEV_CLERK_KEY;
+        isLocal = true;
       }
     }
   }
+
+  const defaultKey = isLocal ? LOCAL_DEV_CLERK_KEY : PROD_CLERK_KEY;
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || defaultKey;
+
+  if (!publishableKey) {
+    return <>{children}</>;
+  }
+
+  const effectiveKey = isLocal ? LOCAL_DEV_CLERK_KEY : publishableKey;
 
   return (
     <ClerkProvider
