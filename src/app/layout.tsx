@@ -11,6 +11,7 @@ import { CoursesProvider } from "@/context/courseContext";
 import { MAINTENANCE_MODE } from "@/config/maintenance";
 import MaintenanceGate from "@/components/MaintenanceGate";
 import { AuthProvider } from "@/components/AuthProvider";
+import { isAuthEnabled } from "@/config/auth";
 import PostHogProviderWrapper from "@/components/analytics/PostHogProvider";
 import PostHogUserSync from "@/components/analytics/PostHogUserSync";
 import PwaUpdatePrompt from "@/components/pwa/PwaUpdatePrompt";
@@ -145,11 +146,12 @@ export const metadata: Metadata = {
 };
 export const revalidate = 60;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const authEnabled = await isAuthEnabled();
   return (
     <html lang="en" className={`${GeistSans.variable}`} suppressHydrationWarning>
       <meta
@@ -157,8 +159,12 @@ export default function RootLayout({
         content="7eR_r20eSByy6ReESw2g-EcMaBRmh_Zpz3q8SbvCH64"
       />
       <head>
-        <link rel="preconnect" href="https://clerk.pyqvitap.site" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://clerk.pyqvitap.site" />
+        {authEnabled && (
+          <>
+            <link rel="preconnect" href="https://clerk.pyqvitap.site" crossOrigin="anonymous" />
+            <link rel="dns-prefetch" href="https://clerk.pyqvitap.site" />
+          </>
+        )}
         <Script
            async
           src="https://www.googletagmanager.com/gtag/js?id=G-J5CD036GJP"
@@ -195,7 +201,7 @@ export default function RootLayout({
       </head>
       <body>
         <PostHogProviderWrapper>
-          <AuthProvider>
+          <AuthProvider authEnabled={authEnabled}>
             <PostHogUserSync />
             <ThemeProvider
               attribute="class"

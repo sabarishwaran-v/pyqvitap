@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   ShieldAlert,
+  ShieldCheck,
   BookOpen,
   Scale,
   FileText,
@@ -85,7 +86,32 @@ export default function DisclaimerPage() {
             </div>
           </section>
 
-          {/* Section 3: Sourcing & Attribution */}
+          {/* Section 3: Open Access & Zero Credential Harvesting */}
+          <section className="rounded-2xl border border-gray-200 bg-white/70 p-6 shadow-sm backdrop-blur-sm dark:border-[#3A3745] dark:bg-[#130E1F]/70 sm:p-8">
+            <div className="flex items-start gap-4">
+              <div className="rounded-xl bg-[#562EE7]/10 p-3 text-[#562EE7] dark:bg-[#A47DE5]/15 dark:text-[#A47DE5]">
+                <ShieldCheck className="h-6 w-6 shrink-0" />
+              </div>
+              <div className="space-y-3">
+                <h2 className="font-jost text-xl font-bold sm:text-2xl">
+                  3. Open Access & Zero Student Credential Harvesting
+                </h2>
+                <div className="space-y-2 font-play text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                  <p>
+                    <strong>No Credential Requirement:</strong> PyqVitAp does not require, solicit, collect, harvest, or store student login credentials, passwords, or institutional email accounts to browse, view, or download past examination papers. All cataloged materials are open for personal academic study.
+                  </p>
+                  <p>
+                    <strong>Zero Commercial Data Selling:</strong> PyqVitAp has never and will never sell, lease, or distribute student information to third-party marketing companies, advertisers, coaching centers, or data brokers.
+                  </p>
+                  <p>
+                    <strong>Configurable Administrative Safeguards:</strong> An enterprise-grade institutional authentication gate is engineered into the platform architecture and can be enabled via feature flag should university administration require access to be restricted strictly to enrolled students.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Section 4: Sourcing & Attribution */}
           <section className="rounded-2xl border border-gray-200 bg-white/70 p-6 shadow-sm backdrop-blur-sm dark:border-[#3A3745] dark:bg-[#130E1F]/70 sm:p-8">
             <div className="flex items-start gap-4">
               <div className="rounded-xl bg-[#562EE7]/10 p-3 text-[#562EE7] dark:bg-[#A47DE5]/15 dark:text-[#A47DE5]">
@@ -93,7 +119,7 @@ export default function DisclaimerPage() {
               </div>
               <div className="space-y-3">
                 <h2 className="font-jost text-xl font-bold sm:text-2xl">
-                  3. Content Sourcing & Institutional Repositories
+                  4. Content Sourcing & Institutional Repositories
                 </h2>
                 <div className="space-y-2 font-play text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                   <p>
@@ -107,7 +133,7 @@ export default function DisclaimerPage() {
             </div>
           </section>
 
-          {/* Section 4: Intellectual Property & Rights */}
+          {/* Section 5: Intellectual Property & Rights */}
           <section className="rounded-2xl border border-gray-200 bg-white/70 p-6 shadow-sm backdrop-blur-sm dark:border-[#3A3745] dark:bg-[#130E1F]/70 sm:p-8">
             <div className="flex items-start gap-4">
               <div className="rounded-xl bg-[#562EE7]/10 p-3 text-[#562EE7] dark:bg-[#A47DE5]/15 dark:text-[#A47DE5]">
@@ -115,7 +141,7 @@ export default function DisclaimerPage() {
               </div>
               <div className="space-y-3">
                 <h2 className="font-jost text-xl font-bold sm:text-2xl">
-                  4. Intellectual Property & Copyright Notice
+                  5. Intellectual Property & Copyright Notice
                 </h2>
                 <div className="space-y-2 font-play text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                   <p>
@@ -129,7 +155,7 @@ export default function DisclaimerPage() {
             </div>
           </section>
 
-          {/* Section 5: No Warranty / Accuracy */}
+          {/* Section 6: No Warranty / Accuracy */}
           <section className="rounded-2xl border border-gray-200 bg-white/70 p-6 shadow-sm backdrop-blur-sm dark:border-[#3A3745] dark:bg-[#130E1F]/70 sm:p-8">
             <div className="flex items-start gap-4">
               <div className="rounded-xl bg-[#562EE7]/10 p-3 text-[#562EE7] dark:bg-[#A47DE5]/15 dark:text-[#A47DE5]">
@@ -137,7 +163,7 @@ export default function DisclaimerPage() {
               </div>
               <div className="space-y-3">
                 <h2 className="font-jost text-xl font-bold sm:text-2xl">
-                  5. No Guarantee of Completeness or Accuracy
+                  6. No Guarantee of Completeness or Accuracy
                 </h2>
                 <div className="space-y-2 font-play text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                   <p>
@@ -151,7 +177,7 @@ export default function DisclaimerPage() {
             </div>
           </section>
 
-          {/* Section 6: Content Availability */}
+          {/* Section 7: Content Availability */}
           <section className="rounded-2xl border border-gray-200 bg-white/70 p-6 shadow-sm backdrop-blur-sm dark:border-[#3A3745] dark:bg-[#130E1F]/70 sm:p-8">
             <div className="flex items-start gap-4">
               <div className="rounded-xl bg-[#562EE7]/10 p-3 text-[#562EE7] dark:bg-[#A47DE5]/15 dark:text-[#A47DE5]">
@@ -159,7 +185,7 @@ export default function DisclaimerPage() {
               </div>
               <div className="space-y-3">
                 <h2 className="font-jost text-xl font-bold sm:text-2xl">
-                  6. Content Availability & Modifications
+                  7. Content Availability & Modifications
                 </h2>
                 <div className="space-y-2 font-play text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                   <p>
@@ -170,7 +196,7 @@ export default function DisclaimerPage() {
             </div>
           </section>
 
-          {/* Section 7: Copyright Inquiries & Takedown Process */}
+          {/* Section 8: Copyright Inquiries & Takedown Process */}
           <section className="rounded-2xl border border-[#562EE7]/30 bg-gradient-to-br from-white/90 to-[#562EE7]/5 p-6 shadow-sm backdrop-blur-sm dark:border-[#A47DE5]/30 dark:bg-gradient-to-br dark:from-[#130E1F]/90 dark:to-[#562EE7]/10 sm:p-8">
             <div className="flex items-start gap-4">
               <div className="rounded-xl bg-[#562EE7] p-3 text-white dark:bg-[#A47DE5] dark:text-black">
@@ -178,7 +204,7 @@ export default function DisclaimerPage() {
               </div>
               <div className="space-y-3">
                 <h2 className="font-jost text-xl font-bold sm:text-2xl">
-                  7. Copyright Inquiries, Takedowns & Contact Process
+                  8. Copyright Inquiries, Takedowns & Contact Process
                 </h2>
                 <div className="space-y-2 font-play text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                   <p>

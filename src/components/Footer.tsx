@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Mail, ExternalLink, Github } from "lucide-react";
 import toast from "react-hot-toast";
 import type { ApiResponse } from '@/interface'
+import { useAuthMode } from "@/context/AuthModeContext";
 
 export default function Footer() {
+  const { authEnabled } = useAuthMode();
   const [email, setEmail] = useState("");
   const handleSubscribe = async () => {
     if (!email.trim()) {
@@ -159,13 +161,17 @@ export default function Footer() {
           >
             Terms of Service
           </Link>
-          <span className="text-xs text-gray-400 dark:text-gray-600">&bull;</span>
-          <Link
-            href="/privacy"
-            className="font-play text-xs font-semibold text-[#562EE7] underline underline-offset-4 transition-colors hover:text-[#4531b3] dark:text-[#A47DE5] dark:hover:text-[#FFC6E8]"
-          >
-            Privacy Policy
-          </Link>
+          {authEnabled && (
+            <>
+              <span className="text-xs text-gray-400 dark:text-gray-600">&bull;</span>
+              <Link
+                href="/privacy"
+                className="font-play text-xs font-semibold text-[#562EE7] underline underline-offset-4 transition-colors hover:text-[#4531b3] dark:text-[#A47DE5] dark:hover:text-[#FFC6E8]"
+              >
+                Privacy Policy
+              </Link>
+            </>
+          )}
           <span className="text-xs text-gray-400 dark:text-gray-600">&bull;</span>
           <Link
             href="/disclaimer"

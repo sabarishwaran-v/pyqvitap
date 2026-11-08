@@ -14,10 +14,12 @@ import {
   LogIn,
   Pin,
 } from "lucide-react";
-import { SignedIn as ClerkSignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { SignedIn as ClerkSignedIn } from "@clerk/nextjs";
 import { PyqvitapUserAvatar } from "@/components/auth/PyqvitapSignedIn";
+import { useAuthMode } from "@/context/AuthModeContext";
 
 function SignedIn({ children }: { children: React.ReactNode }) {
+  const { authEnabled } = useAuthMode();
   const [isLocalhost, setIsLocalhost] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
       const h = window.location.hostname;
@@ -33,7 +35,7 @@ function SignedIn({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  if (isLocalhost) {
+  if (!authEnabled || isLocalhost) {
     return <>{children}</>;
   }
 

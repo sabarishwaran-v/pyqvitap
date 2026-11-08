@@ -609,6 +609,29 @@ test("19. API & Media Endpoints Retain 401/403 Responses", () => {
         resetContext();
       }
     })();
+
+    // --- TEST 28: Open Access Mode (AUTH_ENABLED=false) Safe Default ---
+    await (async () => {
+      total++;
+      try {
+        globalThis[cfSymbol] = {
+          env: {
+            AUTH_ENABLED: "false",
+            FLAGS: {
+              getBooleanValue: async () => false,
+            },
+          },
+        };
+        const result = await isAuthEnabled();
+        assert.strictEqual(result, false, "Open Access mode must return authEnabled=false");
+        console.log("[PASS] 28. Open Access mode (AUTH_ENABLED=false) safely returns false");
+        passed++;
+      } catch (err) {
+        console.error(`[FAIL] 28. Open Access mode safely returns false: ${err.message}`);
+      } finally {
+        resetContext();
+      }
+    })();
   } finally {
     resetContext();
     if (originalCfContext !== undefined) {
