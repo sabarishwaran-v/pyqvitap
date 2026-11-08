@@ -1052,7 +1052,7 @@ export default async function middleware(request: NextRequest, event: NextFetchE
     }
   }
 
-  // When auth is disabled (Open Access Mode), redirect any stale auth routes back to home
+  // When auth is disabled (Open Access Mode), redirect any stale auth routes and privacy policy back
   if (
     pathname === "/sign-in" ||
     pathname === "/sign-in/" ||
@@ -1062,6 +1062,10 @@ export default async function middleware(request: NextRequest, event: NextFetchE
     pathname === "/unauthorized/"
   ) {
     return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  if (pathname === "/privacy" || pathname === "/privacy/") {
+    return NextResponse.redirect(new URL("/terms", request.url));
   }
 
   return handleNormalOperations(request);

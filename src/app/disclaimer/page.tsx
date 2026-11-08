@@ -243,13 +243,6 @@ export default function DisclaimerPage() {
           >
             Terms of Service
           </Link>
-          <span className="text-gray-400 dark:text-gray-600">&bull;</span>
-          <Link
-            href="/privacy"
-            className="font-play text-sm font-semibold text-[#562EE7] underline underline-offset-4 transition-colors hover:text-[#4531b3] dark:text-[#A47DE5] dark:hover:text-[#FFC6E8]"
-          >
-            Privacy Policy
-          </Link>
         </div>
       </div>
     </div>
