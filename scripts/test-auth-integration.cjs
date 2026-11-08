@@ -306,6 +306,12 @@ test("12. Theme-Aware Appearance & Restriction Notice", () => {
   assert(cssContent.includes("Please sign in using your VIT-AP institutional account."), "CSS must inject restriction notice on subtitle");
   assert(cssContent.includes(".cl-card-homepage .cl-footerAction"), "CSS must style footer action on homepage card");
   assert(cssContent.includes("max-width: 480px"), "CSS must constrain card max-width");
+  assert(cssContent.includes("html:not(.dark) .cl-card-homepage .cl-socialButtonsBlockButton"), "CSS must provide light mode overrides for Google SSO button");
+  assert(cssContent.includes(".dark .cl-card-homepage .cl-socialButtonsBlockButton"), "CSS must provide dark mode overrides for Google SSO button");
+  assert(cssContent.includes("html:not(.dark) .cl-card-homepage .cl-formFieldInput"), "CSS must provide light mode overrides for email input");
+  assert(cssContent.includes(".dark .cl-card-homepage .cl-formFieldInput"), "CSS must provide dark mode overrides for email input");
+  assert(cssContent.includes("html:not(.dark) .cl-card-homepage .cl-formFieldLabel"), "CSS must provide light mode overrides for email label");
+  assert(cssContent.includes(".dark .cl-card-homepage .cl-formFieldLabel"), "CSS must provide dark mode overrides for email label");
 });
 
 // --- TEST 13: Passwordless & Dynamic Sign-Up Fallback (transferable default) Configuration ---
