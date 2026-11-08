@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
-import { SignIn, SignUp } from "@clerk/nextjs";
+import { SignIn, SignUp, ClerkLoading, ClerkLoaded, ClerkFailed } from "@clerk/nextjs";
 import { getPyqvitapClerkAppearance } from "@/config/clerk-theme";
 import { useTheme } from "next-themes";
 import { Card } from "@/components/ui/card";
@@ -12,6 +12,121 @@ import {
   sanitizeRedirectUrl,
 } from "@/config/auth";
 import toast from "react-hot-toast";
+
+/**
+ * High-fidelity loading skeleton matching Clerk's SignIn/SignUp layout
+ * Prevents layout shift and eliminates blank cards during initial script loading
+ */
+function AuthFormSkeleton({ isSignUp }: { isSignUp: boolean }) {
+  return (
+    <div className="w-full space-y-3.5 animate-pulse" aria-busy="true" aria-label="Loading authentication">
+      {/* Google SSO Button Skeleton */}
+      <div className="flex h-[42px] w-full items-center justify-center gap-3 rounded-md border border-[#94A3B8]/40 bg-[#F8F9FF] dark:border-white/20 dark:bg-[#181033] px-4 shadow-sm">
+        <svg className="h-4 w-4 shrink-0 opacity-80" viewBox="0 0 24 24">
+          <path
+            fill="#4285F4"
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+          />
+          <path
+            fill="#34A853"
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+          />
+          <path
+            fill="#FBBC05"
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+          />
+          <path
+            fill="#EA4335"
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+          />
+        </svg>
+        <span className="text-sm font-medium text-[#030712]/70 dark:text-[#F9FAFB]/80">
+          Continue with Google
+        </span>
+      </div>
+
+      {/* Divider */}
+      <div className="relative flex items-center justify-center my-3">
+        <div className="w-full border-t border-[#CBD5E1] dark:border-white/15" />
+        <span className="absolute bg-[#F7F8FD] dark:bg-[#030712] px-2 text-xs font-medium text-[#64748B] dark:text-[#9CA3AF]">
+          or
+        </span>
+      </div>
+
+      {/* Email Input Skeleton */}
+      <div className="space-y-1.5 text-left">
+        <div className="h-3.5 w-24 rounded bg-gray-300/60 dark:bg-white/15" />
+        <div className="h-[42px] w-full rounded-md border border-[#94A3B8]/40 bg-[#F8F9FF] dark:border-white/20 dark:bg-[#181033]" />
+      </div>
+
+      {/* Primary Submit Button Skeleton */}
+      <div className="flex h-[42px] w-full items-center justify-center rounded-md bg-gradient-to-r from-[#7C3AED] to-[#9333EA] text-sm font-semibold text-white shadow-md opacity-90">
+        Continue
+      </div>
+
+      {/* Footer Link Skeleton */}
+      <div className="pt-2 text-center">
+        <span className="text-xs text-[#64748B] dark:text-[#9CA3AF]">
+          {isSignUp ? "Already have an account? " : "Don't have an account? "}
+        </span>
+        <span className="text-xs font-semibold text-[#7C3AED] dark:text-[#A78BFA]">
+          {isSignUp ? "Sign in" : "Sign up"}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Graceful fallback notice if Clerk fails to load or times out
+ * Informs the user about potential ad-blockers and gives a direct one-tap reload action
+ */
+function AuthFallbackNotice({
+  onReload,
+  onRetry,
+}: {
+  onReload: () => void;
+  onRetry?: () => void;
+}) {
+  return (
+    <div className="w-full rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-center dark:border-amber-400/20 dark:bg-amber-950/30">
+      <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-amber-500/20 text-amber-500 dark:text-amber-400">
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+          />
+        </svg>
+      </div>
+      <h3 className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+        Authentication taking longer to load
+      </h3>
+      <p className="mt-1 text-xs text-amber-800/80 dark:text-amber-300/80">
+        If you have an ad-blocker or content filter enabled (like Brave Shields or AdGuard), it might be blocking the login service.
+      </p>
+      <div className="mt-3.5 flex items-center justify-center gap-2">
+        <button
+          type="button"
+          onClick={onReload}
+          className="inline-flex items-center gap-1.5 rounded-md bg-[#7C3AED] px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#6D28D9]"
+        >
+          🔄 Reload Page
+        </button>
+        {onRetry && (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="rounded-md border border-gray-400/40 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 dark:border-white/20 dark:text-gray-300 dark:hover:bg-white/5"
+          >
+            Wait a bit more
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function HomepageSignInCard() {
   const { resolvedTheme, theme } = useTheme();
@@ -48,6 +163,23 @@ export default function HomepageSignInCard() {
   // UX Improvement: Account not found state & domain validation errors
   const [isAccountNotFound, setIsAccountNotFound] = useState(false);
   const [domainError, setDomainError] = useState<string | null>(null);
+
+  // Watchdog timer: If Clerk hasn't mounted interactive inputs after 6 seconds, show fallback notice
+  const [loadTimedOut, setLoadTimedOut] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const container = clerkContainerRef.current;
+      const hasInputs = Boolean(
+        container?.querySelector("input, button.cl-formButtonPrimary, .cl-socialButtonsBlockButton")
+      );
+      if (!hasInputs) {
+        setLoadTimedOut(true);
+      }
+    }, 6000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Stable refs for real-time DOM interception & synchronization
   const isAccountNotFoundRef = useRef(false);
@@ -615,29 +747,47 @@ export default function HomepageSignInCard() {
           </p>
         </div>
 
-        {/* Embedded Clerk Form */}
-        <div ref={clerkContainerRef} className="mt-6 w-full">
-          {isSignUp ? (
-            <SignUp
-              appearance={appearance}
-              routing="hash"
-              signInUrl={signInUrl}
-              fallbackRedirectUrl="/"
-              signInFallbackRedirectUrl="/"
-              forceRedirectUrl={hasCustomDestination ? destination : undefined}
-              signInForceRedirectUrl={hasCustomDestination ? destination : undefined}
-            />
-          ) : (
-            <SignIn
-              appearance={appearance}
-              routing="hash"
-              signUpUrl={signUpUrl}
-              fallbackRedirectUrl="/"
-              signUpFallbackRedirectUrl="/"
-              forceRedirectUrl={hasCustomDestination ? destination : undefined}
-              signUpForceRedirectUrl={hasCustomDestination ? destination : undefined}
-            />
-          )}
+        {/* Embedded Clerk Form with High-Fidelity Loading Skeleton and Fail-Safe Fallback */}
+        <div ref={clerkContainerRef} className="mt-6 w-full min-h-[280px]">
+          <ClerkLoading>
+            <AuthFormSkeleton isSignUp={isSignUp} />
+            {loadTimedOut && (
+              <div className="mt-4">
+                <AuthFallbackNotice
+                  onReload={() => window.location.reload()}
+                  onRetry={() => setLoadTimedOut(false)}
+                />
+              </div>
+            )}
+          </ClerkLoading>
+
+          <ClerkLoaded>
+            {isSignUp ? (
+              <SignUp
+                appearance={appearance}
+                routing="hash"
+                signInUrl={signInUrl}
+                fallbackRedirectUrl="/"
+                signInFallbackRedirectUrl="/"
+                forceRedirectUrl={hasCustomDestination ? destination : undefined}
+                signInForceRedirectUrl={hasCustomDestination ? destination : undefined}
+              />
+            ) : (
+              <SignIn
+                appearance={appearance}
+                routing="hash"
+                signUpUrl={signUpUrl}
+                fallbackRedirectUrl="/"
+                signUpFallbackRedirectUrl="/"
+                forceRedirectUrl={hasCustomDestination ? destination : undefined}
+                signUpForceRedirectUrl={hasCustomDestination ? destination : undefined}
+              />
+            )}
+          </ClerkLoaded>
+
+          <ClerkFailed>
+            <AuthFallbackNotice onReload={() => window.location.reload()} />
+          </ClerkFailed>
         </div>
       </Card>
     </div>

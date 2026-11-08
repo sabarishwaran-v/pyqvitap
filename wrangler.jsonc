@@ -17,6 +17,9 @@
       "custom_domain": true
     }
   ],
+  "vars": {
+    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsucHlxdml0YXAuc2l0ZSQ"
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"

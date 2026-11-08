@@ -141,6 +141,8 @@ test("4. Route Classification Matrix", () => {
   assert.strictEqual(isPublicPath("/terms"), true);
   assert.strictEqual(isPublicPath("/privacy"), true);
   assert.strictEqual(isPublicPath("/api/health"), true);
+  assert.strictEqual(isPublicPath("/api/subscribe"), true);
+  assert.strictEqual(isPublicPath("/api/unsubscribe"), true);
   assert.strictEqual(isPublicPath("/manifest.webmanifest"), true);
   assert.strictEqual(isPublicPath("/robots.txt"), true);
   assert.strictEqual(isPublicPath("/sitemap.xml"), true);
