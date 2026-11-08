@@ -2,7 +2,7 @@
  * PyqVitAp Authentication & Clerk Prebuilt UI Integration Test Suite
  *
  * Validates:
- * 1. Domain allowlist integrity (@vitapstudent.ac.in and @vitap.ac.in)
+ * 1. Domain allowlist integrity (@vitapstudent.ac.in strictly)
  * 2. Real-time domain validation error handling
  * 3. Safe redirect sanitization (open-redirect prevention)
  * 4. Route classification (public, protected, auth flow)
@@ -55,18 +55,18 @@ function test(name, fn) {
 test("1. Permitted University Domains Allowlist", () => {
   assert.deepStrictEqual(
     Array.from(ALLOWED_EMAIL_DOMAINS),
-    ["vitapstudent.ac.in", "vitap.ac.in"],
-    "Must permit exactly vitapstudent.ac.in and vitap.ac.in"
+    ["vitapstudent.ac.in"],
+    "Must permit strictly vitapstudent.ac.in"
   );
   assert.strictEqual(ALLOWED_EMAIL_DOMAIN, "vitapstudent.ac.in");
 
   // Valid student email
   assert.strictEqual(isAuthorizedEmail("21bce1084@vitapstudent.ac.in"), true);
-  // Valid faculty email
-  assert.strictEqual(isAuthorizedEmail("faculty.name@vitap.ac.in"), true);
+  // Denied faculty email (restricted to students only)
+  assert.strictEqual(isAuthorizedEmail("faculty.name@vitap.ac.in"), false);
   // Case insensitivity
   assert.strictEqual(isAuthorizedEmail("Student@VITAPSTUDENT.AC.IN"), true);
-  assert.strictEqual(isAuthorizedEmail("Professor@VITAP.AC.IN"), true);
+  assert.strictEqual(isAuthorizedEmail("Professor@VITAP.AC.IN"), false);
 
   // Rejected public providers
   assert.strictEqual(isAuthorizedEmail("user@gmail.com"), false);
@@ -98,11 +98,12 @@ test("2. Real-time Domain Validation Error Messages", () => {
 
   // Valid inputs return null
   assert.strictEqual(getEmailValidationError("student@vitapstudent.ac.in"), null);
-  assert.strictEqual(getEmailValidationError("faculty@vitap.ac.in"), null);
+  // Non-student university domains return error
+  assert.strictEqual(getEmailValidationError("faculty@vitap.ac.in")?.includes("@vitapstudent.ac.in"), true);
 
   // Incomplete / non-university domains return descriptive error
   const errGmail = getEmailValidationError("student@gmail.com");
-  assert(errGmail && errGmail.includes("@vitapstudent.ac.in or @vitap.ac.in"));
+  assert(errGmail && errGmail.includes("@vitapstudent.ac.in"));
 
   const errNoAt = getEmailValidationError("student");
   assert(errNoAt && errNoAt.includes("@vitapstudent.ac.in"));
@@ -184,7 +185,6 @@ test("5. Prebuilt <SignIn /> Page Implementation", () => {
   assert(content.includes('signUpUrl="/sign-up"'), 'Must link to /sign-up');
   assert(content.includes('fallbackRedirectUrl="/"'), 'Must provide fallbackRedirectUrl="/"');
   assert(content.includes("@vitapstudent.ac.in"), "Must document student domain in banner");
-  assert(content.includes("@vitap.ac.in"), "Must document faculty domain in banner");
 });
 
 // --- TEST 6: Verify Prebuilt SignUp Page Component ---
@@ -199,7 +199,6 @@ test("6. Prebuilt <SignUp /> Page Implementation", () => {
   assert(content.includes('signInUrl="/sign-in"'), 'Must link to /sign-in');
   assert(content.includes('fallbackRedirectUrl="/"'), 'Must provide fallbackRedirectUrl="/"');
   assert(content.includes("@vitapstudent.ac.in"), "Must document student domain in banner");
-  assert(content.includes("@vitap.ac.in"), "Must document faculty domain in banner");
 });
 
 // --- TEST 7: Verify AuthProvider Wrapper ---
@@ -221,7 +220,6 @@ test("8. Unauthorized Access Gate (<UnauthorizedPage />)", () => {
 
   assert(content.includes('import { SignOutButton'), "Must import SignOutButton from @clerk/nextjs");
   assert(content.includes("@vitapstudent.ac.in"), "Must display student domain");
-  assert(content.includes("@vitap.ac.in"), "Must display faculty domain");
   assert(content.includes("Switch Account"), "Must provide switch account button");
 });
 

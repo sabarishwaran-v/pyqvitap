@@ -1281,7 +1281,7 @@ function getClerkHandler(): ClerkMiddlewareReturn {
         return new NextResponse(
           JSON.stringify({
             error: "Forbidden",
-            message: "Access restricted to verified @vitapstudent.ac.in or @vitap.ac.in accounts",
+            message: "Access restricted to verified @vitapstudent.ac.in accounts",
           }),
           {
             status: 403,

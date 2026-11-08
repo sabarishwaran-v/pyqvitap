@@ -112,10 +112,6 @@ export default function LoginLanding({ redirectUrl }: LoginLandingProps) {
                     <GraduationCap className="h-3.5 w-3.5" />
                     @vitapstudent.ac.in
                   </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-100/70 px-2.5 py-1 text-purple-900 dark:border-purple-500/30 dark:bg-purple-900/40 dark:text-purple-200">
-                    <BookOpen className="h-3.5 w-3.5" />
-                    @vitap.ac.in
-                  </span>
                 </div>
               </div>
             </div>

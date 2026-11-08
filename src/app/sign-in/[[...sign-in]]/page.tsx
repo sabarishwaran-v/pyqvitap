@@ -49,7 +49,7 @@ export default function SignInPage({
           </span>
         </Link>
         <p className="mt-2 text-xs font-medium text-zinc-400">
-          Sign in with your <span className="text-purple-300 font-semibold">@vitapstudent.ac.in</span> or <span className="text-purple-300 font-semibold">@vitap.ac.in</span> account
+          Sign in with your <span className="text-purple-300 font-semibold">@vitapstudent.ac.in</span> account
         </p>
       </div>
 
