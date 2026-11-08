@@ -312,6 +312,8 @@ test("12. Theme-Aware Appearance & Restriction Notice", () => {
   assert(cssContent.includes(".dark .cl-card-homepage .cl-formFieldInput"), "CSS must provide dark mode overrides for email input");
   assert(cssContent.includes("html:not(.dark) .cl-card-homepage .cl-formFieldLabel"), "CSS must provide light mode overrides for email label");
   assert(cssContent.includes(".dark .cl-card-homepage .cl-formFieldLabel"), "CSS must provide dark mode overrides for email label");
+  assert(cssContent.includes("font-size: 0.95rem"), "CSS must enlarge divider 'or' text for high visibility");
+  assert(cssContent.includes("font-weight: 600"), "CSS must increase divider 'or' font-weight to semibold");
 });
 
 // --- TEST 13: Passwordless & Dynamic Sign-Up Fallback (transferable default) Configuration ---

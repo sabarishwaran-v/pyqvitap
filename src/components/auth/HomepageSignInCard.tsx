@@ -46,9 +46,9 @@ function AuthFormSkeleton({ isSignUp }: { isSignUp: boolean }) {
       </div>
 
       {/* Divider */}
-      <div className="relative flex items-center justify-center my-3">
+      <div className="relative flex items-center justify-center my-4">
         <div className="w-full border-t border-[#CBD5E1] dark:border-white/15" />
-        <span className="absolute bg-[#F7F8FD] dark:bg-[#030712] px-2 text-xs font-medium text-[#64748B] dark:text-[#9CA3AF]">
+        <span className="absolute bg-[#F7F8FD] dark:bg-[#030712] px-3 text-[0.95rem] font-semibold text-[#334155] dark:text-[#E2E8F0]">
           or
         </span>
       </div>
