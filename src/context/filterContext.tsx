@@ -19,6 +19,7 @@ import { toast } from "react-hot-toast";
 import { getSecureUrl, generateFileName } from "@/lib/utils/download";
 import { applyWatermarkAndDisclaimer } from "@/lib/utils/pdfWatermark";
 import { trackEvent } from "@/lib/telemetry";
+import { incrementPaperEngagementCount } from "@/lib/feedback";
 
 export interface ActiveFilterCountInput {
   selectedExams?: string[];
@@ -172,6 +173,8 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
     }
     if (isDownloading) return;
 
+    incrementPaperEngagementCount();
+    incrementPaperEngagementCount(); // Downloading selected pack qualifies as multiple papers
     setIsDownloading(true);
     const toastId = toast.loading(
       `Preparing ${selectedPapers.length} paper${selectedPapers.length > 1 ? "s" : ""} for download…`,
