@@ -52,13 +52,13 @@ export default function PrivacyPage() {
                 </h2>
                 <div className="space-y-2 font-play text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                   <p>
-                    At <strong>PyqVitAp</strong> (&ldquo;we&rdquo;, &ldquo;our&rdquo;, &ldquo;the platform&rdquo;), we recognize that university students value their privacy and digital security. Our architecture is designed around four core data principles:
+                    At <strong>PyqVitAp</strong> (&ldquo;we&rdquo;, &ldquo;our&rdquo;, &ldquo;the platform&rdquo;), we recognize that students value their privacy and digital autonomy. Our platform operates as an open educational archive under four non-negotiable principles:
                   </p>
                   <ul className="list-disc pl-5 space-y-1">
-                    <li><strong>Data Minimization:</strong> We collect only the absolute minimum information required to deliver passwordless verification and keep the paper archive exclusive to university members.</li>
-                    <li><strong>Purpose Limitation:</strong> Collected data is never repurposed for marketing, profiling, monetization, or tracking across other websites.</li>
-                    <li><strong>Zero Monetization:</strong> We do not sell, rent, trade, or distribute your information to advertisers, coaching companies, or data aggregators.</li>
-                    <li><strong>Right to Erasure:</strong> Any student can permanently remove their email address and authentication profile from our systems upon request.</li>
+                    <li><strong>Open Access & Zero Account Obligation:</strong> Browsing, previewing, searching, and downloading past question papers require no registration, sign-in, or student credential submission.</li>
+                    <li><strong>Zero Credential Harvesting:</strong> We do not collect, harvest, store, or sell student emails, passwords, or institutional accounts.</li>
+                    <li><strong>Zero Monetization:</strong> We do not sell, rent, trade, or distribute user information to advertisers, coaching companies, or data aggregators.</li>
+                    <li><strong>Full Control & Erasure:</strong> Users who subscribe voluntarily to newsletter updates can unsubscribe instantly at any time.</li>
                   </ul>
                 </div>
               </div>
@@ -76,22 +76,19 @@ export default function PrivacyPage() {
                   2. What Data We Collect & Why
                 </h2>
                 <div className="space-y-2 font-play text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                  <p>We collect and process only the following categories of data:</p>
+                  <p>In our current Open Access operating mode, PyqVitAp processes minimal, non-invasive data:</p>
                   <ul className="list-disc pl-5 space-y-2">
                     <li>
-                      <strong>Institutional Email Address:</strong> When you sign in or sign up, you provide your official VIT-AP student email address (ending with <code>@vitapstudent.ac.in</code>).
-                      <br />
-                      <em>Purpose:</em> To verify your affiliation with the university and send you a secure 6-digit one-time password (OTP) verification code. This safeguards the past question paper archive from unauthorized public scrapers and bots.
+                      <strong>No Mandatory Student Account Data:</strong> You do not need to sign in, create a profile, or share your university credentials to browse or download examination papers.
                     </li>
                     <li>
-                      <strong>Session & Security Identifiers:</strong> Secure cryptographic session tokens (managed by Clerk) and temporary IP address rate-limiting counters.
-                      <br />
-                      <em>Purpose:</em> To keep you signed in on your current browser and protect the platform against brute-force attacks and abuse.
+                      <strong>Voluntary Newsletter Subscription:</strong> If you voluntarily enter your email in the footer to receive exam pack updates, your email is stored solely to dispatch revision updates. It is never sold, shared, or used for commercial marketing.
                     </li>
                     <li>
-                      <strong>Voluntary Paper Submissions:</strong> Uploaded PDF files and subject metadata (course code, exam term) submitted voluntarily via our upload form.
-                      <br />
-                      <em>Purpose:</em> To review and index past question papers for fellow students.
+                      <strong>Voluntary Paper Submissions:</strong> Uploaded PDF files and subject metadata submitted voluntarily to expand the student archive.
+                    </li>
+                    <li>
+                      <strong>Security Rate-Limiting:</strong> Temporary IP counters to protect platform stability against automated denial-of-service floods.
                     </li>
                   </ul>
                 </div>
@@ -135,10 +132,10 @@ export default function PrivacyPage() {
                 </h2>
                 <div className="space-y-2 font-play text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                   <p>
-                    <strong>We do not sell student data.</strong> Your email address will never be sold, leased, traded, shared, or licensed to third-party commercial entities, coaching centers, recruiters, or advertisement networks under any circumstance.
+                    <strong>We do not sell student data.</strong> PyqVitAp has never and will never sell, lease, trade, share, or license student email addresses or user data to third-party commercial entities, coaching centers, recruiters, or advertisement networks under any circumstance.
                   </p>
                   <p>
-                    <strong>No Unsolicited Marketing:</strong> We will never send promotional emails, newsletters, marketing offers, or advertisements to your university inbox. The only emails you will receive from PyqVitAp are transactional OTP verification codes requested directly by you during authentication.
+                    <strong>No Spam Policy:</strong> We do not send unsolicited marketing emails, advertisements, or third-party promotional material. Optional exam updates are only sent to users who explicitly subscribed via the footer, with one-click unsubscription in every message.
                   </p>
                 </div>
               </div>

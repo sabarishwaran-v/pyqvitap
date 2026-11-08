@@ -1052,6 +1052,18 @@ export default async function middleware(request: NextRequest, event: NextFetchE
     }
   }
 
+  // When auth is disabled (Open Access Mode), redirect any stale auth routes back to home
+  if (
+    pathname === "/sign-in" ||
+    pathname === "/sign-in/" ||
+    pathname === "/sign-up" ||
+    pathname === "/sign-up/" ||
+    pathname === "/unauthorized" ||
+    pathname === "/unauthorized/"
+  ) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
   return handleNormalOperations(request);
 }
 

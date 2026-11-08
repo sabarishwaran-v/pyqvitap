@@ -3,17 +3,20 @@
 import React, { useEffect, useState } from "react";
 import { SignedIn as ClerkSignedIn, UserButton } from "@clerk/nextjs";
 import { getPyqvitapUserProfileAppearance } from "@/config/clerk-theme";
+import { useAuthMode } from "@/context/AuthModeContext";
 
 /**
  * PyqvitapSignedIn:
- * In production (pyqvitap.site):
- *   Strictly delegates to Clerk's <SignedIn> so only verified students/faculty see protected controls.
- * In local development / testing (localhost / 127.0.0.1):
- *   Renders children immediately so that developers and testers can verify all options
- *   (Pin Subjects, Request Paper, Upload Papers, PDF toolbar, Report, etc.) without requiring
- *   a live production Clerk session.
+ * - When auth is disabled (authEnabled=false, Open Access Mode):
+ *   Always renders children immediately so all students have access to features.
+ * - When auth is enabled (authEnabled=true):
+ *   Delegates to Clerk's <SignedIn> so only verified students see protected controls.
+ * - In local development / testing (localhost / 127.0.0.1):
+ *   Bypasses Clerk session for testing ease.
  */
 export function PyqvitapSignedIn({ children }: { children: React.ReactNode }) {
+  const { authEnabled } = useAuthMode();
+
   const [isLocalhost, setIsLocalhost] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
       const h = window.location.hostname;
@@ -29,7 +32,7 @@ export function PyqvitapSignedIn({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  if (isLocalhost) {
+  if (!authEnabled || isLocalhost) {
     return <>{children}</>;
   }
 
@@ -37,6 +40,8 @@ export function PyqvitapSignedIn({ children }: { children: React.ReactNode }) {
 }
 
 export function PyqvitapUserAvatar({ isDark }: { isDark: boolean }) {
+  const { authEnabled } = useAuthMode();
+
   const [isLocalhost, setIsLocalhost] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
       const h = window.location.hostname;
@@ -51,6 +56,11 @@ export function PyqvitapUserAvatar({ isDark }: { isDark: boolean }) {
       setIsLocalhost(h === "localhost" || h === "127.0.0.1");
     }
   }, []);
+
+  // When auth is disabled, there are no user profiles or login avatars to display
+  if (!authEnabled) {
+    return null;
+  }
 
   if (isLocalhost) {
     return (

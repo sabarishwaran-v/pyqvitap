@@ -52,13 +52,16 @@ export default function TermsPage() {
                 </h2>
                 <div className="space-y-2 font-play text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                   <p>
-                    By visiting, signing in, browsing, or utilizing any feature of <strong>PyqVitAp</strong> (&ldquo;the platform&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;), you acknowledge that you have read, understood, and agreed to be bound by these Terms of Service and our accompanying <Link href="/privacy" className="text-[#562EE7] underline dark:text-[#A47DE5]">Privacy Policy</Link> and <Link href="/disclaimer" className="text-[#562EE7] underline dark:text-[#A47DE5]">Disclaimer</Link>.
+                    By visiting, browsing, or utilizing any feature of <strong>PyqVitAp</strong> (&ldquo;the platform&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;), you acknowledge that you have read, understood, and agreed to be bound by these Terms of Service and our accompanying <Link href="/disclaimer" className="text-[#562EE7] underline dark:text-[#A47DE5]">Disclaimer & Rights</Link>.
                   </p>
                   <p>
-                    <strong>Institutional Access Restriction:</strong> Access to protected academic archives, question paper downloads, and collaborative features on PyqVitAp is strictly restricted to active students associated with VIT-AP University. Eligible users must authenticate using an authorized student email domain (<code>@vitapstudent.ac.in</code>).
+                    <strong>Open Academic Resource & No Account Requirement:</strong> PyqVitAp operates as an open-access revision archive dedicated to supporting students in their academic coursework and examination preparation. Browsing, searching, previewing, and downloading question papers do NOT require account creation, password registration, or the mandatory collection of student email addresses.
                   </p>
                   <p>
-                    If you do not agree to these terms or do not meet institutional eligibility, you must immediately discontinue your use of the platform.
+                    <strong>Built-In Institutional Access Controls:</strong> PyqVitAp incorporates native, toggleable authentication safeguards. If required by university administration or institutional directives, domain-restricted verification (<code>@vitapstudent.ac.in</code>) can be activated to restrict access exclusively to verified students. In default open mode, the platform operates freely for student academic benefit without collecting or storing student account credentials.
+                  </p>
+                  <p>
+                    If you do not agree to these terms, you must immediately discontinue your use of the platform.
                   </p>
                 </div>
               </div>
@@ -179,7 +182,6 @@ export default function TermsPage() {
                   <ul className="list-disc pl-5 space-y-1">
                     <li>Use automated web crawlers, scrapers, bots, or extraction scripts to harvest the database or bypass rate limits without authorization.</li>
                     <li>Attempt to disrupt, overload, or flood the service via Denial of Service (DoS/DDoS) attacks or automated request loops.</li>
-                    <li>Share OTP verification codes or attempt to bypass domain authentication checks using disposable or non-institutional email addresses.</li>
                     <li>Engage in any form of academic misconduct, cheating during live examinations, or distributing materials intended to compromise active assessments.</li>
                     <li>Reverse-engineer or exploit security vulnerabilities in the platform infrastructure.</li>
                   </ul>

@@ -18,6 +18,8 @@
     }
   ],
   "vars": {
+    "AUTH_ENABLED": "false",
+    "NEXT_PUBLIC_AUTH_ENABLED": "false",
     "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsucHlxdml0YXAuc2l0ZSQ"
   },
   "assets": {

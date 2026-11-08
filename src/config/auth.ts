@@ -194,6 +194,13 @@ export async function isAuthEnabled(req?: Request | string): Promise<boolean> {
         return false;
       }
     }
+
+    // Check Cloudflare Worker environment variables (e.g. wrangler.jsonc vars)
+    if (env) {
+      const cfAuth = env.AUTH_ENABLED ?? env.NEXT_PUBLIC_AUTH_ENABLED;
+      if (cfAuth === "true" || cfAuth === true || cfAuth === "1") return true;
+      if (cfAuth === "false" || cfAuth === false || cfAuth === "0") return false;
+    }
   } catch {
     // Cloudflare runtime context unavailable; proceed to local environment fallback
   }

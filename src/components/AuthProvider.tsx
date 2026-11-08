@@ -2,20 +2,33 @@ import React from "react";
 import { headers } from "next/headers";
 import { ClerkProvider } from "@clerk/nextjs";
 import { pyqvitapClerkAppearance } from "@/config/clerk-theme";
+import { AuthModeProvider } from "@/context/AuthModeContext";
 
 const PROD_CLERK_KEY = "pk_live_Y2xlcmsucHlxdml0YXAuc2l0ZSQ";
 const LOCAL_DEV_CLERK_KEY = "pk_test_d2FybS13YWxydXMtNDc4NS5jbGVyay5hY2NvdW50cy5kZXYk";
 
+interface AuthProviderProps {
+  authEnabled?: boolean;
+  children: React.ReactNode;
+}
+
 /**
- * Fail-Safe Clerk Auth Provider Wrapper
+ * High-Performance Auth Provider Wrapper
  *
- * If NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is not configured (e.g. during initial setup
- * or when AUTH_ENABLED=false), defaults cleanly based on runtime environment:
- * - Localhost: LOCAL_DEV_CLERK_KEY
- * - Production: PROD_CLERK_KEY
- * When present, initializes Clerk with the PyqVitAp custom dark purple appearance.
+ * When authEnabled=false (Open Access Mode):
+ * - Bypasses ClerkProvider completely.
+ * - Does NOT inject Clerk browser scripts or fire network subrequests.
+ * - Guarantees maximum page load speed and zero latency overhead.
+ * - Wraps children in lightweight AuthModeProvider so components know auth is disabled.
+ *
+ * When authEnabled=true (Restricted Mode):
+ * - Initializes Clerk with custom appearance and @vitapstudent.ac.in domain gates.
  */
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ authEnabled = false, children }: AuthProviderProps) {
+  if (!authEnabled) {
+    return <AuthModeProvider authEnabled={false}>{children}</AuthModeProvider>;
+  }
+
   // Detect localhost on both server (via headers) and client to ensure matching dev keys
   let isLocal = false;
   try {
@@ -46,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || defaultKey;
 
   if (!publishableKey) {
-    return <>{children}</>;
+    return <AuthModeProvider authEnabled={false}>{children}</AuthModeProvider>;
   }
 
   const effectiveKey = isLocal ? LOCAL_DEV_CLERK_KEY : publishableKey;
@@ -65,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signInFallbackRedirectUrl="/"
       signUpFallbackRedirectUrl="/"
     >
-      {children}
+      <AuthModeProvider authEnabled={true}>{children}</AuthModeProvider>
     </ClerkProvider>
   );
 }

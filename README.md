@@ -31,6 +31,24 @@ Here're some of the project's best features:
 *   🛠️ Paper Requests Request papers that are currently unavailable in the collection.
 *   📱 Progressive Web App Install PyqVitAp on supported mobile and desktop devices for an app-like experience.
 *   🔗 Direct DSpace Sourcing: A large portion of the collection is sourced directly from the publicly accessible VIT-AP DSpace repository.
+*   🛡️ Toggleable Institutional Access Control: Built-in authentication architecture with instant toggleable feature flag (`AUTH_ENABLED`).
+
+## 🛡️ Authentication Architecture & Institutional Safeguards
+
+PyqVitAp features an enterprise-grade, toggleable authentication subsystem powered by **Clerk** and **Cloudflare Workers Flagship** (`AUTH_ENABLED`).
+
+### Operating Modes:
+1. **Open Educational Access Mode (Current Default: `AUTH_ENABLED=false`)**:
+   - The platform operates freely for all university learners without mandatory sign-in or account creation.
+   - **Zero Student Credential Harvesting**: No student passwords, login profiles, or institutional emails are collected or stored to browse, search, preview, or download papers.
+   - **Maximum Edge Performance**: When authentication is disabled, authentication scripts and subrequests are completely bypassed, delivering maximum loading speed.
+   - **Zero Commercial Data Usage**: PyqVitAp has never and will never sell, lease, or monetize student data with marketing agencies or third parties.
+
+2. **Restricted Institutional Access Mode (`AUTH_ENABLED=true`)**:
+   - Engineered to comply immediately with university administrative policies should restricted access be mandated.
+   - Restricts archive access strictly to verified VIT-AP student accounts (`@vitapstudent.ac.in`) using passwordless 6-digit email OTPs or Google OAuth.
+   - Enforces a high-performance 3-tier subrequest-free verification model at the Cloudflare edge (Cryptographic claims &rarr; Isolate in-memory cache &rarr; Clerk API fallback).
+   - Can be toggled on or off dynamically in real time via Cloudflare Flagship (`wrangler flagship flags set <app-id> AUTH_ENABLED -V on/off`) or environment variables without code modification.
 
 ## 🛠️ Installation Steps:
 

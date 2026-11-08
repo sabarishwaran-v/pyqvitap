@@ -18,6 +18,7 @@ import {
 import { type ApiResponse } from '@/interface'
 import { MAINTENANCE_MODE } from "@/config/maintenance";
 import { useAuth } from "@clerk/nextjs";
+import { useAuthMode } from "@/context/AuthModeContext";
 
 interface CoursesContextType {
   courses: ICourseWithCount[];
@@ -28,21 +29,20 @@ interface CoursesContextType {
 
 const CoursesContext = createContext<CoursesContextType | undefined>(undefined);
 
+function ClerkAuthMonitor({ onAuthChange }: { onAuthChange: (signedIn: boolean) => void }) {
+  const auth = useAuth();
+  useEffect(() => {
+    onAuthChange(Boolean(auth.isSignedIn));
+  }, [auth.isSignedIn, onAuthChange]);
+  return null;
+}
+
 export function CoursesProvider({ children }: { children: React.ReactNode }) {
+  const { authEnabled } = useAuthMode();
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const [courses, setCourses] = useState<ICourseWithCount[]>([]);
   const [loading, setLoading] = useState(!MAINTENANCE_MODE);
   const [error, setError] = useState<string | null>(null);
-
-  // Monitor Clerk auth state to automatically refetch courses when user signs in
-  let isSignedIn = false;
-  let userId: string | null | undefined = null;
-  try {
-    const auth = useAuth();
-    isSignedIn = Boolean(auth.isSignedIn);
-    userId = auth.userId;
-  } catch {
-    // Fail-safe outside ClerkProvider
-  }
 
   const fetchCourses = useCallback(async () => {
     if (MAINTENANCE_MODE) {
@@ -112,10 +112,10 @@ export function CoursesProvider({ children }: { children: React.ReactNode }) {
 
   // When user signs in, immediately refetch courses
   useEffect(() => {
-    if (isSignedIn || userId) {
+    if (isSignedIn) {
       void fetchCourses();
     }
-  }, [isSignedIn, userId, fetchCourses]);
+  }, [isSignedIn, fetchCourses]);
 
   // When window gains focus and courses are empty, try refetching
   useEffect(() => {
@@ -135,6 +135,7 @@ export function CoursesProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <CoursesContext.Provider value={value}>
+      {authEnabled && <ClerkAuthMonitor onAuthChange={setIsSignedIn} />}
       {children}
     </CoursesContext.Provider>
   );

@@ -3,12 +3,24 @@
 import { useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import posthog from "posthog-js";
+import { useAuthMode } from "@/context/AuthModeContext";
 
 /**
- * Synchronizes authenticated Clerk user profiles with PostHog.
- * Identifies users with their VIT-AP student/faculty role and resets upon sign-out.
+ * Synchronizes authenticated Clerk user profiles with PostHog when auth is enabled.
+ * When auth is disabled (Open Access Mode), safely returns null without mounting
+ * Clerk's useUser hook, preventing any runtime errors or script loading.
  */
-export default function PostHogUserSync(): null {
+export default function PostHogUserSync(): React.ReactNode {
+  const { authEnabled } = useAuthMode();
+
+  if (!authEnabled) {
+    return null;
+  }
+
+  return <PostHogUserSyncInner />;
+}
+
+function PostHogUserSyncInner(): null {
   const { user, isLoaded, isSignedIn } = useUser();
 
   useEffect(() => {

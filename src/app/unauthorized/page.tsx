@@ -1,9 +1,12 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import Image from "next/image";
 import { SignOutButton, useUser } from "@clerk/nextjs";
 import { ShieldAlert, LogOut, ArrowLeft } from "lucide-react";
+import { useAuthMode } from "@/context/AuthModeContext";
 
 function ClerkUserInfo() {
   const { user, isLoaded } = useUser();
@@ -34,7 +37,7 @@ function ClerkSwitchAccountButton() {
 }
 
 export default function UnauthorizedPage() {
-  const hasClerk = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+  const { authEnabled } = useAuthMode();
 
   return (
     <div className="flex min-h-[85vh] flex-col items-center justify-center px-4 py-12">
@@ -78,7 +81,7 @@ export default function UnauthorizedPage() {
             <div className="mt-1 flex flex-wrap gap-2 font-mono text-sm font-bold text-white">
               <span className="rounded bg-purple-900/40 px-2 py-0.5">@vitapstudent.ac.in</span>
             </div>
-            {hasClerk && <ClerkUserInfo />}
+            {authEnabled && <ClerkUserInfo />}
           </div>
 
           <p className="text-xs text-zinc-400">
@@ -86,15 +89,15 @@ export default function UnauthorizedPage() {
           </p>
 
           <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row">
-            {hasClerk ? (
+            {authEnabled ? (
               <ClerkSwitchAccountButton />
             ) : (
               <Link
-                href="/sign-in"
+                href="/"
                 className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-600/30 transition hover:bg-purple-700 active:scale-[0.98]"
               >
-                <LogOut className="h-4 w-4" />
-                Sign In
+                <ArrowLeft className="h-4 w-4" />
+                Return Home
               </Link>
             )}
 
