@@ -15,6 +15,7 @@ import { isAuthEnabled } from "@/config/auth";
 import PostHogProviderWrapper from "@/components/analytics/PostHogProvider";
 import PostHogUserSync from "@/components/analytics/PostHogUserSync";
 import PwaUpdatePrompt from "@/components/pwa/PwaUpdatePrompt";
+import StudentFeedbackModal from "@/components/feedback/StudentFeedbackModal";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -219,6 +220,7 @@ export default async function RootLayout({
                     <>
                       <ChildrenWrapper>{children}</ChildrenWrapper>
                       <PwaUpdatePrompt />
+                      <StudentFeedbackModal />
                     </>
                   )}
                   <Footer />
