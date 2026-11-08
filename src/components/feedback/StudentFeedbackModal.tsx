@@ -77,13 +77,19 @@ export default function StudentFeedbackModal() {
 
     // Check env fallback if flag is undefined
     const envEnabled = process.env.NEXT_PUBLIC_FEEDBACK_CAMPAIGN_ENABLED === "true";
+    const isDev = process.env.NODE_ENV === "development";
 
-    const isEnabled =
-      payloadFromFlag?.enabled !== undefined
-        ? payloadFromFlag.enabled
-        : flagEnabled !== undefined
-        ? Boolean(flagEnabled)
-        : envEnabled;
+    let isEnabled = false;
+    if (payloadFromFlag?.enabled !== undefined) {
+      isEnabled = payloadFromFlag.enabled;
+    } else if (flagEnabled) {
+      isEnabled = true;
+    } else if (envEnabled) {
+      isEnabled = true;
+    } else if (isDev && process.env.NEXT_PUBLIC_FEEDBACK_CAMPAIGN_ENABLED !== "false") {
+      // In local dev, enable by default for easy review unless explicitly disabled
+      isEnabled = true;
+    }
 
     return {
       enabled: isEnabled,
@@ -97,11 +103,34 @@ export default function StudentFeedbackModal() {
     };
   }, [posthog]);
 
-  // Detect mobile device
+  // Detect mobile device & attach developer testing helpers
   useEffect(() => {
     if (typeof window === "undefined") return;
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 640;
     setIsMobileDevice(isMobile);
+
+    // Testing helpers for local review
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__pyqResetFeedback = () => {
+      localStorage.removeItem("pyq_feedback_completed_v");
+      localStorage.removeItem("pyq_feedback_dismissed_at");
+      localStorage.removeItem("pyq_feedback_papers_count");
+      localStorage.removeItem("pyq_feedback_first_seen");
+      setIsOpen(false);
+      setStep("rating");
+      setRating(0);
+      setHoverRating(0);
+      console.log("🧹 [PyqVitAp] Feedback storage reset! You can test fresh.");
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__pyqTriggerFeedback = () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).__pyqResetFeedback();
+      localStorage.setItem("pyq_feedback_papers_count", "2");
+      setIsOpen(true);
+      console.log("🚀 [PyqVitAp] Feedback trigger opened with 2 papers simulated!");
+    };
   }, []);
 
   // Trigger evaluation
