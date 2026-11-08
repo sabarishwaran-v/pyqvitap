@@ -32,7 +32,7 @@ const COMMON_ISSUES = [
   "Other",
 ];
 
-const AMOUNT_PRESETS = [10, 20, 50, 100];
+const AMOUNT_PRESETS = [50, 99];
 
 export default function StudentFeedbackModal() {
   const posthog = usePostHog();
@@ -43,7 +43,7 @@ export default function StudentFeedbackModal() {
   const [hoverRating, setHoverRating] = useState(0);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [comment, setComment] = useState("");
-  const [amount, setAmount] = useState(20);
+  const [amount, setAmount] = useState(50);
   const [customAmount, setCustomAmount] = useState("");
   const [showCoffeePayment, setShowCoffeePayment] = useState(false);
   const [isMobileDevice, setIsMobileDevice] = useState(true);
@@ -530,16 +530,26 @@ export default function StudentFeedbackModal() {
                       <div className="inline-flex items-center rounded-xl border border-white/10 bg-white/5 px-2.5 py-0.5 text-xs text-slate-300">
                         <span>₹</span>
                         <input
-                          type="number"
-                          min={1}
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                           placeholder="Custom"
                           value={customAmount}
                           onChange={(e) => {
-                            setCustomAmount(e.target.value);
-                            const num = parseInt(e.target.value, 10);
+                            const numericOnly = e.target.value.replace(/[^0-9]/g, "");
+                            setCustomAmount(numericOnly);
+                            const num = parseInt(numericOnly, 10);
                             if (num > 0) setAmount(num);
                           }}
-                          className="w-14 bg-transparent pl-1 text-xs text-white focus:outline-none"
+                          onKeyDown={(e) => {
+                            if (
+                              !/^[0-9]$/.test(e.key) &&
+                              !["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"].includes(e.key)
+                            ) {
+                              e.preventDefault();
+                            }
+                          }}
+                          className="w-16 bg-transparent pl-1 text-xs text-white focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                       </div>
                     </div>
