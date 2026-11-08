@@ -225,12 +225,17 @@ export function getPyqvitapClerkAppearance(
       formFieldOptional: {
         display: "none",
       },
+      dividerRow: {
+        marginTop: "1.25rem",
+        marginBottom: "1.25rem",
+      },
       dividerLine: {
-        backgroundColor: isDark ? "rgba(255, 255, 255, 0.15)" : "#CBD5E1",
+        backgroundColor: isDark ? "rgba(255, 255, 255, 0.18)" : "#CBD5E1",
       },
       dividerText: {
-        color: isDark ? "#9CA3AF" : "#64748B",
-        fontSize: "0.75rem",
+        color: isDark ? "#E2E8F0" : "#334155",
+        fontSize: "0.95rem",
+        fontWeight: "600",
       },
       footer: isHomepageCard
         ? {

@@ -479,6 +479,14 @@ html:not(.dark) .cl-signUp-root .cl-formFieldInput:-webkit-autofill {
   caret-color: #18181B !important;
 }
 
+/* Divider Rows */
+.cl-card-homepage .cl-dividerRow,
+.cl-signIn-root .cl-dividerRow,
+.cl-signUp-root .cl-dividerRow {
+  margin-top: 1.25rem !important;
+  margin-bottom: 1.25rem !important;
+}
+
 html:not(.dark) .cl-card-homepage .cl-dividerLine,
 html:not(.dark) .cl-signIn-root .cl-dividerLine,
 html:not(.dark) .cl-signUp-root .cl-dividerLine {
@@ -488,7 +496,11 @@ html:not(.dark) .cl-signUp-root .cl-dividerLine {
 html:not(.dark) .cl-card-homepage .cl-dividerText,
 html:not(.dark) .cl-signIn-root .cl-dividerText,
 html:not(.dark) .cl-signUp-root .cl-dividerText {
-  color: #64748B !important;
+  color: #334155 !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
 }
 
 html:not(.dark) .cl-card-homepage .cl-identityPreviewText,
@@ -595,13 +607,17 @@ html:not(.dark) .cl-signUp-root .cl-formResendCodeLink {
 .dark .cl-card-homepage .cl-dividerLine,
 .dark .cl-signIn-root .cl-dividerLine,
 .dark .cl-signUp-root .cl-dividerLine {
-  background-color: rgba(255, 255, 255, 0.15) !important;
+  background-color: rgba(255, 255, 255, 0.18) !important;
 }
 
 .dark .cl-card-homepage .cl-dividerText,
 .dark .cl-signIn-root .cl-dividerText,
 .dark .cl-signUp-root .cl-dividerText {
-  color: #9CA3AF !important;
+  color: #E2E8F0 !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
 }
 
 .dark .cl-card-homepage .cl-identityPreviewText,
