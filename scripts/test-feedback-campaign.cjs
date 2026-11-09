@@ -52,8 +52,8 @@ function isEligibleForFeedback(payload, options) {
     }
   }
 
-  // Download action trigger
-  if (options && options.isDownloadAction) {
+  // Download action trigger or Paper Page 5s action trigger
+  if (options && (options.isDownloadAction || options.isPaperPageAction)) {
     return true;
   }
 
@@ -182,6 +182,18 @@ assert.strictEqual(
 );
 console.log("[PASS] Test 11: Prior version dismissal does not block bumped campaign version.");
 
+// TEST 12: Paper page 5s action trigger qualifies for feedback on paper view
+storage.clear();
+assert.strictEqual(
+  isEligibleForFeedback(
+    { enabled: true, version: 3 },
+    { isPaperPageAction: true }
+  ),
+  true,
+  "Paper page action must qualify for feedback directly on the paper viewing page"
+);
+console.log("[PASS] Test 12: Paper page viewing trigger qualifies for feedback.");
+
 console.log("\n============================================================");
-console.log("ALL 11 FEEDBACK CAMPAIGN TESTS PASSED SUCCESSFULLY!");
+console.log("ALL 12 FEEDBACK CAMPAIGN TESTS PASSED SUCCESSFULLY!");
 console.log("============================================================\n");

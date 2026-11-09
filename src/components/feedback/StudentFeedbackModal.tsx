@@ -143,6 +143,7 @@ export default function StudentFeedbackModal() {
       setIsOpen(true);
       trackEvent("student_feedback_shown", {
         version: campaignConfig.version,
+        campaign_version: campaignConfig.version,
         trigger: "download_action",
       });
       return true;
@@ -187,37 +188,29 @@ export default function StudentFeedbackModal() {
 
   const pathname = usePathname();
 
-  // Trigger evaluation for active paper browsing (whichever triggers first: download or 2 papers engaged)
-  const checkEligibility = useCallback(() => {
-    if (!campaignConfig.enabled) return;
-    // Never show passive feedback prompt on the homepage
-    if (pathname === "/") return;
-
-    if (isEligibleForFeedback(campaignConfig)) {
-      setIsOpen(true);
-      trackEvent("student_feedback_shown", {
-        version: campaignConfig.version,
-        trigger: "paper_browsing",
-      });
-    }
-  }, [campaignConfig, pathname]);
-
+  // Trigger evaluation on the Paper Viewing Page (/paper/[id]) after 5 seconds
+  // Ensures feedback is 100% visible on the exact page/tab the student is actively reading
   useEffect(() => {
     if (!campaignConfig.enabled) return;
 
-    // Trigger ONLY when user actively engages with paper cards (view/preview), NEVER on website load
-    const handlePaperEngaged = () => {
-      setTimeout(() => {
-        checkEligibility();
-      }, 1000);
-    };
+    const isPaperPage = pathname?.startsWith("/paper/");
+    if (!isPaperPage) return;
 
-    window.addEventListener("pyq_paper_engaged", handlePaperEngaged);
+    const timer = setTimeout(() => {
+      if (isEligibleForFeedback(campaignConfig, { isPaperPageAction: true })) {
+        setIsOpen(true);
+        trackEvent("student_feedback_shown", {
+          version: campaignConfig.version,
+          campaign_version: campaignConfig.version,
+          trigger: "paper_view_5s",
+        });
+      }
+    }, 5000);
 
     return () => {
-      window.removeEventListener("pyq_paper_engaged", handlePaperEngaged);
+      clearTimeout(timer);
     };
-  }, [campaignConfig, checkEligibility]);
+  }, [campaignConfig, pathname]);
 
   const handleDismiss = () => {
     if (rating > 0 && step === "feedback_1to3") {
@@ -226,6 +219,7 @@ export default function StudentFeedbackModal() {
       trackEvent("student_feedback_submitted", {
         rating,
         version: campaignConfig.version,
+        campaign_version: campaignConfig.version,
       });
     } else {
       recordFeedbackDismissal(campaignConfig.version);
@@ -234,6 +228,7 @@ export default function StudentFeedbackModal() {
     trackEvent("student_feedback_dismissed", {
       step,
       version: campaignConfig.version,
+      campaign_version: campaignConfig.version,
     });
     executePendingDownload();
   };
@@ -243,6 +238,7 @@ export default function StudentFeedbackModal() {
     trackEvent("student_feedback_submitted", {
       rating,
       version: campaignConfig.version,
+      campaign_version: campaignConfig.version,
     });
     setStep("thankyou");
     setTimeout(() => {
@@ -261,6 +257,7 @@ export default function StudentFeedbackModal() {
     trackEvent("student_rating_selected", {
       rating: selected,
       version: campaignConfig.version,
+      campaign_version: campaignConfig.version,
     });
   };
 
@@ -275,6 +272,7 @@ export default function StudentFeedbackModal() {
       trackEvent("student_feedback_submitted", {
         rating,
         version: campaignConfig.version,
+        campaign_version: campaignConfig.version,
       });
     }
   };
@@ -286,6 +284,7 @@ export default function StudentFeedbackModal() {
       tags: selectedTags,
       comment: comment.trim() || undefined,
       version: campaignConfig.version,
+      campaign_version: campaignConfig.version,
     });
     setStep("thankyou");
     setTimeout(() => {
@@ -315,6 +314,7 @@ export default function StudentFeedbackModal() {
       trackEvent("student_support_clicked", {
         action: "copy_upi_id",
         version: campaignConfig.version,
+        campaign_version: campaignConfig.version,
       });
       setTimeout(() => setCopiedUpi(false), 2000);
     }
@@ -512,6 +512,7 @@ export default function StudentFeedbackModal() {
                   trackEvent("student_support_clicked", {
                     action: "github_star",
                     version: campaignConfig.version,
+                    campaign_version: campaignConfig.version,
                   })
                 }
                 className="group flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5 transition hover:bg-white/[0.08] hover:border-violet-500/40"
@@ -537,6 +538,7 @@ export default function StudentFeedbackModal() {
                   trackEvent("student_support_clicked", {
                     action: "contribute",
                     version: campaignConfig.version,
+                    campaign_version: campaignConfig.version,
                   })
                 }
                 className="group flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5 transition hover:bg-white/[0.08] hover:border-violet-500/40"
@@ -650,6 +652,7 @@ export default function StudentFeedbackModal() {
                             action: "upi_intent",
                             amount,
                             version: campaignConfig.version,
+                            campaign_version: campaignConfig.version,
                           })
                         }
                         className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 py-2.5 px-4 text-xs font-bold text-white shadow-md shadow-violet-900/30 transition hover:opacity-95"
