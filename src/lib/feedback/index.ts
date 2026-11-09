@@ -2,6 +2,7 @@ import type { FeedbackCampaignPayload } from "./types";
 
 export const STORAGE_KEY_COMPLETED_VERSION = "pyq_feedback_completed_v";
 export const STORAGE_KEY_DISMISSED_AT = "pyq_feedback_dismissed_at";
+export const STORAGE_KEY_DISMISSED_VERSION = "pyq_feedback_dismissed_v";
 export const STORAGE_KEY_PAPERS_COUNT = "pyq_feedback_papers_count";
 export const STORAGE_KEY_FIRST_SEEN = "pyq_feedback_first_seen";
 
@@ -54,7 +55,10 @@ export function getPaperEngagementCount(): number {
 /**
  * Evaluates whether the current student is eligible to see the feedback prompt.
  */
-export function isEligibleForFeedback(payload?: FeedbackCampaignPayload): boolean {
+export function isEligibleForFeedback(
+  payload?: FeedbackCampaignPayload,
+  options?: { isDownloadAction?: boolean }
+): boolean {
   if (typeof window === "undefined") return false;
 
   try {
@@ -73,19 +77,31 @@ export function isEligibleForFeedback(payload?: FeedbackCampaignPayload): boolea
       return false;
     }
 
-    // 3. Check 14-day dismissal cooldown
-    const dismissedAt = Number(
-      localStorage.getItem(STORAGE_KEY_DISMISSED_AT) || 0
+    // 3. Check dismissal cooldown FOR THIS CAMPAIGN VERSION ONLY
+    // Older dismissals for prior versions (e.g. v1 or v2) do not block a newer version (e.g. v3).
+    const dismissedVersion = Number(
+      localStorage.getItem(STORAGE_KEY_DISMISSED_VERSION) || 0
     );
-    const cooldownDays = payload?.cooldown_days ?? DEFAULT_COOLDOWN_DAYS;
-    if (
-      dismissedAt > 0 &&
-      Date.now() - dismissedAt < cooldownDays * 24 * 60 * 60 * 1000
-    ) {
-      return false;
+    if (dismissedVersion >= targetVersion) {
+      const dismissedAt = Number(
+        localStorage.getItem(STORAGE_KEY_DISMISSED_AT) || 0
+      );
+      const cooldownDays = payload?.cooldown_days ?? DEFAULT_COOLDOWN_DAYS;
+      if (
+        dismissedAt > 0 &&
+        Date.now() - dismissedAt < cooldownDays * 24 * 60 * 60 * 1000
+      ) {
+        return false;
+      }
     }
 
-    // 4. Value-moment engagement checks
+    // 4. Download action check:
+    // If user initiated a download, they are immediately eligible!
+    if (options?.isDownloadAction) {
+      return true;
+    }
+
+    // 5. Value-moment engagement checks for passive page views
     const papersCount = getPaperEngagementCount();
     const minPapers = payload?.min_papers ?? DEFAULT_MIN_PAPERS;
 
@@ -127,15 +143,44 @@ export function recordFeedbackCompletion(version: number): void {
 }
 
 /**
- * Records that the student dismissed the prompt, activating the 14-day cooldown.
+ * Records that the student dismissed the prompt for this campaign version,
+ * activating the cooldown sleep for this version.
  */
-export function recordFeedbackDismissal(): void {
+export function recordFeedbackDismissal(version: number = DEFAULT_VERSION): void {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(STORAGE_KEY_DISMISSED_AT, String(Date.now()));
+    localStorage.setItem(STORAGE_KEY_DISMISSED_VERSION, String(version));
   } catch {
     // Ignore storage quota errors
   }
+}
+
+/**
+ * Global download interceptor registry so feedback modal can intercept downloads
+ * and resume them after the student submits feedback or dismisses.
+ */
+type DownloadInterceptor = (onProceed: () => void) => boolean;
+let globalDownloadInterceptor: DownloadInterceptor | null = null;
+
+export function registerDownloadInterceptor(
+  interceptor: DownloadInterceptor | null
+): void {
+  globalDownloadInterceptor = interceptor;
+}
+
+export function requestDownloadWithFeedback(
+  downloadFn: () => void | Promise<void>
+): void {
+  if (globalDownloadInterceptor) {
+    const intercepted = globalDownloadInterceptor(() => {
+      void downloadFn();
+    });
+    if (intercepted) {
+      return;
+    }
+  }
+  void downloadFn();
 }
 
 /**
