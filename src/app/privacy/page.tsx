@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { isAuthEnabled } from "@/config/auth";
 import {
   Lock,
   EyeOff,
@@ -17,7 +19,11 @@ export const metadata: Metadata = {
     "Privacy Policy for PyqVitAp — how we protect your institutional email, uphold student privacy, and adhere to DPDP Act 2023 data minimization principles.",
 };
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const authEnabled = await isAuthEnabled();
+  if (!authEnabled) {
+    redirect("/terms");
+  }
   return (
     <div className="min-h-screen bg-[#F3F5FF] px-4 py-12 text-black dark:bg-[#070114] dark:text-white sm:px-6 md:px-8 lg:py-16">
       <div className="mx-auto max-w-4xl space-y-10">

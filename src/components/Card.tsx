@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import PDFViewer from "@/components/newPdfViewer";
 import { PaperProvider } from "@/context/PaperContext";
 import { trackEvent, trackError } from "@/lib/telemetry";
+import { incrementPaperEngagementCount } from "@/lib/feedback";
 
 interface CardProps {
   paper: IPaper;
@@ -75,6 +76,7 @@ const Card = ({ paper, onSelect, isSelected, isShow=true }: CardProps) => {
       slot: paper.slot,
       year: paper.year,
     });
+    incrementPaperEngagementCount();
 
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -85,6 +87,7 @@ const Card = ({ paper, onSelect, isSelected, isShow=true }: CardProps) => {
   }, [previewOpen, paper._id, paper.subject, paper.exam, paper.slot, paper.year]);
 
   const handleDownload = async (paper: IPaper) => {
+    incrementPaperEngagementCount();
     await downloadFile(getSecureUrl(paper.file_url), generateFileName(paper));
   };
 
@@ -111,6 +114,7 @@ const Card = ({ paper, onSelect, isSelected, isShow=true }: CardProps) => {
             semester: paper.semester,
             source: "catalogue_card",
           });
+          incrementPaperEngagementCount();
 
           window.open(paperLink, "_blank");
         }}

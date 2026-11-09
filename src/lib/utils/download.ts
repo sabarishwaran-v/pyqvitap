@@ -4,6 +4,7 @@ import axios from "axios";
 import { applyWatermarkAndDisclaimer } from "./pdfWatermark";
 import { getMediaGatewayUrl } from "./media";
 import { trackError } from "../telemetry";
+import { incrementPaperEngagementCount } from "../feedback";
 
 export { getMediaGatewayUrl };
 
@@ -24,6 +25,7 @@ export const downloadFile = async (
   preloadedBuffer?: ArrayBuffer,
 ): Promise<void> => {
   try {
+    incrementPaperEngagementCount();
     let buffer: ArrayBuffer;
     let blob: Blob;
 
