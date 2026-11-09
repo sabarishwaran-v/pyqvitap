@@ -57,7 +57,7 @@ export function getPaperEngagementCount(): number {
  */
 export function isEligibleForFeedback(
   payload?: FeedbackCampaignPayload,
-  options?: { isDownloadAction?: boolean }
+  options?: { isDownloadAction?: boolean; isPaperPageAction?: boolean }
 ): boolean {
   if (typeof window === "undefined") return false;
 
@@ -95,9 +95,9 @@ export function isEligibleForFeedback(
       }
     }
 
-    // 4. Download action check:
-    // If user initiated a download, they are immediately eligible!
-    if (options?.isDownloadAction) {
+    // 4. Download action check or Paper Page action:
+    // If user initiated a download or viewed a paper page for threshold time, they are immediately eligible!
+    if (options?.isDownloadAction || options?.isPaperPageAction) {
       return true;
     }
 
@@ -106,21 +106,6 @@ export function isEligibleForFeedback(
     const minPapers = payload?.min_papers ?? DEFAULT_MIN_PAPERS;
 
     if (papersCount >= minPapers) {
-      return true;
-    }
-
-    // Secondary time-on-site check
-    let firstSeen = Number(localStorage.getItem(STORAGE_KEY_FIRST_SEEN) || 0);
-    if (!firstSeen) {
-      firstSeen = Date.now();
-      localStorage.setItem(STORAGE_KEY_FIRST_SEEN, String(firstSeen));
-    }
-
-    const durationSeconds = (Date.now() - firstSeen) / 1000;
-    const minDuration = payload?.min_duration_seconds ?? DEFAULT_MIN_DURATION_SECONDS;
-
-    // Must have viewed at least 1 paper and spent threshold time
-    if (papersCount >= 1 && durationSeconds >= minDuration) {
       return true;
     }
 
