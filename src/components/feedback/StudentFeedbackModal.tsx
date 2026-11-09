@@ -1,7 +1,11 @@
 "use client";
 
-import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { usePostHog } from "posthog-js/react";
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import {
+  usePostHog,
+  useFeatureFlagPayload,
+  useFeatureFlagEnabled,
+} from "posthog-js/react";
 import dynamic from "next/dynamic";
 import { Star, ArrowUpRight, Code2, Coffee, Heart, X } from "lucide-react";
 import { trackEvent } from "@/lib/telemetry";
@@ -17,6 +21,7 @@ import {
   isEligibleForFeedback,
   recordFeedbackCompletion,
   recordFeedbackDismissal,
+  registerDownloadInterceptor,
 } from "@/lib/feedback";
 import type { FeedbackCampaignPayload } from "@/lib/feedback/types";
 
@@ -36,6 +41,17 @@ const AMOUNT_PRESETS = [50, 99];
 
 export default function StudentFeedbackModal() {
   const posthog = usePostHog();
+  const flagPayload = useFeatureFlagPayload("student-feedback-campaign");
+  const flagEnabled = useFeatureFlagEnabled("student-feedback-campaign");
+  const [flagTick, setFlagTick] = useState(0);
+
+  // Re-evaluate on PostHog feature flag load events
+  useEffect(() => {
+    if (!posthog) return;
+    return posthog.onFeatureFlags(() => {
+      setFlagTick((prev) => prev + 1);
+    });
+  }, [posthog]);
 
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<"rating" | "feedback_1to3" | "support_4to5" | "thankyou">("rating");
@@ -50,33 +66,49 @@ export default function StudentFeedbackModal() {
   const [forceDesktopQr, setForceDesktopQr] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
 
+  // Holds pending download to execute immediately after student rates or dismisses
+  const pendingDownloadRef = useRef<(() => void | Promise<void>) | null>(null);
+
+  const executePendingDownload = useCallback(() => {
+    if (pendingDownloadRef.current) {
+      const fn = pendingDownloadRef.current;
+      pendingDownloadRef.current = null;
+      try {
+        void fn();
+      } catch (err) {
+        console.error("Failed to execute pending download:", err);
+      }
+    }
+  }, []);
+
   // Extract flag payload from PostHog or env fallback
   const campaignConfig = useMemo<FeedbackCampaignPayload>(() => {
     let payloadFromFlag: FeedbackCampaignPayload | null = null;
 
-    if (posthog) {
-      const rawPayload = posthog.getFeatureFlagPayload("student-feedback-campaign");
-      if (rawPayload) {
-        if (typeof rawPayload === "string") {
-          try {
-            payloadFromFlag = JSON.parse(rawPayload);
-          } catch {
-            // malformed json, fallback to defaults
-          }
-        } else if (typeof rawPayload === "object") {
-          payloadFromFlag = rawPayload as FeedbackCampaignPayload;
+    const rawPayload = flagPayload ?? (posthog ? posthog.getFeatureFlagPayload("student-feedback-campaign") : null);
+    if (rawPayload) {
+      if (typeof rawPayload === "string") {
+        try {
+          payloadFromFlag = JSON.parse(rawPayload);
+        } catch {
+          // malformed json, fallback to defaults
         }
+      } else if (typeof rawPayload === "object") {
+        payloadFromFlag = rawPayload as FeedbackCampaignPayload;
       }
     }
 
-    const flagEnabled = posthog ? posthog.isFeatureEnabled("student-feedback-campaign") : undefined;
+    const isFlagOn = flagEnabled !== undefined
+      ? Boolean(flagEnabled)
+      : (posthog ? Boolean(posthog.isFeatureEnabled("student-feedback-campaign")) : false);
+
     const envEnabled = process.env.NEXT_PUBLIC_FEEDBACK_CAMPAIGN_ENABLED === "true";
     const isDev = process.env.NODE_ENV === "development";
 
     let isEnabled = false;
     if (payloadFromFlag?.enabled !== undefined) {
       isEnabled = payloadFromFlag.enabled;
-    } else if (flagEnabled) {
+    } else if (isFlagOn) {
       isEnabled = true;
     } else if (envEnabled) {
       isEnabled = true;
@@ -94,7 +126,31 @@ export default function StudentFeedbackModal() {
       upi_name: payloadFromFlag?.upi_name || process.env.NEXT_PUBLIC_UPI_NAME || DEFAULT_UPI_NAME,
       github_repo: payloadFromFlag?.github_repo || DEFAULT_GITHUB_REPO,
     };
-  }, [posthog]);
+  }, [posthog, flagPayload, flagEnabled, flagTick]);
+
+  // Register global download interceptor
+  useEffect(() => {
+    registerDownloadInterceptor((onProceed) => {
+      if (!campaignConfig.enabled) {
+        return false;
+      }
+      if (!isEligibleForFeedback(campaignConfig, { isDownloadAction: true })) {
+        return false;
+      }
+
+      pendingDownloadRef.current = onProceed;
+      setIsOpen(true);
+      trackEvent("student_feedback_shown", {
+        version: campaignConfig.version,
+        trigger: "download_action",
+      });
+      return true;
+    });
+
+    return () => {
+      registerDownloadInterceptor(null);
+    };
+  }, [campaignConfig]);
 
   // Detect mobile device & attach developer testing helpers
   useEffect(() => {
@@ -107,6 +163,7 @@ export default function StudentFeedbackModal() {
     (window as any).__pyqResetFeedback = () => {
       localStorage.removeItem("pyq_feedback_completed_v");
       localStorage.removeItem("pyq_feedback_dismissed_at");
+      localStorage.removeItem("pyq_feedback_dismissed_v");
       localStorage.removeItem("pyq_feedback_papers_count");
       localStorage.removeItem("pyq_feedback_first_seen");
       setIsOpen(false);
@@ -127,7 +184,7 @@ export default function StudentFeedbackModal() {
     };
   }, []);
 
-  // Trigger evaluation
+  // Trigger evaluation for passive background browsing (whichever triggers first)
   const checkEligibility = useCallback(() => {
     if (!campaignConfig.enabled) return;
 
@@ -135,6 +192,7 @@ export default function StudentFeedbackModal() {
       setIsOpen(true);
       trackEvent("student_feedback_shown", {
         version: campaignConfig.version,
+        trigger: "paper_browsing",
       });
     }
   }, [campaignConfig]);
@@ -161,12 +219,18 @@ export default function StudentFeedbackModal() {
   }, [campaignConfig, checkEligibility]);
 
   const handleDismiss = () => {
-    recordFeedbackDismissal();
+    recordFeedbackDismissal(campaignConfig.version);
     setIsOpen(false);
     trackEvent("student_feedback_dismissed", {
       step,
       version: campaignConfig.version,
     });
+    executePendingDownload();
+  };
+
+  const handleDone = () => {
+    setIsOpen(false);
+    executePendingDownload();
   };
 
   const handleRatingSelect = (selected: number) => {
@@ -603,7 +667,7 @@ export default function StudentFeedbackModal() {
             {/* Done Button */}
             <button
               type="button"
-              onClick={handleDismiss}
+              onClick={handleDone}
               className="w-full rounded-2xl bg-violet-600 hover:bg-violet-500 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-violet-950/40 transition"
             >
               Done 👍🏻
@@ -615,16 +679,23 @@ export default function StudentFeedbackModal() {
         {/* STEP 3: THANK YOU CLOSING                                */}
         {/* ======================================================== */}
         {step === "thankyou" && (
-          <div className="space-y-2 py-4 text-center">
+          <div className="space-y-3 py-3 text-center">
             <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-500/20 text-xl text-violet-300">
               💜
             </div>
             <h4 className="text-sm font-bold text-white">
-              Thank you for helping us improve!
+              Thank you, Response Recorded!
             </h4>
             <p className="text-xs text-slate-300">
-              Your feedback is directly used to enhance PyqVitAp. Best of luck with your CATs and FATs!
+              Your feedback helps keep PyqVitAp improving for everyone.
             </p>
+            <button
+              type="button"
+              onClick={handleDone}
+              className="w-full rounded-2xl bg-violet-600 hover:bg-violet-500 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-violet-950/40 transition"
+            >
+              Done 👍🏻
+            </button>
           </div>
         )}
 

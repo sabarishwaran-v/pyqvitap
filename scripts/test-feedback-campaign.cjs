@@ -23,6 +23,7 @@ console.log("============================================================\n");
 // Re-implement pure logic for testing parity
 const STORAGE_KEY_COMPLETED_VERSION = "pyq_feedback_completed_v";
 const STORAGE_KEY_DISMISSED_AT = "pyq_feedback_dismissed_at";
+const STORAGE_KEY_DISMISSED_VERSION = "pyq_feedback_dismissed_v";
 const STORAGE_KEY_PAPERS_COUNT = "pyq_feedback_papers_count";
 const STORAGE_KEY_FIRST_SEEN = "pyq_feedback_first_seen";
 
@@ -34,7 +35,7 @@ function generateUpiUrl(upiId, name, amount, note = "Support PyqVitAp") {
   return `upi://pay?pa=${cleanPa}&pn=${cleanPn}&am=${cleanAm}&cu=INR&tn=${cleanTn}`;
 }
 
-function isEligibleForFeedback(payload) {
+function isEligibleForFeedback(payload, options) {
   if (payload && payload.enabled === false) return false;
 
   const targetVersion = (payload && payload.version) || 1;
@@ -42,10 +43,18 @@ function isEligibleForFeedback(payload) {
 
   if (completedVersion >= targetVersion) return false;
 
-  const dismissedAt = Number(storage.get(STORAGE_KEY_DISMISSED_AT) || 0);
-  const cooldownDays = (payload && payload.cooldown_days) || 3;
-  if (dismissedAt > 0 && Date.now() - dismissedAt < cooldownDays * 24 * 60 * 60 * 1000) {
-    return false;
+  const dismissedVersion = Number(storage.get(STORAGE_KEY_DISMISSED_VERSION) || 0);
+  if (dismissedVersion >= targetVersion) {
+    const dismissedAt = Number(storage.get(STORAGE_KEY_DISMISSED_AT) || 0);
+    const cooldownDays = (payload && payload.cooldown_days) || 3;
+    if (dismissedAt > 0 && Date.now() - dismissedAt < cooldownDays * 24 * 60 * 60 * 1000) {
+      return false;
+    }
+  }
+
+  // Download action trigger
+  if (options && options.isDownloadAction) {
+    return true;
   }
 
   const papersCount = Number(storage.get(STORAGE_KEY_PAPERS_COUNT) || 0);
@@ -108,6 +117,7 @@ console.log("[PASS] Test 5: Bumping campaign to version 2 makes user freshly eli
 
 // TEST 6: User dismisses version 2 (3-day cooldown test)
 storage.set(STORAGE_KEY_DISMISSED_AT, String(Date.now()));
+storage.set(STORAGE_KEY_DISMISSED_VERSION, "2");
 assert.strictEqual(
   isEligibleForFeedback({ enabled: true, version: 2, min_papers: 2, cooldown_days: 3 }),
   false,
@@ -149,6 +159,29 @@ assert.strictEqual(
 );
 console.log("[PASS] Test 9: NPCI UPI deep link formatting and URI encoding validated.");
 
+// TEST 10: Download action trigger immediately intercepts even with 0 papers viewed
+storage.clear();
+assert.strictEqual(
+  isEligibleForFeedback(
+    { enabled: true, version: 1, min_papers: 2 },
+    { isDownloadAction: true }
+  ),
+  true,
+  "Download action must immediately qualify for feedback even with 0 prior paper views"
+);
+console.log("[PASS] Test 10: Download action intercepts even with 0 papers viewed.");
+
+// TEST 11: Past dismissal on Version 1 does NOT block bumped Version 3
+storage.set(STORAGE_KEY_PAPERS_COUNT, "2");
+storage.set(STORAGE_KEY_DISMISSED_AT, String(Date.now())); // dismissed 1 minute ago
+storage.set(STORAGE_KEY_DISMISSED_VERSION, "1"); // was dismissed for v1
+assert.strictEqual(
+  isEligibleForFeedback({ enabled: true, version: 3, min_papers: 2 }),
+  true,
+  "Prior dismissal on version 1 must not block new campaign version 3"
+);
+console.log("[PASS] Test 11: Prior version dismissal does not block bumped campaign version.");
+
 console.log("\n============================================================");
-console.log("ALL 9 FEEDBACK CAMPAIGN TESTS PASSED SUCCESSFULLY!");
+console.log("ALL 11 FEEDBACK CAMPAIGN TESTS PASSED SUCCESSFULLY!");
 console.log("============================================================\n");

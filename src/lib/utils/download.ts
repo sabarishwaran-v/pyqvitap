@@ -4,7 +4,7 @@ import axios from "axios";
 import { applyWatermarkAndDisclaimer } from "./pdfWatermark";
 import { getMediaGatewayUrl } from "./media";
 import { trackError } from "../telemetry";
-import { incrementPaperEngagementCount } from "../feedback";
+import { incrementPaperEngagementCount, requestDownloadWithFeedback } from "../feedback";
 
 export { getMediaGatewayUrl };
 
@@ -19,7 +19,7 @@ export const generateFileName = (paper: IPaper): string => {
   return `${parts.join("-")}.${extension}`;
 };
 
-export const downloadFile = async (
+const executeDownloadFile = async (
   url: string,
   filename: string,
   preloadedBuffer?: ArrayBuffer,
@@ -67,4 +67,21 @@ export const downloadFile = async (
     });
     throw error;
   }
+};
+
+export const downloadFile = async (
+  url: string,
+  filename: string,
+  preloadedBuffer?: ArrayBuffer,
+): Promise<void> => {
+  return new Promise<void>((resolve, reject) => {
+    requestDownloadWithFeedback(async () => {
+      try {
+        await executeDownloadFile(url, filename, preloadedBuffer);
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  });
 };
