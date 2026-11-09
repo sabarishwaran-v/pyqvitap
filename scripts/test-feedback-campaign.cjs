@@ -43,7 +43,7 @@ function isEligibleForFeedback(payload) {
   if (completedVersion >= targetVersion) return false;
 
   const dismissedAt = Number(storage.get(STORAGE_KEY_DISMISSED_AT) || 0);
-  const cooldownDays = (payload && payload.cooldown_days) || 14;
+  const cooldownDays = (payload && payload.cooldown_days) || 3;
   if (dismissedAt > 0 && Date.now() - dismissedAt < cooldownDays * 24 * 60 * 60 * 1000) {
     return false;
   }
@@ -106,20 +106,20 @@ assert.strictEqual(
 );
 console.log("[PASS] Test 5: Bumping campaign to version 2 makes user freshly eligible.");
 
-// TEST 6: User dismisses version 2 (14-day cooldown test)
+// TEST 6: User dismisses version 2 (3-day cooldown test)
 storage.set(STORAGE_KEY_DISMISSED_AT, String(Date.now()));
 assert.strictEqual(
-  isEligibleForFeedback({ enabled: true, version: 2, min_papers: 2, cooldown_days: 14 }),
+  isEligibleForFeedback({ enabled: true, version: 2, min_papers: 2, cooldown_days: 3 }),
   false,
   "Dismissed user within cooldown window must not be prompted"
 );
-console.log("[PASS] Test 6: Dismissal activates 14-day cooldown.");
+console.log("[PASS] Test 6: Dismissal activates 3-day cooldown.");
 
-// TEST 7: Expired cooldown (simulate 15 days in past)
-const fifteenDaysAgo = Date.now() - (15 * 24 * 60 * 60 * 1000);
-storage.set(STORAGE_KEY_DISMISSED_AT, String(fifteenDaysAgo));
+// TEST 7: Expired cooldown (simulate 4 days in past)
+const fourDaysAgo = Date.now() - (4 * 24 * 60 * 60 * 1000);
+storage.set(STORAGE_KEY_DISMISSED_AT, String(fourDaysAgo));
 assert.strictEqual(
-  isEligibleForFeedback({ enabled: true, version: 2, min_papers: 2, cooldown_days: 14 }),
+  isEligibleForFeedback({ enabled: true, version: 2, min_papers: 2, cooldown_days: 3 }),
   true,
   "User with expired cooldown becomes eligible again"
 );
