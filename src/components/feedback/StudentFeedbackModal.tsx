@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { usePathname } from "next/navigation";
 import {
   usePostHog,
   useFeatureFlagPayload,
@@ -184,9 +185,13 @@ export default function StudentFeedbackModal() {
     };
   }, []);
 
-  // Trigger evaluation for passive background browsing (whichever triggers first)
+  const pathname = usePathname();
+
+  // Trigger evaluation for active paper browsing (whichever triggers first: download or 2 papers engaged)
   const checkEligibility = useCallback(() => {
     if (!campaignConfig.enabled) return;
+    // Never show passive feedback prompt on the homepage
+    if (pathname === "/") return;
 
     if (isEligibleForFeedback(campaignConfig)) {
       setIsOpen(true);
@@ -195,15 +200,12 @@ export default function StudentFeedbackModal() {
         trigger: "paper_browsing",
       });
     }
-  }, [campaignConfig]);
+  }, [campaignConfig, pathname]);
 
   useEffect(() => {
     if (!campaignConfig.enabled) return;
 
-    const timer = setTimeout(() => {
-      checkEligibility();
-    }, 2000);
-
+    // Trigger ONLY when user actively engages with paper cards (view/preview), NEVER on website load
     const handlePaperEngaged = () => {
       setTimeout(() => {
         checkEligibility();
@@ -213,19 +215,40 @@ export default function StudentFeedbackModal() {
     window.addEventListener("pyq_paper_engaged", handlePaperEngaged);
 
     return () => {
-      clearTimeout(timer);
       window.removeEventListener("pyq_paper_engaged", handlePaperEngaged);
     };
   }, [campaignConfig, checkEligibility]);
 
   const handleDismiss = () => {
-    recordFeedbackDismissal(campaignConfig.version);
+    if (rating > 0 && step === "feedback_1to3") {
+      // Student already gave stars: record the rating so it is never lost!
+      recordFeedbackCompletion(campaignConfig.version ?? DEFAULT_VERSION);
+      trackEvent("student_feedback_submitted", {
+        rating,
+        version: campaignConfig.version,
+      });
+    } else {
+      recordFeedbackDismissal(campaignConfig.version);
+    }
     setIsOpen(false);
     trackEvent("student_feedback_dismissed", {
       step,
       version: campaignConfig.version,
     });
     executePendingDownload();
+  };
+
+  const handleSkipComment = () => {
+    recordFeedbackCompletion(campaignConfig.version ?? DEFAULT_VERSION);
+    trackEvent("student_feedback_submitted", {
+      rating,
+      version: campaignConfig.version,
+    });
+    setStep("thankyou");
+    setTimeout(() => {
+      setIsOpen(false);
+      executePendingDownload();
+    }, 2500);
   };
 
   const handleDone = () => {
@@ -450,7 +473,7 @@ export default function StudentFeedbackModal() {
               </button>
               <button
                 type="button"
-                onClick={handleDismiss}
+                onClick={handleSkipComment}
                 className="rounded-2xl bg-white/10 py-2.5 px-4 text-xs font-medium text-slate-300 transition hover:bg-white/20"
               >
                 Skip
