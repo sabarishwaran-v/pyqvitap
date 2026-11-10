@@ -103,9 +103,6 @@ export default function DisclaimerPage() {
                   <p>
                     <strong>Zero Commercial Data Selling:</strong> PyqVitAp has never and will never sell, lease, or distribute student information to third-party marketing companies, advertisers, coaching centers, or data brokers.
                   </p>
-                  <p>
-                    <strong>Configurable Administrative Safeguards:</strong> An enterprise-grade institutional authentication gate is engineered into the platform architecture and can be enabled via feature flag should university administration require access to be restricted strictly to enrolled students.
-                  </p>
                 </div>
               </div>
             </div>

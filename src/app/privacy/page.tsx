@@ -160,12 +160,9 @@ export default async function PrivacyPage() {
                 </h2>
                 <div className="space-y-2 font-play text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                   <p>
-                    To ensure industry-leading security without maintaining complex in-house credential servers, we rely on established, certified infrastructure providers:
+                    To ensure industry-leading security without maintaining complex in-house servers, we rely on established, certified infrastructure providers:
                   </p>
                   <ul className="list-disc pl-5 space-y-2">
-                    <li>
-                      <strong>Clerk Authentication (Clerk, Inc.):</strong> Provides our authentication back-end, token issuing, and automated OTP delivery. Clerk is SOC 2 Type II certified and encrypts all communications in transit (TLS 1.3) and at rest (AES-256).
-                    </li>
                     <li>
                       <strong>Cloudflare (Cloudflare, Inc.):</strong> Provides global CDN delivery, DNS routing, DDoS protection, edge SSL/TLS encryption, and automated bot mitigation to protect platform stability.
                     </li>
@@ -193,7 +190,7 @@ export default async function PrivacyPage() {
                     PyqVitAp uses only <strong>strictly necessary</strong> cookies and local browser storage essential for functionality:
                   </p>
                   <ul className="list-disc pl-5 space-y-1">
-                    <li><strong>Authentication Session Cookies:</strong> Issued by Clerk to keep your browser session active so you do not need to re-verify your OTP on every page navigation.</li>
+                    <li><strong>Session Cookies:</strong> Strictly necessary cookies to maintain browser connection state.</li>
                     <li><strong>Theme Preference:</strong> Stored locally in your browser (<code>theme: light / dark</code>) to remember your display choice.</li>
                     <li><strong>Pinned Subjects:</strong> Stored locally in your browser storage for your personal convenience so you can quickly jump to frequently accessed course codes.</li>
                   </ul>

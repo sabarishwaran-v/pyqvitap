@@ -58,9 +58,6 @@ export default function TermsPage() {
                     <strong>Open Academic Resource & No Account Requirement:</strong> PyqVitAp operates as an open-access revision archive dedicated to supporting students in their academic coursework and examination preparation. Browsing, searching, previewing, and downloading question papers do NOT require account creation, password registration, or the mandatory collection of student email addresses.
                   </p>
                   <p>
-                    <strong>Built-In Institutional Access Controls:</strong> PyqVitAp incorporates native, toggleable authentication safeguards. If required by university administration or institutional directives, domain-restricted verification (<code>@vitapstudent.ac.in</code>) can be activated to restrict access exclusively to verified students. In default open mode, the platform operates freely for student academic benefit without collecting or storing student account credentials.
-                  </p>
-                  <p>
                     If you do not agree to these terms, you must immediately discontinue your use of the platform.
                   </p>
                 </div>
