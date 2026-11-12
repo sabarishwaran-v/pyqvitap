@@ -1,40 +1,17 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { MAINTENANCE_MODE } from "@/config/maintenance";
 
 export default function RunningAnnouncement() {
   const maintenanceText = "🚧 PyqVitAp is currently under maintenance. We expect to be back before 9 October 2026.";
   const maintenanceItems = Array(4).fill(maintenanceText);
 
-  const announcementItems = [
-    {
-      badge: "5K+ LIVE",
-      text: "5,000+ past year papers are live now — sourced directly from the DSpace repository to help VIT-AP students excel!",
-      link: "/catalogue",
-      linkText: "Browse Papers",
-    },
-    {
-      badge: "ROADMAP",
-      text: "6,000+ additional question papers are actively being processed and will be added in the coming weeks.",
-      link: "/catalogue",
-      linkText: "View Catalogue",
-    },
-    {
-      badge: "CONTRIBUTE",
-      text: "Have recent CAT or FAT question papers? Help your fellow batchmates by uploading them to the repository.",
-      link: "/upload",
-      linkText: "Upload Now",
-    },
-    {
-      badge: "FREE & OPEN",
-      text: "No login or sign-up required. Freely access, search, and download question papers for all branches and slots.",
-      link: "/catalogue",
-      linkText: "Explore",
-    },
-  ];
+  const announcementText =
+    "Current semester courses across all branches are live (5,070 papers / 264 courses). Remaining 6,000+ papers for subsequent semesters will be added in the coming weeks.";
+  // Repeat items for seamless continuous looping across screen widths
+  const announcementItems = Array(4).fill(announcementText);
 
   if (MAINTENANCE_MODE) {
     return (
@@ -81,19 +58,9 @@ export default function RunningAnnouncement() {
         <div className="flex-1 overflow-hidden">
           <div className="animate-marquee flex items-center gap-8 text-xs">
             {/* Duplicated for infinite seamless loop */}
-            {[...announcementItems, ...announcementItems].map((item, index) => (
-              <div key={index} className="flex shrink-0 items-center gap-2">
-                <span className="rounded bg-purple-600/15 px-1.5 py-0.5 text-[10px] font-bold text-purple-800 dark:bg-purple-400/20 dark:text-purple-200">
-                  {item.badge}
-                </span>
-                <span>{item.text}</span>
-                <Link
-                  href={item.link}
-                  className="inline-flex items-center gap-0.5 font-bold text-purple-700 underline underline-offset-2 hover:text-purple-900 dark:text-purple-300 dark:hover:text-white"
-                >
-                  {item.linkText}
-                  <ArrowRight className="h-3 w-3" />
-                </Link>
+            {[...announcementItems, ...announcementItems].map((text, index) => (
+              <div key={index} className="flex shrink-0 items-center gap-3">
+                <span>{text}</span>
                 <span className="text-purple-400 dark:text-purple-700 mx-2">•</span>
               </div>
             ))}
