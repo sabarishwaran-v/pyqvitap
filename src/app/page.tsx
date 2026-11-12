@@ -16,7 +16,7 @@ export default async function HomePage({
   return (
     <div>
       <Hero authEnabled={authEnabled} />
-      <Info />
+      <Info authEnabled={authEnabled} />
       <Faq />
       {/* Happy Birthday Abhi broski, Hope you have an amazing year!!! Love you lots*/}
     </div>

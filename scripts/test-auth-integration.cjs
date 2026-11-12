@@ -245,7 +245,7 @@ test("10. Homepage Authentication Gate & Public Content Layout", () => {
 
   // Page renders Hero, Info, and Faq seamlessly
   assert(pageContent.includes("<Hero authEnabled={authEnabled} />"), "HomePage must pass authEnabled to Hero");
-  assert(pageContent.includes("<Info />"), "HomePage must render Info for all visitors");
+  assert(pageContent.includes("<Info authEnabled={authEnabled} />") || pageContent.includes("<Info />"), "HomePage must render Info for all visitors");
   assert(pageContent.includes("<Faq />"), "HomePage must render Faq for all visitors");
 
   const heroPath = path.join(ROOT, "src/components/screens/Hero.tsx");
