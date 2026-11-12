@@ -1,12 +1,12 @@
 import { cva, type VariantProps } from "class-variance-authority";
 
 const capsule = cva(
-  "inline-flex items-center justify-center rounded-md px-2.5 py-0.5 text-xs font-semibold transition-colors",
+  "inline-flex items-center justify-center rounded-md p-1 px-3 text-sm font-medium transition-colors",
   {
     variants: {
       theme: {
-        blue: "bg-[#5258DB] text-white dark:bg-[#585CE5] dark:text-white",
-        green: "bg-[#22c55e] text-white",
+        blue: "rounded-sm bg-[#B2B8FF] text-[#1e1b4b] dark:bg-[#7480FFCC] dark:text-white",
+        green: "bg-[#3cc923] text-white",
       },
     },
     defaultVariants: {

@@ -119,7 +119,7 @@ const Card = ({ paper, onSelect, isSelected, isShow=true }: CardProps) => {
           window.open(paperLink, "_blank");
         }}
         className={cn(
-          "group relative flex h-full min-h-[460px] md:min-h-[480px] flex-col justify-between overflow-hidden rounded-xl border-2 border-[#734DFF]/40 bg-white font-play shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#734DFF] hover:shadow-lg dark:border-[#36266D] dark:bg-[#130E26] dark:hover:border-[#7480FF] dark:hover:bg-[#181230]",
+          "group relative flex h-full min-h-[480px] md:min-h-[500px] flex-col justify-between overflow-hidden rounded-xl border-2 border-[#734DFF]/40 bg-white font-play shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#734DFF] hover:shadow-lg dark:border-[#36266D] dark:bg-[#130E26] dark:hover:border-[#7480FF] dark:hover:bg-[#181230]",
           isSelected && "-translate-y-1 border-[#7480FF] bg-[#EFEAFF] shadow-lg ring-2 ring-[#7480FF] dark:border-[#7480FF] dark:bg-[#1c1438]"
         )}
       >
@@ -153,18 +153,18 @@ const Card = ({ paper, onSelect, isSelected, isShow=true }: CardProps) => {
         </div>
 
         <div className="flex flex-1 flex-col p-4 pb-2">
-          <div className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a09bb5] line-clamp-1">
+          <div className="font-play text-md font-medium text-gray-700 dark:text-white/80 line-clamp-1">
             {extractBracketContent(paper.subject) || "PYQ"}
           </div>
 
           <div
             title={extractWithoutBracketContent(paper.subject)}
-            className="mt-1 line-clamp-2 text-base font-bold font-play text-gray-900 dark:text-white min-h-[3rem] flex items-center"
+            className="mt-1 line-clamp-2 font-play text-lg font-semibold text-gray-900 dark:text-white min-h-[3.5rem] flex items-center"
           >
             {extractWithoutBracketContent(paper.subject)}
           </div>
 
-          <div className="mt-3 flex min-h-[58px] flex-wrap items-start content-start gap-1.5 overflow-hidden">
+          <div className="mt-3 flex min-h-[68px] flex-wrap items-start content-start gap-2 overflow-hidden">
             <Capsule>{paper.exam}</Capsule>
             {Boolean(paper.slot && formatSlotDisplay(paper.slot)) && (
               <Capsule>{formatSlotDisplay(paper.slot)}</Capsule>
@@ -180,7 +180,7 @@ const Card = ({ paper, onSelect, isSelected, isShow=true }: CardProps) => {
             {isShow && (
               <label
                 onClick={(e) => e.stopPropagation()}
-                className="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white"
+                className="flex cursor-pointer items-center gap-2 text-base font-play text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white"
               >
                 <input
                   checked={isSelected}
@@ -188,24 +188,24 @@ const Card = ({ paper, onSelect, isSelected, isShow=true }: CardProps) => {
                     e.stopPropagation();
                     handleCheckboxChange();
                   }}
-                  className="h-4 w-4 rounded accent-[#7480FF] cursor-pointer"
+                  className="h-5 w-5 rounded accent-[#7480FF] cursor-pointer"
                   type="checkbox"
                 />
-                <span>Select</span>
+                <p>Select</p>
               </label>
             )}
 
             {paper.answer_key_included && (
-              <span className="flex items-center gap-1 text-xs font-semibold text-[#7480FF]">
-                <Check className="h-3.5 w-3.5 stroke-[2.5]" />
-                <span>Answer Key</span>
-              </span>
+              <div className="flex items-center gap-2 font-normal text-[#7480FF]">
+                <Check color="#7480FF" className="h-5 w-5" />
+                Answer Key
+              </div>
             )}
           </div>
 
           <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
             <Eye
-              className="h-5 w-5 cursor-pointer transition-all duration-150 hover:scale-110 hover:text-[#7480FF]"
+              className="cursor-pointer transition-all duration-200 ease-out hover:scale-110 hover:text-[#7480FF]"
               onClick={(e) => {
                 e.stopPropagation();
                 setPreviewOpen(true);
@@ -218,7 +218,7 @@ const Card = ({ paper, onSelect, isSelected, isShow=true }: CardProps) => {
                 e.stopPropagation();
                 void handleDownload(paper);
               }}
-              className="cursor-pointer transition-all duration-150 hover:scale-110 hover:text-[#7480FF]"
+              className="cursor-pointer transition-all duration-200 ease-out hover:scale-110 hover:text-[#7480FF]"
               aria-label="Download paper"
             />
           </div>
