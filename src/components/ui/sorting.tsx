@@ -32,7 +32,7 @@ const SortComponent: React.FC<SortComponentProps> = ({
   const getSortLabel = () => {
     if (currentSort === "asc") return "Year (Old to New)";
     if (currentSort === "desc") return "Year (New to Old)";
-    return "Sort by Year";
+    return "Default Order";
   };
 
   return (

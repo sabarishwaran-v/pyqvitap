@@ -29,7 +29,7 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
   const [pinned, setPinned] = useState<boolean>(false);
   const [relatedSubjects, setRelatedSubjects] = useState<string[]>([]);
   const { courses } = useCourses();
-  const [sortOption, setSortOption] = useState<"asc" | "desc" | "none">("none");
+  const [sortOption, setSortOption] = useState<"asc" | "desc" | "none">("desc");
 
   // Use filter context
   const {
@@ -68,6 +68,7 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
 
   useEffect(() => {
     setCurrentPage(1);
+    setSortOption("desc");
   }, [subject, setCurrentPage]);
 
   // Fetch related subjects when subject changes
@@ -120,6 +121,10 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
         searchParams.get("semester")?.split(",").filter(Boolean) ?? [],
       );
       setSelectedAnswerKeyIncluded(searchParams.get("answerkey") === "true");
+      const sortParam = searchParams.get("sort");
+      if (sortParam === "asc" || sortParam === "none" || sortParam === "desc") {
+        setSortOption(sortParam);
+      }
       if (subjectName && Array.isArray(currentPinnedSubjects)) {
         if (currentPinnedSubjects.includes(subjectName)) {
           setPinned(true);
@@ -244,9 +249,9 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
       );
     });
     if (sortOption === "asc") {
-      filtered.sort((a, b) => a.year.localeCompare(b.year));
+      filtered.sort((a, b) => (a.year ?? "").localeCompare(b.year ?? ""));
     } else if (sortOption === "desc") {
-      filtered.sort((a, b) => b.year.localeCompare(a.year));
+      filtered.sort((a, b) => (b.year ?? "").localeCompare(a.year ?? ""));
     }
     setFilteredPapers(filtered);
     setAppliedFilters(
