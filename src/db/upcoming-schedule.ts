@@ -3,7 +3,7 @@ import { getModel } from "@/lib/database/mongoose";
 
 export type IUpcomingSchedule = {
   date: string;
-  slot: "A" | "B" | "C" | "D" | "E" | "F" | "G";
+  slot: string;
   courseCodes?: string[];
   sessions?: Record<string, string[]>;
 };
@@ -14,7 +14,6 @@ const upcomingScheduleSchema = new Schema<IUpcomingSchedule>(
     slot: {
       type: String,
       required: true,
-      enum: ["A", "B", "C", "D", "E", "F", "G"],
     },
     courseCodes: {
       type: [String],
