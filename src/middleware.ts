@@ -210,14 +210,18 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
     .marquee-track {
       display: inline-flex;
       white-space: nowrap;
-      animation: marquee 32s linear infinite;
+      will-change: transform;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transform: translate3d(0, 0, 0);
+      animation: marquee 55s linear infinite;
     }
     .marquee-track:hover {
       animation-play-state: paused;
     }
     @keyframes marquee {
-      0% { transform: translateX(0%); }
-      100% { transform: translateX(-50%); }
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-50%, 0, 0); }
     }
     .marquee-item {
       display: inline-flex;
