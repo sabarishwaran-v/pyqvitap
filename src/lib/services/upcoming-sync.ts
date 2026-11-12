@@ -16,12 +16,15 @@ const examScheduleMap = examScheduleData as Record<
 const SLOT_ORDER = ["A", "B", "C", "D", "E", "F", "G"] as const;
 type SlotKey = (typeof SLOT_ORDER)[number];
 
-function isSlotKey(value: string): value is SlotKey {
-  return SLOT_ORDER.includes(value as SlotKey);
+function isSlotKey(value: string): boolean {
+  if (!value) return false;
+  const upper = value.trim().toUpperCase();
+  return SLOT_ORDER.includes(upper.charAt(0) as SlotKey);
 }
 
-function getSelectedGroupKeys(slot: SlotKey): SlotKey[] {
-  const index = SLOT_ORDER.indexOf(slot);
+function getSelectedGroupKeys(slot: string): SlotKey[] {
+  const baseLetter = slot.charAt(0).toUpperCase() as SlotKey;
+  const index = SLOT_ORDER.indexOf(baseLetter);
   if (index === -1) return [];
   const current = SLOT_ORDER[index];
   if (!current) return [];
@@ -83,7 +86,7 @@ export async function checkAndSyncUpcomingSlots(force = false): Promise<void> {
 
   const scheduledSlotRaw = scheduleDoc.slot;
   if (!scheduledSlotRaw || !isSlotKey(scheduledSlotRaw)) return;
-  const scheduledSlot = scheduledSlotRaw;
+  const scheduledSlot = scheduledSlotRaw.trim().toUpperCase();
 
   // Cache key combines the exam date and slot, plus cutoff flag, so it only recomputes when slot changes
   const syncKey = `${scheduleDoc.date}:${scheduledSlot}:${pastCutoff ? "POST" : "PRE"}`;
@@ -109,7 +112,9 @@ export async function checkAndSyncUpcomingSlots(force = false): Promise<void> {
   }
 
   // Priority 2: Flat courseCodes directly in MongoDB document (e.g. ["CSE2018", ...])
+  // Only fallback to flat courseCodes if sessions did not populate codes
   if (
+    codeToSlots.size === 0 &&
     scheduleDoc?.courseCodes &&
     Array.isArray(scheduleDoc.courseCodes) &&
     scheduleDoc.courseCodes.length > 0
@@ -118,20 +123,22 @@ export async function checkAndSyncUpcomingSlots(force = false): Promise<void> {
       const clean = code.replace("*", "").trim().toUpperCase();
       if (!clean) continue;
       if (!codeToSlots.has(clean)) codeToSlots.set(clean, new Set());
-      codeToSlots.get(clean)!.add(`Slot ${scheduledSlot}`);
+      codeToSlots.get(clean)!.add(scheduledSlot);
     }
   }
 
   // Priority 3: Fallback to exam_schedule_courses.json if MongoDB document didn't specify course codes
   if (codeToSlots.size === 0) {
-    const slotConfig = examScheduleMap[scheduledSlot];
+    const slotConfig =
+      examScheduleMap[scheduledSlot] ||
+      examScheduleMap[scheduledSlot.charAt(0)];
     if (slotConfig) {
       if (Array.isArray(slotConfig)) {
         for (const code of slotConfig) {
           const clean = code.replace("*", "").trim().toUpperCase();
           if (!clean) continue;
           if (!codeToSlots.has(clean)) codeToSlots.set(clean, new Set());
-          codeToSlots.get(clean)!.add(`Slot ${scheduledSlot}`);
+          codeToSlots.get(clean)!.add(scheduledSlot);
         }
       } else if (typeof slotConfig === "object") {
         for (const [subSlotKey, codes] of Object.entries(slotConfig)) {

@@ -1,6 +1,7 @@
 /**
  * PyqVitAp FAT Schedule Seeder - Fall Semester (2026-27)
  * Seeds the 14 exam days into MongoDB `UpcomingSchedule` collection
+ * with subslots (A1, A2, B1, B2, C1, C2, D1, D2, E1, E2, F1, F2, G1, G2)
  * and triggers immediate sync for Day 1.
  */
 
@@ -26,8 +27,7 @@ function getMongoUri() {
 const FAT_SCHEDULE_2026 = [
   {
     date: "2026-11-16",
-    slot: "A",
-    subSlot: "A1",
+    slot: "A1",
     courseCodes: [
       "CHY1005", "CHY4301", "CSE2018", "CSE2019", "CSE2025", "CSE3002", "CSE3008",
       "CSE4006", "CSE4007", "ECE2001", "ECE2002", "ECE2003", "FRL1001", "FRL1004",
@@ -38,8 +38,7 @@ const FAT_SCHEDULE_2026 = [
   },
   {
     date: "2026-11-17",
-    slot: "A",
-    subSlot: "A2",
+    slot: "A2",
     courseCodes: [
       "CSE0109", "CSE2018", "CSE2019", "CSE2025", "CSE3002", "CSE3008", "CSE4006",
       "CSE4007", "ECE2001", "ECE2002", "ECE2005", "FRL1005", "HUM2117", "LAW2101",
@@ -50,8 +49,7 @@ const FAT_SCHEDULE_2026 = [
   },
   {
     date: "2026-11-18",
-    slot: "B",
-    subSlot: "B1",
+    slot: "B1",
     courseCodes: [
       "CHY4307", "CSE0305", "CSE0602", "CSE2009", "CSE2013", "CSE2016", "CSE2025",
       "CSE3024", "CSE3028", "CSE3036", "CSE3041", "CSE4003", "CSE4007", "ECE2002",
@@ -62,8 +60,7 @@ const FAT_SCHEDULE_2026 = [
   },
   {
     date: "2026-11-19",
-    slot: "B",
-    subSlot: "B2",
+    slot: "B2",
     courseCodes: [
       "CSE2009", "CSE2013", "CSE2016", "CSE2025", "CSE3024", "CSE3028", "CSE3041",
       "CSE4005", "CSE4007", "CSE4049", "ECE2002", "ECE2005", "ECE2006", "ECE2014",
@@ -74,8 +71,7 @@ const FAT_SCHEDULE_2026 = [
   },
   {
     date: "2026-11-20",
-    slot: "C",
-    subSlot: "C1",
+    slot: "C1",
     courseCodes: [
       "CSE0207", "CSE0601", "CSE2004", "CSE2015", "CSE3002", "CSE3009", "CSE3014",
       "CSE4006", "CSE4011", "CSE4012", "CSE4039", "ECE2003", "ECE2006", "ECE2014",
@@ -86,8 +82,7 @@ const FAT_SCHEDULE_2026 = [
   },
   {
     date: "2026-11-21",
-    slot: "C",
-    subSlot: "C2",
+    slot: "C2",
     courseCodes: [
       "CSE0208", "CSE2015", "CSE3002", "CSE3009", "CSE3014", "CSE4006", "CSE4011",
       "CSE4012", "CSE4016", "CSE4039", "ECE2001", "ECE2003", "ECE2014", "FRL1001",
@@ -98,8 +93,7 @@ const FAT_SCHEDULE_2026 = [
   },
   {
     date: "2026-11-23",
-    slot: "D",
-    subSlot: "D1",
+    slot: "D1",
     courseCodes: [
       "CHY4208", "CSE2001", "CSE2008", "CSE2027", "CSE2028", "CSE3004", "CSE3040",
       "CSE4050", "ECE4012", "ENG2014", "FRL1004", "LAW2102", "LAW5114", "LIB2123",
@@ -110,8 +104,7 @@ const FAT_SCHEDULE_2026 = [
   },
   {
     date: "2026-11-24",
-    slot: "D",
-    subSlot: "D2",
+    slot: "D2",
     courseCodes: [
       "CHY1007", "CSE2001", "CSE2008", "CSE2027", "CSE3001", "CSE3004", "CSE3040",
       "CSE4039", "ECE2007", "FRL2004", "FRL2005", "HUM2118", "HUM3108", "LAW2102",
@@ -122,8 +115,7 @@ const FAT_SCHEDULE_2026 = [
   },
   {
     date: "2026-11-25",
-    slot: "E",
-    subSlot: "E1",
+    slot: "E1",
     courseCodes: [
       "CSE0302", "CSE0402", "CSE0603", "CSE1013", "CSE2001", "CSE3003", "CSE3004",
       "CSE3006", "CSE4033", "CSE4047", "ECE2009", "ECE3005", "ECE4007", "ENG1018",
@@ -134,8 +126,7 @@ const FAT_SCHEDULE_2026 = [
   },
   {
     date: "2026-11-26",
-    slot: "E",
-    subSlot: "E2",
+    slot: "E2",
     courseCodes: [
       "CHY1007", "CSE0302", "CSE1013", "CSE2001", "CSE2028", "CSE3003", "CSE3004",
       "CSE4033", "CSE4040", "ECE3005", "FRL1001", "HUM2119", "HUM3110", "LAW2103",
@@ -145,8 +136,7 @@ const FAT_SCHEDULE_2026 = [
   },
   {
     date: "2026-11-27",
-    slot: "F",
-    subSlot: "F1",
+    slot: "F1",
     courseCodes: [
       "CHY2001", "CHY2002", "CHY4310", "CSE1022", "CSE2008", "CSE2026", "CSE2027",
       "CSE3001", "CSE3003", "CSE3015", "CSE4021", "ECE2013", "ECE4002", "ECE4003",
@@ -157,8 +147,7 @@ const FAT_SCHEDULE_2026 = [
   },
   {
     date: "2026-11-28",
-    slot: "F",
-    subSlot: "F2",
+    slot: "F2",
     courseCodes: [
       "CHY2002", "CSE1022", "CSE2008", "CSE2027", "CSE3003", "CSE3015", "CSE4021",
       "ECE2013", "ECE4002", "ECE4005", "ENG1014", "FRL1004", "FRL1005", "HUM2002",
@@ -169,8 +158,7 @@ const FAT_SCHEDULE_2026 = [
   },
   {
     date: "2026-11-30",
-    slot: "G",
-    subSlot: "G1",
+    slot: "G1",
     courseCodes: [
       "ENG2008", "FRL1001", "FRL1005", "LAW2100", "LIB2006", "LIB2019", "LIB2115",
       "MGT1040", "MGT1105", "STS2003", "STS2010", "STS3007"
@@ -178,8 +166,7 @@ const FAT_SCHEDULE_2026 = [
   },
   {
     date: "2026-12-01",
-    slot: "G",
-    subSlot: "G2",
+    slot: "G2",
     courseCodes: [
       "CSE0401", "CSE0506", "ECE0401", "ENG2008", "FRL1005", "HUM2014", "LAW1108",
       "LAW2100", "LIB1013", "LIB2006", "LIB2019", "MGT1105", "MGT3120", "STS2010",
@@ -201,40 +188,39 @@ async function seed() {
   const slotCollection = mongoose.connection.collection("upcomingslots");
   const subjectCollection = mongoose.connection.collection("upcomingsubjects");
   const coursesCollection = mongoose.connection.collection("courses");
-  const courseCountsCollection = mongoose.connection.collection("coursec嚐unts"); // fallback
 
   // 1. Clear old schedules
   await scheduleCollection.deleteMany({});
   console.log("Cleared old UpcomingSchedules.");
 
-  // 2. Insert the 14 FAT schedule documents
+  // 2. Insert the 14 FAT schedule documents with subslots
   const documents = FAT_SCHEDULE_2026.map((item) => ({
     date: item.date,
     slot: item.slot,
     courseCodes: item.courseCodes,
     sessions: {
-      [item.subSlot]: item.courseCodes
+      [item.slot]: item.courseCodes
     },
     createdAt: new Date(),
     updatedAt: new Date()
   }));
 
   await scheduleCollection.insertMany(documents);
-  console.log(`Inserted ${documents.length} FAT schedule days into UpcomingSchedule.`);
+  console.log(`Inserted ${documents.length} FAT schedule days into UpcomingSchedule with subslots.`);
 
-  // 3. Update UpcomingSlot to FAT mode with reset lastSyncedDate to trigger sync
+  // 3. Update UpcomingSlot to FAT mode with slot A1
   await slotCollection.findOneAndUpdate(
     {},
     {
       $set: {
         syncMode: "FAT",
         lastSyncedDate: "",
-        slot: "A"
+        slot: "A1"
       }
     },
     { upsert: true }
   );
-  console.log("Configured UpcomingSlot to syncMode: FAT.");
+  console.log("Configured UpcomingSlot to syncMode: FAT, slot: A1.");
 
   // 4. Resolve Day 1 courses to populate upcoming subjects immediately
   const day1 = FAT_SCHEDULE_2026[0];
@@ -250,19 +236,20 @@ async function seed() {
 
   const finalSubjects = [];
   for (const code of day1.courseCodes) {
-    const fullName = courseMap.get(code) || `${code} [${code}]`;
-    finalSubjects.push({
-      subject: fullName,
-      slots: [day1.subSlot],
-      count: 0
-    });
+    const fullName = courseMap.get(code);
+    if (fullName) {
+      finalSubjects.push({
+        subject: fullName,
+        slots: [day1.slot],
+      });
+    }
   }
 
   await subjectCollection.deleteMany({});
   if (finalSubjects.length > 0) {
     await subjectCollection.insertMany(finalSubjects);
   }
-  console.log(`Populated ${finalSubjects.length} Day 1 (${day1.date} / ${day1.subSlot}) courses into UpcomingSubject.`);
+  console.log(`Populated ${finalSubjects.length} Day 1 (${day1.date} / ${day1.slot}) courses into UpcomingSubject.`);
 
   await mongoose.disconnect();
   console.log("Seeding and sync completed successfully!");

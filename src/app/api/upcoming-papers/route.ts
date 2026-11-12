@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   return cachedJsonEndpoint<IUpcomingPaper[]>({
     request,
     cacheKeyPrefix: "api_upcoming_papers",
-    ttlSeconds: 1800, // 30 minutes fresh edge TTL
+    ttlSeconds: 300, // 5 minutes fresh edge TTL
     maxStaleAgeSeconds: 86400, // 24 hours stale fallback on DB failure
     errorMessage: "Failed to fetch upcoming papers",
     producer: () => getUpcomingSubjects(),
