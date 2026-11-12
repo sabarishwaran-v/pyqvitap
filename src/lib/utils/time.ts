@@ -31,8 +31,8 @@ export function isAtOrAfterCutoffInIST(examType: "CAT" | "FAT" = "CAT"): boolean
   if (Number.isNaN(hourNumber) || Number.isNaN(minuteNumber)) return false;
 
   if (examType === "FAT") {
-    // Trigger after 9:30 AM IST for FAT exams
-    return hourNumber > 9 || (hourNumber === 9 && minuteNumber >= 30);
+    // Trigger at 10:00 AM IST for FAT exams (when exam begins)
+    return hourNumber >= 10;
   }
 
   // Trigger after 2:00 PM IST (14:00) for CAT exams (default)

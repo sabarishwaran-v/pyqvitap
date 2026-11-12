@@ -153,8 +153,7 @@ function Navbar() {
 
   return (
     <div className="sticky top-0 z-[50] w-full bg-[#B2B8FF] dark:bg-[#130E1F]">
-      {/* Temporarily hidden: running announcement banner */}
-      {false && <RunningAnnouncement />}
+      <RunningAnnouncement />
 
       <div className="flex items-center justify-between bg-inherit px-4 py-4 md:px-8 md:py-5">
         {}
