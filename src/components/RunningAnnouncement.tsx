@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Sparkles } from "lucide-react";
 import { MAINTENANCE_MODE } from "@/config/maintenance";
 
 export default function RunningAnnouncement() {
@@ -17,12 +16,11 @@ export default function RunningAnnouncement() {
     return (
       <div className="relative z-[55] w-full overflow-hidden border-b border-yellow-500/30 bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 py-2 text-xs font-medium text-yellow-700 dark:border-yellow-500/30 dark:from-[#1a1505] dark:via-[#141004] dark:to-[#1a1505] dark:text-yellow-400">
         <div className="relative flex w-full items-center">
-          {/* Static Left Notice Badge */}
-          <div className="z-10 flex shrink-0 items-center gap-1.5 bg-amber-50 pl-4 pr-3 dark:bg-[#1a1505]">
-            <span className="flex h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
-            <span className="flex items-center gap-1 rounded-full bg-yellow-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-yellow-700 dark:bg-yellow-400/20 dark:text-yellow-300">
-              <Sparkles className="h-3 w-3" />
-              Notice
+          {/* Static Left Glowing Dot */}
+          <div className="z-10 flex shrink-0 items-center pl-4 pr-3 bg-amber-50 dark:bg-[#1a1505]">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-yellow-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-yellow-500" />
             </span>
           </div>
 
@@ -45,12 +43,11 @@ export default function RunningAnnouncement() {
   return (
     <div className="relative z-[55] w-full overflow-hidden border-b border-purple-300/40 bg-gradient-to-r from-[#EDE8FF] via-[#E8EAFF] to-[#EDE8FF] py-2 text-xs font-medium text-purple-950 dark:border-purple-900/50 dark:from-[#170E2E] dark:via-[#130B26] dark:to-[#170E2E] dark:text-purple-200">
       <div className="relative flex w-full items-center">
-        {/* Static Left Notice Badge */}
-        <div className="z-10 flex shrink-0 items-center gap-1.5 bg-[#EDE8FF] pl-4 pr-3 dark:bg-[#170E2E]">
-          <span className="flex h-2 w-2 rounded-full bg-violet-600 animate-pulse" />
-          <span className="flex items-center gap-1 rounded-full bg-purple-600/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-purple-700 dark:bg-purple-400/15 dark:text-purple-300">
-            <Sparkles className="h-3 w-3" />
-            Notice
+        {/* Static Left Glowing Dot */}
+        <div className="z-10 flex shrink-0 items-center pl-4 pr-3 bg-[#EDE8FF] dark:bg-[#170E2E]">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-violet-600" />
           </span>
         </div>
 
