@@ -195,10 +195,11 @@ const RelatedPapers = ({
               </Link>
             )}
           </div>
-          <div className="cursor-pointer grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {relatedPapers.map((paper) => (
               <div
                 key={paper._id}
+                className="h-full flex flex-col"
                 onClick={() => {
                   trackEvent("related_paper_opened", {
                     current_paper_id: id,

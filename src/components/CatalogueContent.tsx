@@ -419,7 +419,7 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
         ) : papers.length > 0 ? (
           <div className="flex flex-col items-center pb-32 md:pb-8">
             <div
-              className={`grid h-fit grid-cols-1 gap-8 px-[30px] pb-[40px] md:grid-cols-2 lg:grid-cols-4 ${filtersPulled ? "blur-xl" : ""}`}
+              className={`grid h-fit w-full grid-cols-1 items-stretch gap-6 px-[30px] pb-[40px] sm:gap-8 md:grid-cols-2 lg:grid-cols-4 ${filtersPulled ? "blur-xl" : ""}`}
             >
               {appliedFilters ? (
                 paginatedPapers.length > 0 ? (
