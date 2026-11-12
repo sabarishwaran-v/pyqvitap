@@ -1,5 +1,8 @@
+"use client";
+
 import {
   ShieldCheck,
+  User,
   Download,
   Database,
   Filter,
@@ -9,8 +12,24 @@ import Image from "next/image";
 import man from "@/assets/man.svg" with { type: "image/svg" };
 import man1 from "@/assets/man1.svg" with { type: "image/svg" };
 import PWAInstallButton from "../ui/PWAInstallButton";
+import { useEffect, useState } from "react";
 
-function Info() {
+interface InfoProps {
+  authEnabled?: boolean;
+}
+
+function Info({ authEnabled = false }: InfoProps) {
+  const [isTestAuth, setIsTestAuth] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setIsTestAuth(params.get("test_auth") === "true");
+    }
+  }, []);
+
+  const isRestricted = authEnabled || isTestAuth;
+
   return (
     <>
       <section
@@ -31,8 +50,18 @@ function Info() {
               <div className="origin-top-left">
                 <div className="grid grid-cols-3 gap-2 overflow-hidden font-play text-xs text-black dark:text-white sm:text-sm lg:gap-4 lg:text-lg xl:text-base">
                   <FeatureCard
-                    icon={<ShieldCheck size={24} />}
-                    text="Restricted to VITAPians"
+                    icon={
+                      isRestricted ? (
+                        <ShieldCheck size={24} />
+                      ) : (
+                        <User size={24} />
+                      )
+                    }
+                    text={
+                      isRestricted
+                        ? "Restricted to VITAPians"
+                        : "No Sign-up required"
+                    }
                   />
                   <FeatureCard
                     isHighlight
