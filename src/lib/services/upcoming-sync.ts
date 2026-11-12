@@ -184,13 +184,13 @@ export async function checkAndSyncUpcomingSlots(force = false): Promise<void> {
 
   if (codeToSlots.size > 0) {
     // Exact Course-Code Mode: Match scheduled course codes against courses existing in the DB
-    for (const [code, slotSet] of codeToSlots.entries()) {
+    for (const [code] of codeToSlots.entries()) {
       const fullCourseName = courseMap.get(code);
       // ONLY include courses that exist in the database!
       if (fullCourseName) {
         finalSubjects.push({
           subject: fullCourseName,
-          slots: Array.from(slotSet).sort(),
+          slots: [], // Kept empty to avoid misleading students that papers are slot-exclusive
           count: countMap.get(fullCourseName) ?? 0,
         });
       }
@@ -218,9 +218,7 @@ export async function checkAndSyncUpcomingSlots(force = false): Promise<void> {
     finalSubjects = Array.from(candidateSubjects).map((subject) => ({
       subject,
       count: countMap.get(subject) ?? 0,
-      slots: Object.entries(slotToSubjectsMap)
-        .filter(([, subjects]) => subjects.includes(subject))
-        .map(([token]) => token),
+      slots: [],
     }));
 
     finalSubjects.sort((a, b) => b.count - a.count);

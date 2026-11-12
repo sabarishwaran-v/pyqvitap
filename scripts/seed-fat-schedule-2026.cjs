@@ -240,7 +240,7 @@ async function seed() {
     if (fullName) {
       finalSubjects.push({
         subject: fullName,
-        slots: [day1.slot],
+        slots: [], // Keep empty: PYQ papers apply to all slots, avoids misleading slot tags
       });
     }
   }

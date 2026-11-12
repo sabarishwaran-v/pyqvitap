@@ -13,7 +13,7 @@ import { Capsule } from "@/components/ui/capsule";
 
 interface PaperCardProps {
   subject: string;
-  slots: string[];
+  slots?: string[];
 }
 
 export default function PaperCard({ subject, slots }: PaperCardProps) {
@@ -65,10 +65,7 @@ export default function PaperCard({ subject, slots }: PaperCardProps) {
         const queryParams = new URLSearchParams({ subject });
         router.push(`/catalogue?${queryParams.toString()}`);
       }}
-      className={`h-full rounded-sm border-2 border-[#734DFF] bg-[#FFFFFF] text-black shadow-lg transition duration-150 ease-in-out dark:border-[#36266D] dark:bg-[#171720] dark:text-white ${
-        // ? "cursor-not-allowed opacity-60 hover:bg-[#FFFFFF] dark:hover:bg-[#171720]"
-        "cursor-pointer hover:bg-[#EFEAFF] hover:dark:bg-[#262635]"
-      }`}
+      className="flex h-full cursor-pointer flex-col justify-between rounded-sm border-2 border-[#734DFF] bg-[#FFFFFF] text-black shadow-lg transition duration-150 ease-in-out hover:bg-[#EFEAFF] dark:border-[#36266D] dark:bg-[#171720] dark:text-white dark:hover:bg-[#262635]"
     >
       <div className="border-b-2 border-[#453D60] p-2">
         <div className="flex items-start justify-between">
@@ -99,12 +96,12 @@ export default function PaperCard({ subject, slots }: PaperCardProps) {
         </div>
       </div>
 
-      <div className="flex flex-col justify-between p-4">
+      <div className="flex flex-1 flex-col justify-between p-4">
         <h2 className="mt-2 font-play text-base font-bold md:text-xl">
           {courseName}
         </h2>
 
-        {
+        {slots && slots.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2 font-play">
             {Array.from(new Set(slots.map(formatSlotDisplay)))
               .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
@@ -112,7 +109,7 @@ export default function PaperCard({ subject, slots }: PaperCardProps) {
                 <Capsule key={index}>{slotValue}</Capsule>
               ))}
           </div>
-        }
+        )}
       </div>
     </div>
   );
