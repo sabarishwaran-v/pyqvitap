@@ -1,4 +1,5 @@
 import Paper from "@/db/papers";
+import StudentPaper from "@/db/studentPaper";
 import { type IPaper } from "@/interface";
 import { escapeRegExp } from "@/lib/utils/regex";
 import { extractUniqueValues } from "@/lib/utils/paper-aggregation";
@@ -42,9 +43,9 @@ export async function getPapersBySubject(subject: string) {
 				subject: { $regex: new RegExp(`${escapedSubject}`, "i") },
 			}).lean<IPaper[]>();
 		}
+		const codeMatch = subject.match(/\[([A-Z0-9]+)\]/);
 		if (finalPapers.length === 0) {
 			// Fallback to code search if subject is like 'NAME [CODE]'
-			const codeMatch = subject.match(/\[([A-Z0-9]+)\]/);
 			if (codeMatch && codeMatch[1]) {
 				finalPapers = await Paper.find({
 					subject: { $regex: new RegExp(`\\[${codeMatch[1]}\\]`, "i") },
@@ -52,10 +53,50 @@ export async function getPapersBySubject(subject: string) {
 			}
 		}
 
-		const uniqueValues = extractUniqueValues(finalPapers);
+		// Query approved student papers from student_papers collection (production: true)
+		let studentPapers = await StudentPaper.find({
+			production: true,
+			subject: subject,
+		}).lean();
+
+		if (studentPapers.length === 0) {
+			studentPapers = await StudentPaper.find({
+				production: true,
+				subject: { $regex: new RegExp(`^${escapedSubject}$`, "i") },
+			}).lean();
+		}
+
+		if (studentPapers.length === 0) {
+			studentPapers = await StudentPaper.find({
+				production: true,
+				subject: { $regex: new RegExp(`${escapedSubject}`, "i") },
+			}).lean();
+		}
+
+		if (studentPapers.length === 0 && codeMatch && codeMatch[1]) {
+			studentPapers = await StudentPaper.find({
+				production: true,
+				subject: { $regex: new RegExp(`\\[${codeMatch[1]}\\]`, "i") },
+			}).lean();
+		}
+
+		const approvedStudentPapers: IPaper[] = studentPapers.map((sp) => ({
+			_id: sp._id.toString(),
+			exam: (sp.exam || "CAT-1") as IPaper["exam"],
+			file_url: sp.file_url,
+			thumbnail_url: sp.thumbnail_url || "",
+			semester: (sp.semester || "Fall Semester") as IPaper["semester"],
+			campus: (sp.campus || "Andhra Pradesh") as IPaper["campus"],
+			slot: sp.slot || "",
+			subject: sp.subject || "",
+			year: sp.year || "",
+		}));
+
+		const allPapers = [...finalPapers, ...approvedStudentPapers];
+		const uniqueValues = extractUniqueValues(allPapers);
 
 		return {
-			papers: finalPapers,
+			papers: allPapers,
 			...uniqueValues,
 		};
 	});
@@ -65,11 +106,26 @@ export async function getPaperById(id: string) {
 	return await withDatabase(async () => {
 		const paper = await Paper.findById(id).lean<IPaper | null>();
 
-		if (!paper) {
-			throw new Error("Paper not found"); // 404
+		if (paper) {
+			return paper;
 		}
 
-		return paper;
+		const studentPaper = await StudentPaper.findOne({ _id: id, production: true }).lean();
+		if (studentPaper) {
+			return {
+				_id: studentPaper._id.toString(),
+				exam: (studentPaper.exam || "CAT-1") as IPaper["exam"],
+				file_url: studentPaper.file_url,
+				thumbnail_url: studentPaper.thumbnail_url || "",
+				semester: (studentPaper.semester || "Fall Semester") as IPaper["semester"],
+				campus: (studentPaper.campus || "Andhra Pradesh") as IPaper["campus"],
+				slot: studentPaper.slot || "",
+				subject: studentPaper.subject || "",
+				year: studentPaper.year || "",
+			} as IPaper;
+		}
+
+		throw new Error("Paper not found"); // 404
 	});
 }
 
@@ -122,7 +178,24 @@ export async function getPapersBySubjects(subjects: StoredSubjects) {
 			subject: { $in: subjects },
 		}).lean<IPaper[]>();
 
-		const transformed = transformPapersToSubjectSlots(usersPapers);
+		const studentPapers = await StudentPaper.find({
+			subject: { $in: subjects },
+			production: true,
+		}).lean();
+
+		const studentAsPapers: IPaper[] = studentPapers.map((sp) => ({
+			_id: sp._id.toString(),
+			exam: (sp.exam || "CAT-1") as IPaper["exam"],
+			file_url: sp.file_url,
+			thumbnail_url: sp.thumbnail_url || "",
+			semester: (sp.semester || "Fall Semester") as IPaper["semester"],
+			campus: (sp.campus || "Andhra Pradesh") as IPaper["campus"],
+			slot: sp.slot || "",
+			subject: sp.subject || "",
+			year: sp.year || "",
+		}));
+
+		const transformed = transformPapersToSubjectSlots([...usersPapers, ...studentAsPapers]);
 
 		if (papersBySubjectsCache.size > 500) {
 			papersBySubjectsCache.clear();

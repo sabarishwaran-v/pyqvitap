@@ -215,3 +215,42 @@ export interface SlotCrowdsourceStatus {
   userSlot?: string | null;
   voteDistribution?: Record<string, number>;
 }
+
+export type ReviewStatus = "PENDING_AI" | "MATCHED" | "MISMATCH" | "NOT_ABLE_TO_REVIEW";
+
+export interface IStudentPaperMatching {
+  is_valid_exam_paper: boolean;
+  course_code_matched: boolean;
+  course_title_matched: boolean;
+  exam_valid: boolean;
+  semester_valid: boolean;
+}
+
+export interface IStudentPaperMetadata {
+  course_code: string | null;
+  course_title: string | null;
+  exam: string | null;
+  slot: string | null;
+  year: string | null;
+  semester: string | null;
+  campus: string | null;
+  ambiguous_tags: string[];
+}
+
+export interface IStudentPaper {
+  _id: string;
+  file_url: string;
+  thumbnail_url: string;
+  production: boolean;
+  review_status: ReviewStatus;
+  matching: IStudentPaperMatching;
+  metadata: IStudentPaperMetadata;
+  subject: string | null;
+  exam: string | null;
+  slot: string;
+  year: string | null;
+  semester: string | null;
+  campus: string;
+  uploaded_at: Date | string;
+}
+
