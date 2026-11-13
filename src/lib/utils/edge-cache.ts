@@ -156,87 +156,70 @@ export async function cachedJsonEndpoint<T>({
   const maxStaleMs = maxStaleAgeSeconds * 1000;
   const now = Date.now();
 
-  const cacheControlHeader = request.headers.get("cache-control") || "";
-  const pragmaHeader = request.headers.get("pragma") || "";
-  const isNoCache =
-    cacheControlHeader.includes("no-cache") ||
-    cacheControlHeader.includes("no-store") ||
-    pragmaHeader.includes("no-cache") ||
-    u.searchParams.has("refresh");
-
+  // 1. Check Tier 1 (In-Memory Isolate Cache)
   const memoryEntry = isolateMemoryCache.get(memoryKey) as CacheEntry<T> | undefined;
+  if (memoryEntry && now - memoryEntry.timestamp < ttlMs) {
+    return NextResponse.json<ApiResponse<T>>(
+      { status: "success", data: memoryEntry.data, message: "OK" },
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": `public, max-age=60, s-maxage=${ttlSeconds}, stale-while-revalidate=86400`,
+          "X-Cache": "HIT-MEMORY",
+        },
+      }
+    );
+  }
 
+  // 2. Check Tier 2 (Cloudflare Cache API - caches.default)
   let cfCache: Cache | null = null;
+
   try {
     const defaultCache = (globalThis as unknown as { caches?: { default?: Cache } }).caches?.default;
     if (defaultCache) {
       cfCache = defaultCache;
-    }
-  } catch (err) {
-    console.warn(`[EdgeCache] Error accessing Cloudflare Cache API for ${memoryKey}:`, err);
-  }
+      const cacheReq = new Request(normalizedCacheUrl, { method: "GET" });
+      const edgeMatch = await cfCache.match(cacheReq);
 
-  if (!isNoCache) {
-    // 1. Check Tier 1 (In-Memory Isolate Cache)
-    if (memoryEntry && now - memoryEntry.timestamp < ttlMs) {
-      return NextResponse.json<ApiResponse<T>>(
-        { status: "success", data: memoryEntry.data, message: "OK" },
-        {
-          status: 200,
-          headers: {
-            "Content-Type": "application/json",
-            "Cache-Control": `public, max-age=60, s-maxage=${ttlSeconds}, stale-while-revalidate=86400`,
-            "X-Cache": "HIT-MEMORY",
-          },
-        }
-      );
-    }
+      if (edgeMatch) {
+        const edgeTimestamp = extractResponseTimestamp(edgeMatch, ttlSeconds);
+        const edgeAgeMs = now - edgeTimestamp;
 
-    // 2. Check Tier 2 (Cloudflare Cache API - caches.default)
-    if (cfCache) {
-      try {
-        const cacheReq = new Request(normalizedCacheUrl, { method: "GET" });
-        const edgeMatch = await cfCache.match(cacheReq);
+        // Ensure edge entry has not exceeded maximum allowed stale age
+        if (edgeAgeMs <= maxStaleMs) {
+          // Clone edgeMatch BEFORE constructing res to avoid locking the stream
+          const edgeMatchForHydration = edgeMatch.clone();
+          const res = new Response(edgeMatch.body, edgeMatch);
+          res.headers.set("X-Cache", "HIT-EDGE");
 
-        if (edgeMatch) {
-          const edgeTimestamp = extractResponseTimestamp(edgeMatch, ttlSeconds);
-          const edgeAgeMs = now - edgeTimestamp;
-
-          // Ensure edge entry has not exceeded maximum allowed stale age
-          if (edgeAgeMs <= maxStaleMs) {
-            // Clone edgeMatch BEFORE constructing res to avoid locking the stream
-            const edgeMatchForHydration = edgeMatch.clone();
-            const res = new Response(edgeMatch.body, edgeMatch);
-            res.headers.set("X-Cache", "HIT-EDGE");
-
-            // Hydrate Tier 1 in-memory cache with the preserved edge timestamp
-            try {
-              const rawJson: unknown = await edgeMatchForHydration.json();
-              const apiRes = rawJson as ApiResponse<T>;
-              if (apiRes?.data && (!validate || validate(apiRes.data))) {
-                isolateMemoryCache.set(memoryKey, {
-                  data: apiRes.data,
-                  timestamp: edgeTimestamp,
-                });
-              }
-            } catch (hydrationErr) {
-              console.warn(
-                `[EdgeCache] Failed hydrating Tier 1 from Tier 2 for ${memoryKey}:`,
-                hydrationErr
-              );
+          // Hydrate Tier 1 in-memory cache with the preserved edge timestamp
+          try {
+            const rawJson: unknown = await edgeMatchForHydration.json();
+            const apiRes = rawJson as ApiResponse<T>;
+            if (apiRes?.data && (!validate || validate(apiRes.data))) {
+              isolateMemoryCache.set(memoryKey, {
+                data: apiRes.data,
+                timestamp: edgeTimestamp,
+              });
             }
-
-            return res;
-          } else {
+          } catch (hydrationErr) {
             console.warn(
-              `[EdgeCache] Tier 2 match for ${memoryKey} exceeded maxStaleAge (${Math.round(edgeAgeMs / 1000)}s > ${maxStaleAgeSeconds}s). Discarding.`
+              `[EdgeCache] Failed hydrating Tier 1 from Tier 2 for ${memoryKey}:`,
+              hydrationErr
             );
           }
+
+          return res;
+        } else {
+          console.warn(
+            `[EdgeCache] Tier 2 match for ${memoryKey} exceeded maxStaleAge (${Math.round(edgeAgeMs / 1000)}s > ${maxStaleAgeSeconds}s). Discarding.`
+          );
         }
-      } catch (err) {
-        console.warn(`[EdgeCache] Error reading from Cloudflare Cache API for ${memoryKey}:`, err);
       }
     }
+  } catch (err) {
+    console.warn(`[EdgeCache] Error reading from Cloudflare Cache API for ${memoryKey}:`, err);
   }
 
   // 3. Tier 3: Execute Producer (Database query via withDatabase)
@@ -285,7 +268,7 @@ export async function cachedJsonEndpoint<T>({
         headers: {
           "Content-Type": "application/json",
           "Cache-Control": `public, max-age=60, s-maxage=${ttlSeconds}, stale-while-revalidate=86400`,
-          "X-Cache": isNoCache ? "BYPASS-NOCACHE" : "MISS",
+          "X-Cache": "MISS",
           "X-Edge-Created-At": generationTime.toString(),
           "Date": new Date(generationTime).toUTCString(),
         },
