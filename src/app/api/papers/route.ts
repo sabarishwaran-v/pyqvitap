@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
   return cachedJsonEndpoint({
     request: req,
     cacheKeyPrefix: "api_papers",
-    ttlSeconds: 30, // 30 seconds fresh TTL so MongoDB admin status toggles propagate quickly
+    ttlSeconds: 900, // 15 minutes fresh TTL
     maxStaleAgeSeconds: 86400, // 24 hours max stale fallback
     errorMessage: "Failed to fetch papers",
     producer: async () => {
