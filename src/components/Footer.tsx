@@ -184,13 +184,13 @@ export default function Footer() {
         {/* PyqVitAp Release Version */}
         <div className="mt-3 flex items-center justify-center pb-2 text-center">
           <a
-            href="https://github.com/sabarishwaran-v/pyqvitap/releases/tag/v1.0.0"
+            href="https://github.com/sabarishwaran-v/pyqvitap/releases/tag/v1.1.0"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center rounded-full bg-[#562EE7]/10 px-2.5 py-0.5 font-play text-[11px] font-semibold text-[#562EE7] no-underline transition-colors hover:bg-[#562EE7]/20 dark:bg-[#A47DE5]/20 dark:text-[#FFC6E8] dark:hover:bg-[#A47DE5]/30"
-            title="PyqVitAp Release v1.0.0"
+            title="PyqVitAp Release v1.1.0"
           >
-            v1.0.0
+            v1.1.0
           </a>
         </div>
       </div>
