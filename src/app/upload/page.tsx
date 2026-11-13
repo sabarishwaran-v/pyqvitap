@@ -27,6 +27,7 @@ import { Upload, XIcon } from "lucide-react";
 import { GlobalWorkerOptions } from "pdfjs-dist";
 import type { ApiResponse } from "@/interface";
 import { convertImagesToPdf } from "@/lib/utils/imageToPdf";
+import { generateFirstPageThumbnail } from "@/lib/utils/thumbnailGenerator";
 
 GlobalWorkerOptions.workerSrc =
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.worker.min.mjs";
@@ -36,7 +37,7 @@ interface uploadResponse {
   thumbnail_url: string;
 }
 export default function Page() {
-  const campus = "Vellore";
+  const campus = "Andhra Pradesh";
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<
     { id: string; file: File; preview: string }[]
@@ -288,10 +289,24 @@ export default function Page() {
             throw new Error("File exceeds 5MB limit. Please select a smaller file or fewer images.");
           }
 
+          let thumbnailFile: File | null = null;
+          try {
+            if (isDirectPdf) {
+              thumbnailFile = await generateFirstPageThumbnail(fileToUpload, true);
+            } else if (files[0]) {
+              thumbnailFile = await generateFirstPageThumbnail(files[0], false);
+            }
+          } catch (thumbErr) {
+            console.warn("[Upload] Thumbnail generation failed, continuing upload:", thumbErr);
+          }
+
           const formData = new FormData();
           formData.append("files", fileToUpload);
           formData.append("campus", campus);
           formData.append("isPdf", "true");
+          if (thumbnailFile) {
+            formData.append("thumbnail", thumbnailFile, "thumbnail.webp");
+          }
 
           try {
             await axios.post<ApiResponse<uploadResponse>>(
