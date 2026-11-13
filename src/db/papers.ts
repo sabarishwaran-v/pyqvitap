@@ -118,4 +118,6 @@ export const PaperAdmin: Model<IAdminPaper> =
 const Paper: Model<IPaper> =
   getModel<IPaper>("Paper", paperSchema, "papers");
 
+export { StudentPaper } from "@/db/studentPaper";
 export default Paper;
+
