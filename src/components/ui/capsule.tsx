@@ -1,12 +1,12 @@
 import { cva, type VariantProps } from "class-variance-authority";
 
 const capsule = cva(
-  "inline-flex items-center justify-center rounded-md p-1 px-3 text-sm font-medium transition-colors",
+  "rounded-md p-1 px-3 text-sm",
   {
     variants: {
       theme: {
-        blue: "rounded-sm bg-[#B2B8FF] text-[#1e1b4b] dark:bg-[#7480FFCC] dark:text-white",
-        green: "bg-[#3cc923] text-white",
+        blue: "rounded-sm bg-[#B2B8FF] dark:bg-[#7480FFCC]",
+        green: "bg-[#3cc923]",
       },
     },
     defaultVariants: {
@@ -19,9 +19,9 @@ export interface CapsuleProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof capsule> {}
 
-export function Capsule({ children, theme, className, ...props }: CapsuleProps) {
+export function Capsule({ children, theme, ...props }: CapsuleProps) {
   return (
-    <div className={capsule({ theme, className })} {...props}>
+    <div className={capsule({ theme })} {...props}>
       {children}
     </div>
   );
