@@ -10,10 +10,10 @@ let defaultStorage: StorageService | null = null;
 
 export function getStorageService(): StorageService {
   if (!defaultStorage) {
-    if (process.env.STORAGE_PROVIDER === "r2") {
-      defaultStorage = new R2Storage();
-    } else {
+    if (process.env.STORAGE_PROVIDER === "cloudinary") {
       defaultStorage = new CloudinaryStorage();
+    } else {
+      defaultStorage = new R2Storage();
     }
   }
   return defaultStorage;
