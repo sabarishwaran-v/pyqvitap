@@ -663,19 +663,6 @@ export async function GET(
   const reason = r2Error ? "r2_error" : "not_found";
 
   if (!fallbackEnabled) {
-    if (process.env.NODE_ENV === "development") {
-      try {
-        const prodRes = await fetch(`https://pyqvitap.site/api/media/${key}`);
-        if (prodRes.ok && prodRes.body) {
-          const headers = new Headers(prodRes.headers);
-          return new Response(prodRes.body, {
-            status: prodRes.status,
-            headers,
-          });
-        }
-      } catch {}
-    }
-
     console.warn(
       JSON.stringify({
         event: "media_r2_failure",
@@ -914,19 +901,6 @@ export async function HEAD(
   const reason = r2Error ? "r2_error" : "not_found";
 
   if (!fallbackEnabled) {
-    if (process.env.NODE_ENV === "development") {
-      try {
-        const prodRes = await fetch(`https://pyqvitap.site/api/media/${key}`);
-        if (prodRes.ok && prodRes.body) {
-          const headers = new Headers(prodRes.headers);
-          return new Response(prodRes.body, {
-            status: prodRes.status,
-            headers,
-          });
-        }
-      } catch {}
-    }
-
     console.warn(
       JSON.stringify({
         event: "media_r2_failure",

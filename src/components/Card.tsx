@@ -103,7 +103,7 @@ const Card = ({ paper, onSelect, isSelected, isShow=true }: CardProps) => {
         onClick={(e) => {
           const target = e.target as HTMLElement;
 
-          if (target.closest("button, input, svg, label")) return;
+          if (target.closest("button, input, svg")) return;
 
           trackEvent("paper_opened", {
             paper_id: paper._id,
@@ -119,14 +119,14 @@ const Card = ({ paper, onSelect, isSelected, isShow=true }: CardProps) => {
           window.open(paperLink, "_blank");
         }}
         className={cn(
-          "group relative flex h-full min-h-[480px] md:min-h-[500px] flex-col justify-between overflow-hidden rounded-xl border-2 border-[#734DFF]/40 bg-white font-play shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#734DFF] hover:shadow-lg dark:border-[#36266D] dark:bg-[#130E26] dark:hover:border-[#7480FF] dark:hover:bg-[#181230]",
-          isSelected && "-translate-y-1 border-[#7480FF] bg-[#EFEAFF] shadow-lg ring-2 ring-[#7480FF] dark:border-[#7480FF] dark:bg-[#1c1438]"
+          "cursor-pointer overflow-hidden rounded-sm border-2 border-[#734DFF] bg-[#FFFFFF] font-play shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:bg-[#EFEAFF] hover:shadow-md dark:border-[#36266D] dark:bg-[#171720] dark:shadow-none hover:dark:bg-[#262635]",
+          isSelected && "-translate-y-0.5 bg-[#EFEAFF] shadow-md ring-2 ring-[#7480FF]"
         )}
       >
-        <div className="relative flex h-[240px] md:h-[260px] w-full shrink-0 items-center justify-center overflow-hidden bg-[#F4F1FD] p-3 dark:bg-[#0E0A1E]">
           {imgError ? (
             <div
-              className="flex h-full w-full flex-col items-center justify-center text-[#734DFF] dark:text-[#a588ff]"
+              className="flex w-full flex-col items-center justify-center bg-[#EFEAFF] p-4 text-[#734DFF] dark:bg-[#1f1f2e] dark:text-[#a588ff] md:h-[250px]"
+              style={{ minHeight: "180px" }}
               aria-label={`Preview unavailable for ${paper.subject}`}
             >
               <FileText className="h-12 w-12 stroke-[1.5] opacity-80" />
@@ -138,90 +138,81 @@ const Card = ({ paper, onSelect, isSelected, isShow=true }: CardProps) => {
               </span>
             </div>
           ) : (
-            <div className="relative h-full w-full">
-              <Image
-                src={thumbnailSrc}
-                alt={paper.subject}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                className="object-contain p-1 transition-transform duration-200 group-hover:scale-[1.02]"
-                onError={handleImageError}
-                unoptimized
-              />
-            </div>
+            <Image
+              src={thumbnailSrc}
+              alt={paper.subject}
+              width={320}
+              height={180}
+              className="w-full object-cover p-4 pb-3 md:h-[250px]"
+              onError={handleImageError}
+              unoptimized
+            />
           )}
-        </div>
-
-        <div className="flex flex-1 flex-col p-4 pb-2">
-          <div className="font-play text-md font-medium text-gray-700 dark:text-white/80 line-clamp-1">
-            {extractBracketContent(paper.subject) || "PYQ"}
-          </div>
-
-          <div
-            title={extractWithoutBracketContent(paper.subject)}
-            className="mt-1 line-clamp-2 font-play text-lg font-semibold text-gray-900 dark:text-white min-h-[3.5rem] flex items-center"
-          >
-            {extractWithoutBracketContent(paper.subject)}
-          </div>
-
-          <div className="mt-3 flex min-h-[68px] flex-wrap items-start content-start gap-2 overflow-hidden">
-            <Capsule>{paper.exam}</Capsule>
-            {Boolean(paper.slot && formatSlotDisplay(paper.slot)) && (
-              <Capsule>{formatSlotDisplay(paper.slot)}</Capsule>
-            )}
-            <Capsule>{paper.year}</Capsule>
-            <Capsule>{paper.semester}</Capsule>
-            {paper.school && <Capsule>{paper.school}</Capsule>}
-          </div>
-        </div>
-
-        <div className="mt-auto flex items-center justify-between border-t border-gray-100 px-4 pb-4 pt-3 dark:border-white/5 font-play">
-          <div className="flex items-center gap-2">
-            {isShow && (
-              <label
-                onClick={(e) => e.stopPropagation()}
-                className="flex cursor-pointer items-center gap-2 text-base font-play text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white"
-              >
-                <input
-                  checked={isSelected}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    handleCheckboxChange();
-                  }}
-                  className="h-5 w-5 rounded accent-[#7480FF] cursor-pointer"
-                  type="checkbox"
-                />
-                <p>Select</p>
-              </label>
-            )}
-
-            {paper.answer_key_included && (
-              <div className="flex items-center gap-2 font-normal text-[#7480FF]">
-                <Check color="#7480FF" className="h-5 w-5" />
-                Answer Key
+          <div className="justify-center">
+            <div className="flex flex-row items-center justify-between px-4 pb-2">
+              <div className="text-md font-play font-medium">
+                {extractBracketContent(paper.subject)}
               </div>
-            )}
+            </div>
+
+            <div className="h-[1px] w-full bg-[#734DFF] dark:bg-[#36266D]" />
+
+            <div className="space-y-2 p-4">
+              <div className="font-play text-lg font-semibold">
+                {extractWithoutBracketContent(paper.subject)}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Capsule>{paper.exam}</Capsule>
+                {Boolean(paper.slot && formatSlotDisplay(paper.slot)) && (
+                  <Capsule>{formatSlotDisplay(paper.slot)}</Capsule>
+                )}
+                <Capsule>{paper.year}</Capsule>
+                <Capsule>{paper.semester}</Capsule>
+                {paper.school && <Capsule>{paper.school}</Capsule>}
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
-            <Eye
-              className="cursor-pointer transition-all duration-200 ease-out hover:scale-110 hover:text-[#7480FF]"
+        <div className="flex justify-end gap-2 px-4 pb-2">
+          <Eye
+           className="cursor-pointer transition-all duration-200 ease-out hover:scale-110"
               onClick={(e) => {
                 e.stopPropagation();
                 setPreviewOpen(true);
               }}
-              aria-label="Preview paper"
             />
-            <Download
-              size={20}
-              onClick={(e) => {
+
+          <Download
+            size={20}
+            onClick={(e) => {
+              e.stopPropagation();
+              void handleDownload(paper);
+            }}
+            className="cursor-pointer"
+          />
+        </div>
+         
+        <div className="flex items-center justify-between gap-2 px-4 pb-4 font-play">
+          {isShow && <div className="flex items-center gap-2">
+            <input
+              checked={isSelected}
+              onChange={(e) => {
                 e.stopPropagation();
-                void handleDownload(paper);
+                handleCheckboxChange();
               }}
-              className="cursor-pointer transition-all duration-200 ease-out hover:scale-110 hover:text-[#7480FF]"
-              aria-label="Download paper"
+              onClick={(e) => e.stopPropagation()}
+              className="h-5 w-5 accent-[#7480FF]"
+              type="checkbox"
             />
-          </div>
+            <p>Select</p>
+          </div>}
+
+          {paper.answer_key_included && (
+            <div className="flex items-center gap-2 font-normal text-[#7480FF]">
+              <Check color="#7480FF" />
+              Answer Key
+            </div>
+          )}
         </div>
       </div>
 
