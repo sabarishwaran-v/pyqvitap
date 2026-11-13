@@ -9,6 +9,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 const MAX_COMPRESSED_PDF_SIZE = 5 * 1024 * 1024; // 5MB compressed
 const COMPRESS_THRESHOLD = 5 * 1024 * 1024; // 5MB
+const CANONICAL_CAMPUS = "Andhra Pradesh"; // PyqVitAp is strictly for Andhra Pradesh campus
 
 type UploadPaperInput = {
   files: File[];
@@ -109,7 +110,7 @@ export async function uploadPaper({
         slot: null,
         year: null,
         semester: null,
-        campus: campus || "Andhra Pradesh",
+        campus: CANONICAL_CAMPUS,
         ambiguous_tags: [],
       },
       subject: null,
@@ -117,7 +118,7 @@ export async function uploadPaper({
       slot: "",
       year: null,
       semester: null,
-      campus: campus || "Andhra Pradesh",
+      campus: CANONICAL_CAMPUS,
       uploaded_at: new Date(),
     });
   });
@@ -144,7 +145,7 @@ export async function uploadPaper({
               slot: null,
               year: null,
               semester: null,
-              campus: campus || "Andhra Pradesh",
+              campus: CANONICAL_CAMPUS,
               ambiguous_tags: [],
             },
             subject: null,
@@ -216,7 +217,7 @@ export async function uploadPaper({
             slot: analyzed.slot,
             year: analyzed.year,
             semester: analyzed.semester,
-            campus: campus || "Andhra Pradesh",
+            campus: CANONICAL_CAMPUS,
             ambiguous_tags: analyzed.ambiguous_tags,
           },
           subject: canonicalSubject,
