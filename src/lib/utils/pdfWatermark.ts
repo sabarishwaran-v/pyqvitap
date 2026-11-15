@@ -5,7 +5,6 @@ import {
   PDFName,
   PDFString,
   PDFArray,
-  degrees,
 } from "pdf-lib";
 
 // 72x72 optimized PNG of the official PyqVitAp rounded app badge
@@ -30,10 +29,10 @@ function decodeBase64(base64: string): Uint8Array {
 
 /**
  * Applies the finalized visual branding design to downloaded question papers:
- * 1. A subtle diagonal watermark ("pyqvitap / Your PYQs, All in One Place.") across every page.
- * 2. On Page 1 ONLY: A modern, rounded card container with the PyqVitAp logo badge, branding,
- *    clickable website link (https://pyqvitap.site), separator line, and exact disclaimer.
- * 3. On Page 2+: Diagonal watermark only (no footer, no disclaimer, no bottom website line).
+ * 1. On Final Page ONLY: The current modern, rounded card container with the PyqVitAp logo badge,
+ *    branding, clickable website link (https://pyqvitap.site), separator line, and exact disclaimer.
+ * 2. On other pages: Completely clean (no watermark, no footer, no disclaimer).
+ * Centered watermarks are 100% removed from all pages.
  *
  * If an unexpected error occurs during transformation, it safely falls back to returning the original unmodified bytes.
  */
@@ -63,54 +62,12 @@ export async function applyWatermarkAndDisclaimer(
 
     const pages = pdfDoc.getPages();
     const totalPages = pages.length;
+    const page = totalPages > 0 ? pages[totalPages - 1] : null;
 
-    for (let i = 0; i < totalPages; i++) {
-      const page = pages[i];
-      if (!page) continue;
+    // Final Page ONLY: Current Footer Card Container (Centered watermarks removed 100% from all pages)
+    if (page) {
       const { width, height } = page.getSize();
-
-      // Safety check: skip if page dimensions are abnormally small
-      if (width < 250 || height < 300) {
-        continue;
-      }
-
-      // --- 1. Subtle Diagonal Background Watermark (Every Page) ---
-      const diagAngle = 35;
-      const diagCenterX = width * 0.52;
-      const diagCenterY = height * 0.44;
-      const titleText = "pyqvitap";
-      const titleSize = height >= 700 ? 34 : 26;
-      const tagText = "Your PYQs, All in One Place.";
-      const tagSize = height >= 700 ? 13.5 : 10.5;
-
-      page.drawText(titleText, {
-        x: diagCenterX,
-        y: diagCenterY,
-        size: titleSize,
-        font: fontBold,
-        color: rgb(0.48, 0.42, 0.7),
-        opacity: 0.13,
-        rotate: degrees(diagAngle),
-      });
-
-      const rad = (diagAngle * Math.PI) / 180;
-      const lineSpacing = height >= 700 ? 18 : 14;
-      const tagX = diagCenterX + lineSpacing * Math.sin(rad);
-      const tagY = diagCenterY - lineSpacing * Math.cos(rad);
-
-      page.drawText(tagText, {
-        x: tagX,
-        y: tagY,
-        size: tagSize,
-        font: font,
-        color: rgb(0.48, 0.42, 0.7),
-        opacity: 0.13,
-        rotate: degrees(diagAngle),
-      });
-
-      // --- 2. Page 1 ONLY: Final Footer Card Container ---
-      if (i === 0) {
-        if (height >= 400 && width >= 300) {
+      if (height >= 400 && width >= 300) {
           const cardMarginX = Math.max(18, Math.min(24, width * 0.04));
           const cardWidth = width - cardMarginX * 2;
           const cardHeight = 52;
@@ -280,7 +237,6 @@ export async function applyWatermarkAndDisclaimer(
           });
         }
       }
-    }
 
     const savedBytes = await pdfDoc.save();
     return savedBytes;

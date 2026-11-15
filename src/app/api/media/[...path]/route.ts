@@ -658,6 +658,55 @@ export async function GET(
     console.error(`[Media Gateway] R2 read error for key "${key}":`, r2Error);
   }
 
+  // 1.5 Dev mode proxy fallback: When running locally, proxy missing media from production pyqvitap.site
+  if (process.env.NODE_ENV !== "production") {
+    try {
+      const prodUrl = `https://pyqvitap.site/api/media/${key}`;
+      const prodHeaders = new Headers();
+      const rangeHeader = req.headers.get("range");
+      if (rangeHeader) prodHeaders.set("range", rangeHeader);
+
+      const prodRes = await fetch(prodUrl, { headers: prodHeaders });
+      if (prodRes.ok || prodRes.status === 206 || prodRes.status === 304) {
+        const resHeaders = new Headers();
+        const copyHeaders = [
+          "content-type",
+          "content-length",
+          "content-range",
+          "accept-ranges",
+          "etag",
+          "last-modified",
+          "cache-control",
+        ];
+        for (const h of copyHeaders) {
+          const val = prodRes.headers.get(h);
+          if (val) resHeaders.set(h, val);
+        }
+        if (!resHeaders.has("content-length")) {
+          const contentRange = prodRes.headers.get("content-range");
+          if (contentRange) {
+            const rangeMatch = contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+)/);
+            if (rangeMatch && rangeMatch[1] && rangeMatch[2]) {
+              const start = parseInt(rangeMatch[1], 10);
+              const end = parseInt(rangeMatch[2], 10);
+              if (!Number.isNaN(start) && !Number.isNaN(end)) {
+                const len = end - start + 1;
+                resHeaders.set("content-length", len.toString());
+              }
+            }
+          }
+        }
+        resHeaders.set("X-Media-Dev-Proxy", "true");
+        return new Response(prodRes.body, {
+          status: prodRes.status,
+          headers: resHeaders,
+        });
+      }
+    } catch (proxyErr) {
+      console.warn("[Media Gateway Dev Proxy Error]:", proxyErr);
+    }
+  }
+
   // 2. Check if Cloudinary Fallback is Enabled
   const fallbackEnabled = await isCloudinaryFallbackEnabled();
   const reason = r2Error ? "r2_error" : "not_found";
