@@ -6,8 +6,18 @@ export const AUTHORITATIVE_SLOTS = [
 
 export type AuthoritativeSlot = typeof AUTHORITATIVE_SLOTS[number];
 
-export const MIN_SLOT_CONTRIBUTIONS = 10;
-export const MIN_SLOT_CONSENSUS = 0.70;
+// Adaptive Consensus Engine thresholds:
+export const MIN_EARLY_VOTES = 5;
+export const MIN_EARLY_CONSENSUS = 0.75;
+export const MIN_STANDARD_VOTES = 10;
+export const MIN_STANDARD_CONSENSUS = 0.60;
+export const MIN_DOMINANCE_RATIO = 1.6;
+export const MIN_DOMINANCE_MARGIN = 3;
+export const MIN_AI_TRIGGER_VOTES = 12;
+
+// Backwards-compatibility exports:
+export const MIN_SLOT_CONTRIBUTIONS = MIN_STANDARD_VOTES;
+export const MIN_SLOT_CONSENSUS = MIN_STANDARD_CONSENSUS;
 
 export function isValidSlot(slot: unknown): slot is AuthoritativeSlot {
   if (typeof slot !== "string") return false;
