@@ -4,13 +4,19 @@ import SlotContribution from "@/db/slotContribution";
 import { withDatabase } from "@/lib/database/mongoose";
 import {
   AUTHORITATIVE_SLOTS,
-  MIN_SLOT_CONSENSUS,
-  MIN_SLOT_CONTRIBUTIONS,
+  MIN_EARLY_VOTES,
+  MIN_EARLY_CONSENSUS,
+  MIN_STANDARD_VOTES,
+  MIN_STANDARD_CONSENSUS,
+  MIN_DOMINANCE_RATIO,
+  MIN_DOMINANCE_MARGIN,
+  MIN_AI_TRIGGER_VOTES,
   isValidSlot,
   isValidContributorId,
   normalizeSlot,
   type AuthoritativeSlot,
 } from "@/lib/constants/slots";
+import { detectSlotFromUrl } from "@/lib/services/slot-ai";
 import { CustomError } from "@/lib/utils/error";
 import type { SlotCrowdsourceStatus } from "@/interface";
 
@@ -20,7 +26,12 @@ export interface ConsensusEvaluation {
   winningSlot: AuthoritativeSlot | null;
   winningPercentage: number;
   winningVotes: number;
+  runnerUpSlot: AuthoritativeSlot | null;
+  runnerUpVotes: number;
+  margin: number;
   countsBySlot: Record<string, number>;
+  needsAiVerification: boolean;
+  resolutionReason?: "early_consensus" | "standard_dominance" | "ratio_dominance";
 }
 
 export interface SubmitContributionResult {
@@ -34,50 +45,80 @@ export interface SubmitContributionResult {
 }
 
 /**
- * Pure consensus evaluation function based on PyqVitAp consensus rules:
- * 1. Count contributions by slot.
- * 2. Do NOT confirm anything before MIN_SLOT_CONTRIBUTIONS (10) total valid contributions.
- * 3. Once >= 10, find winning slot with highest count.
- * 4. winningVotes / totalContributions >= MIN_SLOT_CONSENSUS (0.70) => confirmed.
- * 5. Otherwise, keep collecting.
+ * Pure consensus evaluation function based on the Adaptive Confidence Consensus (ACC) model:
+ * 1. Early Fast-Path (5 to 9 votes): >= 75% consensus + 3-vote margin => confirm.
+ * 2. Standard Dominance (>= 10 votes): >= 60% consensus + 3-vote margin OR 1.6x lead over 2nd place => confirm.
+ * 3. Deep Contestation (>= 12 votes): If still deadlocked, triggers AI header table OCR tie-breaking.
  */
 export function evaluateConsensus(
   countsBySlot: Record<string, number>
 ): ConsensusEvaluation {
   let totalContributions = 0;
-  let winningSlot: AuthoritativeSlot | null = null;
-  let winningVotes = 0;
+  const candidates: Array<{ slot: AuthoritativeSlot; count: number }> = [];
 
   for (const slot of AUTHORITATIVE_SLOTS) {
     const count = countsBySlot[slot] ?? 0;
     totalContributions += count;
-    if (count > winningVotes) {
-      winningVotes = count;
-      winningSlot = slot;
+    if (count > 0) {
+      candidates.push({ slot, count });
     }
   }
 
-  if (totalContributions < MIN_SLOT_CONTRIBUTIONS || !winningSlot || totalContributions === 0) {
-    return {
-      isConsensusReached: false,
-      totalContributions,
-      winningSlot: null,
-      winningPercentage: totalContributions > 0 ? winningVotes / totalContributions : 0,
-      winningVotes,
-      countsBySlot,
-    };
+  candidates.sort((a, b) => b.count - a.count);
+
+  const winningSlot = candidates[0]?.slot ?? null;
+  const winningVotes = candidates[0]?.count ?? 0;
+  const runnerUpSlot = candidates[1]?.slot ?? null;
+  const runnerUpVotes = candidates[1]?.count ?? 0;
+  const margin = winningVotes - runnerUpVotes;
+  const winningPercentage =
+    totalContributions > 0 ? winningVotes / totalContributions : 0;
+
+  let isConsensusReached = false;
+  let resolutionReason: ConsensusEvaluation["resolutionReason"] = undefined;
+
+  // Stage 1: Early Fast-Path (5 to 9 votes)
+  if (
+    totalContributions >= MIN_EARLY_VOTES &&
+    totalContributions < MIN_STANDARD_VOTES
+  ) {
+    if (winningPercentage >= MIN_EARLY_CONSENSUS && margin >= 3) {
+      isConsensusReached = true;
+      resolutionReason = "early_consensus";
+    }
   }
 
-  const ratio = winningVotes / totalContributions;
-  const isConsensusReached = ratio >= MIN_SLOT_CONSENSUS;
+  // Stage 2: Standard Dominance (>= 10 votes)
+  if (totalContributions >= MIN_STANDARD_VOTES) {
+    if (winningPercentage >= MIN_STANDARD_CONSENSUS && margin >= 3) {
+      isConsensusReached = true;
+      resolutionReason = "standard_dominance";
+    } else if (
+      runnerUpVotes > 0 &&
+      winningVotes >= MIN_DOMINANCE_RATIO * runnerUpVotes &&
+      margin >= MIN_DOMINANCE_MARGIN
+    ) {
+      isConsensusReached = true;
+      resolutionReason = "ratio_dominance";
+    }
+  }
+
+  // Stage 3: Contested papers with >= 12 votes flag for AI verification
+  const needsAiVerification =
+    !isConsensusReached && totalContributions >= MIN_AI_TRIGGER_VOTES;
 
   return {
     isConsensusReached,
     totalContributions,
     winningSlot: isConsensusReached ? winningSlot : null,
-    winningPercentage: ratio,
+    winningPercentage,
     winningVotes,
+    runnerUpSlot,
+    runnerUpVotes,
+    margin,
     countsBySlot,
+    needsAiVerification,
+    resolutionReason,
   };
 }
 
@@ -218,9 +259,32 @@ export async function submitSlotContribution(input: {
 
     // 4. Evaluate consensus
     const consensus = evaluateConsensus(countsBySlot);
+    let isConfirmed = consensus.isConsensusReached;
+    let confirmedSlot: AuthoritativeSlot | null = consensus.winningSlot;
 
-    // 5. If consensus reached, atomically update paper
-    if (consensus.isConsensusReached && consensus.winningSlot) {
+    // 5. If not confirmed yet, but votes >= 12 and paper has file_url, try AI header scan
+    if (!isConfirmed && consensus.needsAiVerification && paper.file_url) {
+      try {
+        const detectedAiSlot = await detectSlotFromUrl(paper.file_url);
+        if (detectedAiSlot) {
+          const aiVotes = countsBySlot[detectedAiSlot] ?? 0;
+          // Validated if AI detected slot has support among student votes (>= 2 votes or >= 15%)
+          if (
+            aiVotes >= 2 ||
+            (consensus.totalContributions > 0 &&
+              aiVotes / consensus.totalContributions >= 0.15)
+          ) {
+            isConfirmed = true;
+            confirmedSlot = detectedAiSlot;
+          }
+        }
+      } catch (aiErr) {
+        console.warn("[SlotCrowdsource] AI tie-breaker error:", aiErr);
+      }
+    }
+
+    // 6. If consensus reached or AI confirmed, atomically update paper
+    if (isConfirmed && confirmedSlot) {
       const updated = await Paper.findOneAndUpdate(
         {
           _id: paperId,
@@ -229,7 +293,7 @@ export async function submitSlotContribution(input: {
         },
         {
           $set: {
-            slot: consensus.winningSlot,
+            slot: confirmedSlot,
             slotSource: "crowdsourced",
             slotConfirmedAt: new Date(),
             slotContributionCount: consensus.totalContributions,
@@ -242,10 +306,12 @@ export async function submitSlotContribution(input: {
         success: true,
         status: "confirmed",
         isConfirmed: true,
-        confirmedSlot: updated?.slot ? (updated.slot as AuthoritativeSlot) : consensus.winningSlot,
+        confirmedSlot: updated?.slot
+          ? (updated.slot as AuthoritativeSlot)
+          : confirmedSlot,
         totalContributions: consensus.totalContributions,
         userSlot: normalizedSlot,
-        message: `Consensus reached! Slot confirmed as ${consensus.winningSlot}.`,
+        message: `Consensus reached! Slot confirmed as ${confirmedSlot}.`,
       };
     }
 

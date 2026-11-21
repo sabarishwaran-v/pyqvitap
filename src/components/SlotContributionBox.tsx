@@ -83,27 +83,9 @@ export default function SlotContributionBox({
       });
   }, [paperId, initialSlot, slotSource]);
 
-  // 1. If paper has an existing authoritative slot (non-crowdsourced), do not show crowdsourcing UI
-  if (slot && source !== "crowdsourced") {
+  // If paper has any confirmed slot (DSpace, manual, or crowdsourced), completely remove the contribution box
+  if (slot) {
     return null;
-  }
-
-  // 2. If paper slot has been confirmed via crowdsourcing, show the authoritative confirmation tag
-  if (slot && (source === "crowdsourced" || isConfirmed)) {
-    return (
-      <div className="mx-auto my-3 flex max-w-2xl items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-50/90 px-3.5 py-2 text-xs font-play text-emerald-950 shadow-sm backdrop-blur-sm dark:border-emerald-500/30 dark:bg-emerald-950/40 dark:text-emerald-200">
-        <div className="flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-          <span className="font-semibold text-sm">Slot: {slot} ✓</span>
-          <span className="text-[11px] opacity-80">· Confirmed from student contributions</span>
-        </div>
-        {totalContributions > 0 && (
-          <span className="text-[11px] opacity-75 font-medium">
-            {totalContributions} contribution{totalContributions > 1 ? "s" : ""}
-          </span>
-        )}
-      </div>
-    );
   }
 
   // 3. User already contributed previously
